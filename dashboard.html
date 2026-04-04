@@ -1,910 +1,1749 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Watios — Monitor de Energía</title>
-<meta name="description" content="Watios — Monitoreo de energía eléctrica en tiempo real con detección de anomalías IA vía Google Apps Script y ESP32.">
-<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-<style>
-:root {
-  --bg:      #0a0e17;
-  --surface: #111827;
-  --surface2:#0d1420;
-  --border:  #1e293b;
-  --accent:  #00e5ff;
-  --danger:  #ff3b3b;
-  --ok:      #00e676;
-  --warn:    #ffb020;
-  --volt:    #00e5ff;
-  --amp:     #ff4081;
-  --watt:    #69ff47;
-  --kwh:     #ffb020;
-  --joule:   #b388ff;
-  --text:    #e2e8f0;
-  --muted:   #4a5568;
-  --mono:    'Share Tech Mono', monospace;
-  --sans:    'Syne', sans-serif;
-}
-* { margin:0; padding:0; box-sizing:border-box; }
-html { scroll-behavior: smooth; }
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: var(--sans);
-  min-height: 100vh;
-}
-body::before {
-  content:'';
-  position:fixed; inset:0;
-  background-image:
-    linear-gradient(rgba(0,229,255,0.025) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0,229,255,0.025) 1px, transparent 1px);
-  background-size: 40px 40px;
-  pointer-events:none; z-index:0;
-}
-.container { position:relative; z-index:1; max-width:1440px; margin:0 auto; padding:20px 24px; }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Watios — Monitor de Energía</title>
+  <meta name="description"
+    content="Watios — Monitoreo de energía eléctrica en tiempo real con detección de anomalías IA vía Google Apps Script y ESP32.">
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Syne:wght@400;700;800&display=swap"
+    rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --bg: #0a0e17;
+      --surface: #111827;
+      --surface2: #0d1420;
+      --border: #1e293b;
+      --accent: #00e5ff;
+      --danger: #ff3b3b;
+      --ok: #00e676;
+      --warn: #ffb020;
+      --volt: #00e5ff;
+      --amp: #ff4081;
+      --watt: #69ff47;
+      --kwh: #ffb020;
+      --joule: #b388ff;
+      --text: #e2e8f0;
+      --muted: #4a5568;
+      --mono: 'Share Tech Mono', monospace;
+      --sans: 'Syne', sans-serif;
+    }
 
-/* ── Tabs ── */
-.tab-bar {
-  display:flex; gap:4px;
-  border-bottom: 1px solid var(--border);
-  margin-bottom: 20px;
-}
-.tab-btn {
-  font-family:var(--mono); font-size:0.72rem;
-  padding:8px 18px; border:none; background:transparent;
-  color:var(--muted); cursor:pointer; border-bottom:2px solid transparent;
-  transition:.2s; text-transform:uppercase; letter-spacing:1px;
-}
-.tab-btn.active { color:var(--accent); border-bottom-color:var(--accent); }
-.tab-btn:hover:not(.active) { color:var(--text); }
-.tab-pane { display:none; }
-.tab-pane.active { display:block; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-/* ── Header ── */
-header {
-  display:flex; align-items:center; justify-content:space-between;
-  margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid var(--border);
-}
-.header-left h1 { font-size:1.4rem; font-weight:800; }
-.header-left h1 span { color:var(--accent); }
-.header-left p { font-family:var(--mono); font-size:0.68rem; color:var(--muted); margin-top:3px; }
-.header-right { display:flex; align-items:center; gap:12px; }
-.status-pill {
-  display:flex; align-items:center; gap:8px;
-  background:var(--surface); border:1px solid var(--border);
-  border-radius:999px; padding:5px 13px;
-  font-family:var(--mono); font-size:0.7rem;
-}
-.dot { width:8px; height:8px; border-radius:50%; background:var(--muted); transition:background .3s; }
-.dot.live { background:var(--ok); box-shadow:0 0 8px var(--ok); animation:pulse 2s infinite; }
-.dot.error { background:var(--danger); }
-@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
-#last-update { font-family:var(--mono); font-size:0.68rem; color:var(--muted); }
+    html {
+      scroll-behavior: smooth;
+    }
 
-/* ── Config bar ── */
-.config-bar {
-  display:flex; align-items:center; gap:10px; flex-wrap:wrap;
-  background:var(--surface); border:1px solid var(--border);
-  border-radius:12px; padding:12px 16px; margin-bottom:20px;
-}
-.config-bar label { font-family:var(--mono); font-size:0.68rem; color:var(--muted); white-space:nowrap; }
-.config-bar input[type=text] {
-  flex:1; min-width:220px;
-  background:var(--bg); border:1px solid var(--border); border-radius:6px;
-  color:var(--text); font-family:var(--mono); font-size:0.73rem; padding:6px 10px;
-}
-.config-bar input[type=text]:focus { outline:none; border-color:var(--accent); }
-.btn {
-  font-family:var(--mono); font-size:0.7rem; padding:6px 14px;
-  border-radius:6px; border:1px solid var(--accent);
-  background:transparent; color:var(--accent); cursor:pointer; transition:.2s; white-space:nowrap;
-}
-.btn:hover { background:var(--accent); color:var(--bg); }
-.btn-warn { border-color:var(--warn); color:var(--warn); }
-.btn-warn:hover { background:var(--warn); color:var(--bg); }
-.btn-danger { border-color:var(--danger); color:var(--danger); }
-.btn-danger:hover { background:var(--danger); color:#fff; }
-.countdown-wrap { margin-left:auto; font-family:var(--mono); font-size:0.68rem; color:var(--muted); display:flex; gap:6px; align-items:center; }
-#countdown { color:var(--accent); min-width:26px; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      min-height: 100vh;
+    }
 
-/* ── KPI ── */
-.kpi-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:12px; margin-bottom:20px; }
-.kpi-card {
-  background:var(--surface); border:1px solid var(--border);
-  border-radius:12px; padding:14px; position:relative; overflow:hidden;
-  transition:border-color .3s, transform .2s; cursor:pointer;
-}
-.kpi-card:hover { transform:translateY(-2px); }
-.kpi-card::before {
-  content:''; position:absolute; top:0; left:0; right:0; height:2px;
-  background:var(--cc, var(--accent));
-}
-.kpi-card::after {
-  content:'↗ ver gráfica'; display:block;
-  font-family:var(--mono); font-size:0.55rem; color:var(--muted);
-  margin-top:5px; opacity:0; transition:opacity .2s;
-  text-transform:uppercase; letter-spacing:1px;
-}
-.kpi-card:hover::after { opacity:1; }
-.kpi-card.anom { border-color:var(--danger); animation:aflash 1s ease 3; }
-@keyframes aflash { 0%,100%{background:var(--surface)} 50%{background:rgba(255,59,59,.12)} }
-.kpi-label { font-family:var(--mono); font-size:0.62rem; color:var(--muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:6px; }
-.kpi-value { font-family:var(--mono); font-size:1.7rem; line-height:1; color:var(--cc, var(--accent)); transition:color .3s; }
-.kpi-value.anom-val { color:var(--danger) !important; }
-.kpi-unit { font-family:var(--mono); font-size:0.62rem; color:var(--muted); margin-top:4px; }
-.kpi-stats { display:flex; gap:6px; margin-top:8px; padding-top:7px; border-top:1px solid var(--border); }
-.kpi-stat { flex:1; }
-.ksl { font-family:var(--mono); font-size:0.56rem; color:var(--muted); text-transform:uppercase; }
-.ksv { font-family:var(--mono); font-size:0.7rem; color:var(--text); margin-top:2px; }
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0, 229, 255, 0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 229, 255, 0.025) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
 
-/* ── Charts ── */
-.charts-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:20px; }
-.chart-card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:16px; transition:border-color .2s; }
-.chart-card:hover { border-color:#2d3f55; }
-.chart-card.wide { grid-column:1/-1; }
-.chart-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
-.chart-title { font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--muted); }
-.chart-badge { font-family:var(--mono); font-size:0.62rem; padding:2px 8px; border-radius:4px; background:var(--border); }
-.chart-wrap { position:relative; height:165px; }
-.chart-wrap.tall { height:200px; }
-.chart-card.chart-focused {
-  border-color:var(--accent) !important;
-  box-shadow:0 0 0 1px var(--accent), 0 0 28px rgba(0,229,255,.25);
-}
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 20px 24px;
+    }
 
-/* ── Chatbot ── */
-.chat-card {
-  background:var(--surface); border:1px solid var(--border);
-  border-radius:12px; overflow:hidden; margin-bottom:20px;
-  display:flex; flex-direction:column;
-}
-.chat-header {
-  display:flex; align-items:center; justify-content:space-between;
-  padding:14px 18px; border-bottom:1px solid var(--border);
-  background:var(--surface2);
-}
-.chat-header-left { display:flex; align-items:center; gap:10px; }
-.chat-logo {
-  width:28px; height:28px; border-radius:6px;
-  background:linear-gradient(135deg,#00e5ff22,#b388ff33);
-  border:1px solid #b388ff55;
-  display:flex; align-items:center; justify-content:center;
-  font-size:14px;
-}
-.chat-title { font-size:0.78rem; font-weight:700; color:var(--text); }
-.chat-subtitle { font-family:var(--mono); font-size:0.62rem; color:var(--muted); }
-.chat-key-row { display:flex; gap:8px; align-items:center; padding:10px 16px; border-bottom:1px solid var(--border); background:var(--bg); }
-.chat-key-row label { font-family:var(--mono); font-size:0.65rem; color:var(--muted); white-space:nowrap; }
-.chat-key-row input {
-  flex:1; background:var(--surface); border:1px solid var(--border); border-radius:6px;
-  color:var(--text); font-family:var(--mono); font-size:0.73rem; padding:6px 10px;
-}
-.chat-key-row input:focus { outline:none; border-color:var(--accent); }
-.chat-messages {
-  flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:12px;
-  min-height:260px; max-height:400px;
-}
-.chat-messages::-webkit-scrollbar { width:4px; }
-.chat-messages::-webkit-scrollbar-track { background:transparent; }
-.chat-messages::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
-.msg { display:flex; gap:10px; max-width:88%; animation:fadeIn .25s ease; }
-@keyframes fadeIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
-.msg.user { align-self:flex-end; flex-direction:row-reverse; }
-.msg-avatar {
-  width:28px; height:28px; border-radius:6px; flex-shrink:0;
-  display:flex; align-items:center; justify-content:center; font-size:12px;
-  background:var(--border);
-}
-.msg.user .msg-avatar { background:linear-gradient(135deg,#00e5ff33,#00e5ff11); border:1px solid #00e5ff33; }
-.msg.ai .msg-avatar  { background:linear-gradient(135deg,#b388ff33,#b388ff11); border:1px solid #b388ff33; }
-.msg-bubble {
-  background:var(--surface2); border:1px solid var(--border);
-  border-radius:10px; padding:10px 13px;
-  font-family:var(--mono); font-size:0.76rem; line-height:1.65;
-  color:var(--text); max-width:100%;
-}
-.msg.user .msg-bubble { background:rgba(0,229,255,.06); border-color:rgba(0,229,255,.2); color:var(--accent); }
-.msg-time { font-size:0.58rem; color:var(--muted); margin-top:4px; }
-.msg.user .msg-time { text-align:right; }
-.typing-dot { display:inline-block; width:6px; height:6px; border-radius:50%; background:var(--muted); margin:0 2px; animation:tdot 1.2s infinite; }
-.typing-dot:nth-child(2){animation-delay:.2s} .typing-dot:nth-child(3){animation-delay:.4s}
-@keyframes tdot { 0%,80%,100%{opacity:.2;transform:scale(.8)} 40%{opacity:1;transform:scale(1)} }
-.chat-input-row {
-  display:flex; gap:8px; padding:12px 16px; border-top:1px solid var(--border);
-  background:var(--surface2);
-}
-#chat-input {
-  flex:1; background:var(--bg); border:1px solid var(--border); border-radius:8px;
-  color:var(--text); font-family:var(--mono); font-size:0.75rem;
-  padding:8px 12px; outline:none; resize:none; height:36px;
-  transition:border-color .2s;
-}
-#chat-input:focus { border-color:var(--accent); }
-#chat-send {
-  padding:8px 16px; border-radius:8px; border:none;
-  background:var(--accent); color:var(--bg);
-  font-family:var(--mono); font-size:0.72rem; font-weight:700;
-  cursor:pointer; transition:.2s; white-space:nowrap;
-}
-#chat-send:hover { background:#00cfee; }
-#chat-send:disabled { background:var(--border); color:var(--muted); cursor:not-allowed; }
-.chat-suggest { display:flex; flex-wrap:wrap; gap:6px; padding:0 16px 10px; }
-.suggest-chip {
-  font-family:var(--mono); font-size:0.62rem; padding:4px 10px;
-  border-radius:999px; border:1px solid var(--border); background:transparent;
-  color:var(--muted); cursor:pointer; transition:.2s;
-}
-.suggest-chip:hover { border-color:var(--accent); color:var(--accent); }
+    /* ── Tabs ── */
+    .tab-bar {
+      display: flex;
+      gap: 4px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 20px;
+    }
 
-/* ── Table ── */
-.table-card { background:var(--surface); border:1px solid var(--border); border-radius:12px; overflow:hidden; margin-bottom:20px; }
-.table-head-bar { display:flex; align-items:center; justify-content:space-between; padding:12px 16px; border-bottom:1px solid var(--border); }
-.table-head-bar span { font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--muted); }
-.anom-badge { font-family:var(--mono); font-size:0.66rem; padding:3px 10px; border-radius:4px; background:rgba(255,59,59,.12); color:var(--danger); border:1px solid rgba(255,59,59,.25); }
-.table-scroll { overflow:auto; max-height:280px; }
-table { width:100%; border-collapse:collapse; font-family:var(--mono); font-size:0.72rem; }
-thead th {
-  position:sticky; top:0; background:#0d1420;
-  padding:8px 13px; text-align:left; color:var(--muted);
-  font-size:0.6rem; text-transform:uppercase; letter-spacing:1px;
-  border-bottom:1px solid var(--border); white-space:nowrap;
-}
-tbody tr { border-bottom:1px solid var(--border); transition:background .15s; }
-tbody tr:hover { background:rgba(255,255,255,.02); }
-tbody tr.ranom { background:rgba(255,59,59,.05); }
-tbody td { padding:7px 13px; white-space:nowrap; }
-.canom { color:var(--danger); font-weight:700; }
-.cnorm { color:var(--text); }
-.tag { display:inline-block; padding:1px 5px; border-radius:3px; font-size:0.56rem; margin-left:3px; background:rgba(255,59,59,.18); color:var(--danger); }
-.tok { color:var(--ok); font-size:0.6rem; }
+    .tab-btn {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      padding: 8px 18px;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: .2s;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
 
-/* ── Loading overlay ── */
-.overlay {
-  position:fixed; inset:0; background:var(--bg);
-  display:flex; flex-direction:column; align-items:center; justify-content:center;
-  z-index:100; transition:opacity .4s;
-}
-.overlay.hidden { opacity:0; pointer-events:none; }
-.ring { width:40px; height:40px; border:2px solid var(--border); border-top-color:var(--accent); border-radius:50%; animation:spin .8s linear infinite; margin-bottom:12px; }
-@keyframes spin { to{transform:rotate(360deg)} }
-.overlay p { font-family:var(--mono); font-size:0.7rem; color:var(--muted); }
+    .tab-btn.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
 
-/* ── Info banner ── */
-.info-banner {
-  display:flex; align-items:center; gap:10px;
-  background:rgba(0,229,255,.06); border:1px solid rgba(0,229,255,.2);
-  border-radius:10px; padding:10px 16px; margin-bottom:16px;
-  font-family:var(--mono); font-size:0.7rem; color:var(--muted);
-}
-.info-banner span { color:var(--accent); }
+    .tab-btn:hover:not(.active) {
+      color: var(--text);
+    }
 
-/* ── Responsive ── */
-@media(max-width:1100px){ .kpi-grid{grid-template-columns:repeat(3,1fr)} }
-@media(max-width:768px){
-  .kpi-grid{grid-template-columns:repeat(2,1fr)}
-  .charts-grid{grid-template-columns:1fr}
-  header { flex-direction:column; align-items:flex-start; gap:10px; }
-}
-</style>
+    .tab-pane {
+      display: none;
+    }
+
+    .tab-pane.active {
+      display: block;
+    }
+
+    /* ── Header ── */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .header-left h1 {
+      font-size: 1.4rem;
+      font-weight: 800;
+    }
+
+    .header-left h1 span {
+      color: var(--accent);
+    }
+
+    .header-left p {
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      color: var(--muted);
+      margin-top: 3px;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .status-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 5px 13px;
+      font-family: var(--mono);
+      font-size: 0.7rem;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--muted);
+      transition: background .3s;
+    }
+
+    .dot.live {
+      background: var(--ok);
+      box-shadow: 0 0 8px var(--ok);
+      animation: pulse 2s infinite;
+    }
+
+    .dot.error {
+      background: var(--danger);
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1
+      }
+
+      50% {
+        opacity: .4
+      }
+    }
+
+    #last-update {
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      color: var(--muted);
+    }
+
+    /* ── Config bar ── */
+    .config-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 16px;
+      margin-bottom: 20px;
+    }
+
+    .config-bar label {
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .config-bar input[type=text] {
+      flex: 1;
+      min-width: 220px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 0.73rem;
+      padding: 6px 10px;
+    }
+
+    .config-bar input[type=text]:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .btn {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      padding: 6px 14px;
+      border-radius: 6px;
+      border: 1px solid var(--accent);
+      background: transparent;
+      color: var(--accent);
+      cursor: pointer;
+      transition: .2s;
+      white-space: nowrap;
+    }
+
+    .btn:hover {
+      background: var(--accent);
+      color: var(--bg);
+    }
+
+    .btn-warn {
+      border-color: var(--warn);
+      color: var(--warn);
+    }
+
+    .btn-warn:hover {
+      background: var(--warn);
+      color: var(--bg);
+    }
+
+    .btn-danger {
+      border-color: var(--danger);
+      color: var(--danger);
+    }
+
+    .btn-danger:hover {
+      background: var(--danger);
+      color: #fff;
+    }
+
+    .countdown-wrap {
+      margin-left: auto;
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      color: var(--muted);
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    #countdown {
+      color: var(--accent);
+      min-width: 26px;
+    }
+
+    /* ── KPI ── */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .kpi-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      position: relative;
+      overflow: hidden;
+      transition: border-color .3s, transform .2s;
+      cursor: pointer;
+    }
+
+    .kpi-card:hover {
+      transform: translateY(-2px);
+    }
+
+    .kpi-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--cc, var(--accent));
+    }
+
+    .kpi-card::after {
+      content: '↗ ver gráfica';
+      display: block;
+      font-family: var(--mono);
+      font-size: 0.55rem;
+      color: var(--muted);
+      margin-top: 5px;
+      opacity: 0;
+      transition: opacity .2s;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .kpi-card:hover::after {
+      opacity: 1;
+    }
+
+    .kpi-card.anom {
+      border-color: var(--danger);
+      animation: aflash 1s ease 3;
+    }
+
+    @keyframes aflash {
+
+      0%,
+      100% {
+        background: var(--surface)
+      }
+
+      50% {
+        background: rgba(255, 59, 59, .12)
+      }
+    }
+
+    .kpi-label {
+      font-family: var(--mono);
+      font-size: 0.62rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+    }
+
+    .kpi-value {
+      font-family: var(--mono);
+      font-size: 1.7rem;
+      line-height: 1;
+      color: var(--cc, var(--accent));
+      transition: color .3s;
+    }
+
+    .kpi-value.anom-val {
+      color: var(--danger) !important;
+    }
+
+    .kpi-unit {
+      font-family: var(--mono);
+      font-size: 0.62rem;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .kpi-stats {
+      display: flex;
+      gap: 6px;
+      margin-top: 8px;
+      padding-top: 7px;
+      border-top: 1px solid var(--border);
+    }
+
+    .kpi-stat {
+      flex: 1;
+    }
+
+    .ksl {
+      font-family: var(--mono);
+      font-size: 0.56rem;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+
+    .ksv {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      color: var(--text);
+      margin-top: 2px;
+    }
+
+    /* ── Charts ── */
+    .charts-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+
+    .chart-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      transition: border-color .2s;
+    }
+
+    .chart-card:hover {
+      border-color: #2d3f55;
+    }
+
+    .chart-card.wide {
+      grid-column: 1/-1;
+    }
+
+    .chart-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .chart-title {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--muted);
+    }
+
+    .chart-badge {
+      font-family: var(--mono);
+      font-size: 0.62rem;
+      padding: 2px 8px;
+      border-radius: 4px;
+      background: var(--border);
+    }
+
+    .chart-wrap {
+      position: relative;
+      height: 165px;
+    }
+
+    .chart-wrap.tall {
+      height: 200px;
+    }
+
+    .chart-card.chart-focused {
+      border-color: var(--accent) !important;
+      box-shadow: 0 0 0 1px var(--accent), 0 0 28px rgba(0, 229, 255, .25);
+    }
+
+    /* ── Chatbot ── */
+    .chat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 20px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .chat-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface2);
+    }
+
+    .chat-header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .chat-logo {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      background: linear-gradient(135deg, #00e5ff22, #b388ff33);
+      border: 1px solid #b388ff55;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+    }
+
+    .chat-title {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .chat-subtitle {
+      font-family: var(--mono);
+      font-size: 0.62rem;
+      color: var(--muted);
+    }
+
+    .chat-key-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg);
+    }
+
+    .chat-key-row label {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .chat-key-row input {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 0.73rem;
+      padding: 6px 10px;
+    }
+
+    .chat-key-row input:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      min-height: 260px;
+      max-height: 400px;
+    }
+
+    .chat-messages::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .chat-messages::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .chat-messages::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 2px;
+    }
+
+    .msg {
+      display: flex;
+      gap: 10px;
+      max-width: 88%;
+      animation: fadeIn .25s ease;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(6px)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0)
+      }
+    }
+
+    .msg.user {
+      align-self: flex-end;
+      flex-direction: row-reverse;
+    }
+
+    .msg-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      background: var(--border);
+    }
+
+    .msg.user .msg-avatar {
+      background: linear-gradient(135deg, #00e5ff33, #00e5ff11);
+      border: 1px solid #00e5ff33;
+    }
+
+    .msg.ai .msg-avatar {
+      background: linear-gradient(135deg, #b388ff33, #b388ff11);
+      border: 1px solid #b388ff33;
+    }
+
+    .msg-bubble {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 13px;
+      font-family: var(--mono);
+      font-size: 0.76rem;
+      line-height: 1.65;
+      color: var(--text);
+      max-width: 100%;
+    }
+
+    .msg.user .msg-bubble {
+      background: rgba(0, 229, 255, .06);
+      border-color: rgba(0, 229, 255, .2);
+      color: var(--accent);
+    }
+
+    .msg-time {
+      font-size: 0.58rem;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .msg.user .msg-time {
+      text-align: right;
+    }
+
+    .typing-dot {
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--muted);
+      margin: 0 2px;
+      animation: tdot 1.2s infinite;
+    }
+
+    .typing-dot:nth-child(2) {
+      animation-delay: .2s
+    }
+
+    .typing-dot:nth-child(3) {
+      animation-delay: .4s
+    }
+
+    @keyframes tdot {
+
+      0%,
+      80%,
+      100% {
+        opacity: .2;
+        transform: scale(.8)
+      }
+
+      40% {
+        opacity: 1;
+        transform: scale(1)
+      }
+    }
+
+    .chat-input-row {
+      display: flex;
+      gap: 8px;
+      padding: 12px 16px;
+      border-top: 1px solid var(--border);
+      background: var(--surface2);
+    }
+
+    #chat-input {
+      flex: 1;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      padding: 8px 12px;
+      outline: none;
+      resize: none;
+      height: 36px;
+      transition: border-color .2s;
+    }
+
+    #chat-input:focus {
+      border-color: var(--accent);
+    }
+
+    #chat-send {
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: none;
+      background: var(--accent);
+      color: var(--bg);
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: .2s;
+      white-space: nowrap;
+    }
+
+    #chat-send:hover {
+      background: #00cfee;
+    }
+
+    #chat-send:disabled {
+      background: var(--border);
+      color: var(--muted);
+      cursor: not-allowed;
+    }
+
+    .chat-suggest {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      padding: 0 16px 10px;
+    }
+
+    .suggest-chip {
+      font-family: var(--mono);
+      font-size: 0.62rem;
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      transition: .2s;
+    }
+
+    .suggest-chip:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* ── Table ── */
+    .table-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+
+    .table-head-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .table-head-bar span {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--muted);
+    }
+
+    .anom-badge {
+      font-family: var(--mono);
+      font-size: 0.66rem;
+      padding: 3px 10px;
+      border-radius: 4px;
+      background: rgba(255, 59, 59, .12);
+      color: var(--danger);
+      border: 1px solid rgba(255, 59, 59, .25);
+    }
+
+    .table-scroll {
+      overflow: auto;
+      max-height: 280px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+    }
+
+    thead th {
+      position: sticky;
+      top: 0;
+      background: #0d1420;
+      padding: 8px 13px;
+      text-align: left;
+      color: var(--muted);
+      font-size: 0.6rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+
+    tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background .15s;
+    }
+
+    tbody tr:hover {
+      background: rgba(255, 255, 255, .02);
+    }
+
+    tbody tr.ranom {
+      background: rgba(255, 59, 59, .05);
+    }
+
+    tbody td {
+      padding: 7px 13px;
+      white-space: nowrap;
+    }
+
+    .canom {
+      color: var(--danger);
+      font-weight: 700;
+    }
+
+    .cnorm {
+      color: var(--text);
+    }
+
+    .tag {
+      display: inline-block;
+      padding: 1px 5px;
+      border-radius: 3px;
+      font-size: 0.56rem;
+      margin-left: 3px;
+      background: rgba(255, 59, 59, .18);
+      color: var(--danger);
+    }
+
+    .tok {
+      color: var(--ok);
+      font-size: 0.6rem;
+    }
+
+    /* ── Loading overlay ── */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      transition: opacity .4s;
+    }
+
+    .overlay.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .ring {
+      width: 40px;
+      height: 40px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin .8s linear infinite;
+      margin-bottom: 12px;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg)
+      }
+    }
+
+    .overlay p {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      color: var(--muted);
+    }
+
+    /* ── Info banner ── */
+    .info-banner {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(0, 229, 255, .06);
+      border: 1px solid rgba(0, 229, 255, .2);
+      border-radius: 10px;
+      padding: 10px 16px;
+      margin-bottom: 16px;
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      color: var(--muted);
+    }
+
+    .info-banner span {
+      color: var(--accent);
+    }
+
+    /* ── Responsive ── */
+    @media(max-width:1100px) {
+      .kpi-grid {
+        grid-template-columns: repeat(3, 1fr)
+      }
+    }
+
+    @media(max-width:768px) {
+      .kpi-grid {
+        grid-template-columns: repeat(2, 1fr)
+      }
+
+      .charts-grid {
+        grid-template-columns: 1fr
+      }
+
+      header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+      }
+    }
+    /* ── Toast de alerta ── */
+    .toast-anom {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 300;
+      background: #1a0808;
+      border: 1.5px solid var(--danger);
+      border-radius: 10px;
+      padding: 14px 18px;
+      font-family: var(--mono);
+      font-size: 0.76rem;
+      color: var(--text);
+      max-width: 340px;
+      box-shadow: 0 0 24px rgba(255,59,59,.25);
+      animation: slideIn .3s ease;
+      line-height: 1.6;
+    }
+    .toast-anom strong { color: var(--danger); display: block; margin-bottom: 4px; }
+    .toast-anom .toast-close {
+      position: absolute; top: 8px; right: 10px;
+      cursor: pointer; color: var(--muted); font-size: 0.8rem;
+    }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+  </style>
 </head>
+
 <body>
 
-<div class="overlay" id="overlay">
-  <div class="ring"></div>
-  <p id="overlay-msg">Conectando con Servidor Local Node.js...</p>
-</div>
-
-<div class="container">
-
-  <header>
-    <div class="header-left">
-      <h1><span>Wat</span>ios</h1>
-      <p>ESP32 · Node.js · DeepSeek AI · Monitoreo en Tiempo Real Machine Learning</p>
-    </div>
-    <div class="header-right">
-      <span id="last-update">--</span>
-      <div class="status-pill">
-        <div class="dot" id="dot"></div>
-        <span id="status-txt">Iniciando</span>
-      </div>
-    </div>
-  </header>
-
-  <!-- Config -->
-  <div class="config-bar">
-    <label>Servidor WebSocket</label>
-    <input type="text" id="ws-url" value="ws://127.0.0.1:5000/ws" placeholder="ws://192.168.1.XX:5000/ws">
-    <button class="btn" id="btn-fetch" onclick="initWebSocket()">↻ Reconectar</button>
-    <button class="btn btn-warn" onclick="downloadCSV()">⬇ CSV</button>
-    <div class="countdown-wrap"><span id="ws-status">Desconectado</span></div>
+  <div class="overlay" id="overlay">
+    <div class="ring"></div>
+    <p id="overlay-msg">Conectando con Servidor Local Node.js...</p>
   </div>
 
-  <!-- Info -->
-  <div class="info-banner">
-     Arquitectura: <span>ESP32 → Node.js (Local) + WebSockets → Dashboard</span>
-    &nbsp;|&nbsp; Respaldo simultáneo en Google Sheets &nbsp;|&nbsp; Machine Learning y IA Local
-  </div>
+  <div class="container">
 
-  <!-- Tabs -->
-  <div class="tab-bar">
-    <button class="tab-btn active" id="tab-btn-live"    onclick="switchTab('tab-live',this)">En Vivo</button>
-    <button class="tab-btn"        id="tab-btn-charts"  onclick="switchTab('tab-charts',this)">Gráficas</button>
-    <button class="tab-btn"        id="tab-btn-chat"    onclick="switchTab('tab-chat',this)">Chatbot IA</button>
-    <button class="tab-btn"        id="tab-btn-history" onclick="switchTab('tab-history',this)">Historial</button>
-  </div>
+    <header>
+      <div class="header-left">
+        <h1><span>Wat</span>ios</h1>
+        <p>ESP32 · DeepSeek AI · Machine Learning</p>
+      </div>
+      <div class="header-right">
+        <span id="last-update">--</span>
+        <div class="status-pill">
+          <div class="dot" id="dot"></div>
+          <span id="status-txt">Iniciando</span>
+        </div>
+      </div>
+    </header>
 
-  <!-- TAB: En Vivo -->
-  <div class="tab-pane active" id="tab-live">
-    <div class="kpi-grid">
-      <div class="kpi-card" style="--cc:var(--volt)" id="ck-vrms" onclick="goToChart('vrms')" title="Ver gráfica Voltaje">
-        <div class="kpi-label">Voltaje</div>
-        <div class="kpi-value" id="v-vrms">--</div>
-        <div class="kpi-unit">V rms</div>
-        <div class="kpi-stats">
-          <div class="kpi-stat"><div class="ksl">Min</div><div class="ksv" id="mn-vrms">--</div></div>
-          <div class="kpi-stat"><div class="ksl">Max</div><div class="ksv" id="mx-vrms">--</div></div>
-          <div class="kpi-stat"><div class="ksl">Prom</div><div class="ksv" id="av-vrms">--</div></div>
-        </div>
-      </div>
-      <div class="kpi-card" style="--cc:var(--amp)" id="ck-irms" onclick="goToChart('irms')" title="Ver gráfica Corriente">
-        <div class="kpi-label">Corriente</div>
-        <div class="kpi-value" id="v-irms">--</div>
-        <div class="kpi-unit">A rms</div>
-        <div class="kpi-stats">
-          <div class="kpi-stat"><div class="ksl">Min</div><div class="ksv" id="mn-irms">--</div></div>
-          <div class="kpi-stat"><div class="ksl">Max</div><div class="ksv" id="mx-irms">--</div></div>
-          <div class="kpi-stat"><div class="ksl">Prom</div><div class="ksv" id="av-irms">--</div></div>
-        </div>
-      </div>
-      <div class="kpi-card" style="--cc:var(--watt)" id="ck-power" onclick="goToChart('power')" title="Ver gráfica Potencia">
-        <div class="kpi-label">Potencia</div>
-        <div class="kpi-value" id="v-power">--</div>
-        <div class="kpi-unit">W aparente</div>
-        <div class="kpi-stats">
-          <div class="kpi-stat"><div class="ksl">Min</div><div class="ksv" id="mn-power">--</div></div>
-          <div class="kpi-stat"><div class="ksl">Max</div><div class="ksv" id="mx-power">--</div></div>
-          <div class="kpi-stat"><div class="ksl">Prom</div><div class="ksv" id="av-power">--</div></div>
-        </div>
-      </div>
-      <div class="kpi-card" style="--cc:var(--kwh)" id="ck-kwh" onclick="goToChart('kwh')" title="Ver gráfica Energía">
-        <div class="kpi-label">Energía</div>
-        <div class="kpi-value" id="v-kwh">--</div>
-        <div class="kpi-unit">kWh</div>
-        <div class="kpi-stats">
-          <div class="kpi-stat"><div class="ksl">Min</div><div class="ksv" id="mn-kwh">--</div></div>
-          <div class="kpi-stat"><div class="ksl">Max</div><div class="ksv" id="mx-kwh">--</div></div>
-          <div class="kpi-stat"><div class="ksl">Prom</div><div class="ksv" id="av-kwh">--</div></div>
-        </div>
-      </div>
-      <div class="kpi-card" style="--cc:var(--joule)" id="ck-joule" onclick="goToChart('joule')" title="Ver gráfica Joule">
-        <div class="kpi-label">Joule Inst.</div>
-        <div class="kpi-value" id="v-joule">--</div>
-        <div class="kpi-unit">J = I²R</div>
-        <div class="kpi-stats">
-          <div class="kpi-stat"><div class="ksl">Min</div><div class="ksv" id="mn-joule">--</div></div>
-          <div class="kpi-stat"><div class="ksl">Max</div><div class="ksv" id="mx-joule">--</div></div>
-          <div class="kpi-stat"><div class="ksl">Prom</div><div class="ksv" id="av-joule">--</div></div>
-        </div>
-      </div>
+    <!-- Config -->
+    <div class="config-bar">
+      <label>Servidor WebSocket</label>
+      <input type="text" id="ws-url" value="ws://192.168.1.13:5000/ws" placeholder="ws://192.168.1.13:5000/ws">
+      <button class="btn" id="btn-fetch" onclick="initWebSocket()">↻ Reconectar</button>
+      <button class="btn btn-warn" onclick="downloadCSV()">⬇ CSV</button>
+      <div class="countdown-wrap"><span id="ws-status">Desconectado</span></div>
     </div>
-    <div class="chart-card wide" style="margin-bottom:14px">
-      <div class="chart-head"><span class="chart-title">Voltaje vs Tiempo</span><span class="chart-badge" style="color:var(--volt)">V rms</span></div>
-      <div class="chart-wrap tall"><canvas id="ch-vrms"></canvas></div>
-    </div>
-  </div>
 
-  <!-- TAB: Gráficas -->
-  <div class="tab-pane" id="tab-charts">
-    <div class="chart-card wide" id="chart-card-vrms" style="margin-bottom:14px">
-      <div class="chart-head"><span class="chart-title">Voltaje vs Tiempo</span><span class="chart-badge" style="color:var(--volt)">V rms</span></div>
-      <div class="chart-wrap tall"><canvas id="ch-vrms-g"></canvas></div>
+    <!-- Info -->
+    <div class="info-banner">
+      Arquitectura: <span>ESP32 → Servidor.py (FastAPI) + WebSockets → Dashboard</span>
+      &nbsp;|&nbsp; Respaldo simultáneo en Google Sheets &nbsp;|&nbsp; Machine Learning y IA Local
     </div>
-    <div class="charts-grid">
-      <div class="chart-card" id="chart-card-irms">
-        <div class="chart-head"><span class="chart-title">Corriente vs Tiempo</span><span class="chart-badge" style="color:var(--amp)">A rms</span></div>
-        <div class="chart-wrap"><canvas id="ch-irms"></canvas></div>
-      </div>
-      <div class="chart-card" id="chart-card-power">
-        <div class="chart-head"><span class="chart-title">Potencia Aparente vs Tiempo</span><span class="chart-badge" style="color:var(--watt)">W</span></div>
-        <div class="chart-wrap"><canvas id="ch-power"></canvas></div>
-      </div>
-      <div class="chart-card" id="chart-card-kwh">
-        <div class="chart-head"><span class="chart-title">Energía vs Tiempo</span><span class="chart-badge" style="color:var(--kwh)">kWh</span></div>
-        <div class="chart-wrap"><canvas id="ch-kwh"></canvas></div>
-      </div>
-      <div class="chart-card" id="chart-card-joule">
-        <div class="chart-head"><span class="chart-title">Joule Instantáneo vs Tiempo</span><span class="chart-badge" style="color:var(--joule)">J</span></div>
-        <div class="chart-wrap"><canvas id="ch-joule"></canvas></div>
-      </div>
-    </div>
-  </div>
 
-  <!-- TAB: Chatbot IA -->
-  <div class="tab-pane" id="tab-chat">
-    <div class="chat-card">
-      <div class="chat-header">
-        <div class="chat-header-left">
-          <div class="chat-logo"></div>
-          <div>
-            <div class="chat-title">Asistente de Energía — DeepSeek</div>
-            <div class="chat-subtitle">Analiza datos del sensor en tiempo real (Protegido por Node)</div>
+    <!-- Tabs -->
+    <div class="tab-bar">
+      <button class="tab-btn active" id="tab-btn-live" onclick="switchTab('tab-live',this)">En Vivo</button>
+      <button class="tab-btn" id="tab-btn-charts" onclick="switchTab('tab-charts',this)">Gráficas</button>
+      <button class="tab-btn" id="tab-btn-chat" onclick="switchTab('tab-chat',this)">Chatbot IA</button>
+      <button class="tab-btn" id="tab-btn-history" onclick="switchTab('tab-history',this)">Historial</button>
+    </div>
+
+    <!-- TAB: En Vivo -->
+    <div class="tab-pane active" id="tab-live">
+      <div class="kpi-grid">
+        <div class="kpi-card" style="--cc:var(--volt)" id="ck-vrms" onclick="goToChart('vrms')"
+          title="Ver gráfica Voltaje">
+          <div class="kpi-label">Voltaje</div>
+          <div class="kpi-value" id="v-vrms">--</div>
+          <div class="kpi-unit">V rms</div>
+          <div class="kpi-stats">
+            <div class="kpi-stat">
+              <div class="ksl">Min</div>
+              <div class="ksv" id="mn-vrms">--</div>
+            </div>
+            <div class="kpi-stat">
+              <div class="ksl">Max</div>
+              <div class="ksv" id="mx-vrms">--</div>
+            </div>
+            <div class="kpi-stat">
+              <div class="ksl">Prom</div>
+              <div class="ksv" id="av-vrms">--</div>
+            </div>
           </div>
         </div>
-        <div style="display: flex; gap: 8px;">
-           <button class="btn" style="font-size:.62rem;padding:4px 10px" onclick="autoAnalyze()"> Analizar</button>
-           <button class="btn btn-danger" style="font-size:.62rem;padding:4px 10px" onclick="clearChat()">Limpiar</button>
+        <div class="kpi-card" style="--cc:var(--amp)" id="ck-irms" onclick="goToChart('irms')"
+          title="Ver gráfica Corriente">
+          <div class="kpi-label">Corriente</div>
+          <div class="kpi-value" id="v-irms">--</div>
+          <div class="kpi-unit">A rms</div>
+          <div class="kpi-stats">
+            <div class="kpi-stat">
+              <div class="ksl">Min</div>
+              <div class="ksv" id="mn-irms">--</div>
+            </div>
+            <div class="kpi-stat">
+              <div class="ksl">Max</div>
+              <div class="ksv" id="mx-irms">--</div>
+            </div>
+            <div class="kpi-stat">
+              <div class="ksl">Prom</div>
+              <div class="ksv" id="av-irms">--</div>
+            </div>
+          </div>
         </div>
-      </div>
-      <div class="chat-suggest">
-        <button class="suggest-chip" onclick="sendSuggestion(this)">¿Hay anomalías?</button>
-        <button class="suggest-chip" onclick="sendSuggestion(this)">Resumen del circuito</button>
-        <button class="suggest-chip" onclick="sendSuggestion(this)">¿Consumo normal?</button>
-        <button class="suggest-chip" onclick="sendSuggestion(this)">Tendencia de voltaje</button>
-        <button class="suggest-chip" onclick="sendSuggestion(this)">¿Qué significa el Joule?</button>
-      </div>
-      <div class="chat-messages" id="chat-messages">
-        <div class="msg ai">
-          <div class="msg-avatar"></div>
-          <div>
-            <div class="msg-bubble">¡Hola! Soy el asistente de Watios. Ingresa tu API key de DeepSeek y hazme cualquier pregunta sobre tu circuito eléctrico.</div>
-            <div class="msg-time">Listo para analizar</div>
+        <div class="kpi-card" style="--cc:var(--watt)" id="ck-power" onclick="goToChart('power')"
+          title="Ver gráfica Potencia">
+          <div class="kpi-label">Potencia</div>
+          <div class="kpi-value" id="v-power">--</div>
+          <div class="kpi-unit">W aparente</div>
+          <div class="kpi-stats">
+            <div class="kpi-stat">
+              <div class="ksl">Min</div>
+              <div class="ksv" id="mn-power">--</div>
+            </div>
+            <div class="kpi-stat">
+              <div class="ksl">Max</div>
+              <div class="ksv" id="mx-power">--</div>
+            </div>
+            <div class="kpi-stat">
+              <div class="ksl">Prom</div>
+              <div class="ksv" id="av-power">--</div>
+            </div>
+          </div>
+        </div>
+        <div class="kpi-card" style="--cc:var(--kwh)" id="ck-kwh" onclick="goToChart('kwh')"
+          title="Ver gráfica Energía">
+          <div class="kpi-label">Energía</div>
+          <div class="kpi-value" id="v-kwh">--</div>
+          <div class="kpi-unit">kWh</div>
+          <div class="kpi-stats">
+            <div class="kpi-stat">
+              <div class="ksl">Min</div>
+              <div class="ksv" id="mn-kwh">--</div>
+            </div>
+            <div class="kpi-stat">
+              <div class="ksl">Max</div>
+              <div class="ksv" id="mx-kwh">--</div>
+            </div>
+            <div class="kpi-stat">
+              <div class="ksl">Prom</div>
+              <div class="ksv" id="av-kwh">--</div>
+            </div>
+          </div>
+        </div>
+        <div class="kpi-card" style="--cc:var(--joule)" id="ck-joule" onclick="goToChart('joule')"
+          title="Ver gráfica Joule">
+          <div class="kpi-label">Joule Inst.</div>
+          <div class="kpi-value" id="v-joule">--</div>
+          <div class="kpi-unit">mJ = I²R × 10³</div>
+          <div class="kpi-stats">
+            <div class="kpi-stat">
+              <div class="ksl">Min</div>
+              <div class="ksv" id="mn-joule">--</div>
+            </div>
+            <div class="kpi-stat">
+              <div class="ksl">Max</div>
+              <div class="ksv" id="mx-joule">--</div>
+            </div>
+            <div class="kpi-stat">
+              <div class="ksl">Prom</div>
+              <div class="ksv" id="av-joule">--</div>
+            </div>
           </div>
         </div>
       </div>
-      <div class="chat-input-row">
-        <textarea id="chat-input" placeholder="Escribe tu pregunta... (Enter para enviar)" onkeydown="chatKeydown(event)"></textarea>
-        <button id="chat-send" onclick="sendChatMessage()">Enviar ↗</button>
+      <div class="chart-card wide" style="margin-bottom:14px">
+        <div class="chart-head"><span class="chart-title">Voltaje vs Tiempo</span><span class="chart-badge"
+            style="color:var(--volt)">V rms</span></div>
+        <div class="chart-wrap tall"><canvas id="ch-vrms"></canvas></div>
       </div>
     </div>
-  </div>
 
-  <!-- TAB: Historial -->
-  <div class="tab-pane" id="tab-history">
-    <div class="table-card">
-      <div class="table-head-bar">
-        <span>Historial de lecturas (<span id="row-count">0</span> registros)</span>
-        <span class="anom-badge" id="anom-count">0 anomalías</span>
+    <!-- TAB: Gráficas -->
+    <div class="tab-pane" id="tab-charts">
+      <div class="chart-card wide" id="chart-card-vrms" style="margin-bottom:14px">
+        <div class="chart-head"><span class="chart-title">Voltaje vs Tiempo</span><span class="chart-badge"
+            style="color:var(--volt)">V rms</span></div>
+        <div class="chart-wrap tall"><canvas id="ch-vrms-g"></canvas></div>
       </div>
-      <div class="table-scroll">
-        <table>
-          <thead>
-            <tr>
-              <th>Fecha</th><th>Vrms (V)</th><th>Irms (A)</th>
-              <th>Potencia (W)</th><th>kWh</th><th>Joule (J)</th><th>Estado</th>
-            </tr>
-          </thead>
-          <tbody id="tbody">
-            <tr><td colspan="7" style="text-align:center;color:var(--muted);padding:24px">Esperando datos...</td></tr>
-          </tbody>
-        </table>
+      <div class="charts-grid">
+        <div class="chart-card" id="chart-card-irms">
+          <div class="chart-head"><span class="chart-title">Corriente vs Tiempo</span><span class="chart-badge"
+              style="color:var(--amp)">A rms</span></div>
+          <div class="chart-wrap"><canvas id="ch-irms"></canvas></div>
+        </div>
+        <div class="chart-card" id="chart-card-power">
+          <div class="chart-head"><span class="chart-title">Potencia Aparente vs Tiempo</span><span class="chart-badge"
+              style="color:var(--watt)">W</span></div>
+          <div class="chart-wrap"><canvas id="ch-power"></canvas></div>
+        </div>
+        <div class="chart-card" id="chart-card-kwh">
+          <div class="chart-head"><span class="chart-title">Energía vs Tiempo</span><span class="chart-badge"
+              style="color:var(--kwh)">kWh</span></div>
+          <div class="chart-wrap"><canvas id="ch-kwh"></canvas></div>
+        </div>
+        <div class="chart-card" id="chart-card-joule">
+          <div class="chart-head"><span class="chart-title">Joule Instantáneo vs Tiempo</span><span class="chart-badge"
+              style="color:var(--joule)">J</span></div>
+          <div class="chart-wrap"><canvas id="ch-joule"></canvas></div>
+        </div>
       </div>
     </div>
-  </div>
 
-</div><!-- /container -->
+    <!-- TAB: Chatbot IA -->
+    <div class="tab-pane" id="tab-chat">
+      <div class="chat-card">
+        <div class="chat-header">
+          <div class="chat-header-left">
+            <div class="chat-logo"></div>
+            <div>
+              <div class="chat-title">Asistente de Energía — DeepSeek</div>
+              <div class="chat-subtitle">Analiza datos del sensor en tiempo real (proxy en Servidor.py)</div>
+            </div>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn" style="font-size:.62rem;padding:4px 10px" onclick="autoAnalyze()"> Analizar</button>
+            <button class="btn btn-danger" style="font-size:.62rem;padding:4px 10px"
+              onclick="clearChat()">Limpiar</button>
+          </div>
+        </div>
+        <div class="chat-suggest">
+          <button class="suggest-chip" onclick="sendSuggestion(this)">¿Hay anomalías?</button>
+          <button class="suggest-chip" onclick="sendSuggestion(this)">Resumen del circuito</button>
+          <button class="suggest-chip" onclick="sendSuggestion(this)">¿Consumo normal?</button>
+          <button class="suggest-chip" onclick="sendSuggestion(this)">Tendencia de voltaje</button>
+          <button class="suggest-chip" onclick="sendSuggestion(this)">¿Qué significa el Joule?</button>
+        </div>
+        <div class="chat-messages" id="chat-messages">
+          <div class="msg ai">
+            <div class="msg-avatar"></div>
+            <div>
+              <div class="msg-bubble">Hola, soy Watios. Pregúntame cómo va tu circuito.</div>
+              <div class="msg-time">Listo</div>
+            </div>
+          </div>
+        </div>
+        <div class="chat-input-row">
+          <textarea id="chat-input" placeholder="Escribe tu pregunta... (Enter para enviar)"
+            onkeydown="chatKeydown(event)"></textarea>
+          <button id="chat-send" onclick="sendChatMessage()">Enviar ↗</button>
+        </div>
+      </div>
+    </div>
 
-<script>
-// ════════════════════════════════════════════════════════════
-//  WATIOS — Dashboard Local WebSockets + ML
-//  Fuente de datos: Servidor Local Node.js
-// ════════════════════════════════════════════════════════════
+    <!-- TAB: Historial -->
+    <div class="tab-pane" id="tab-history">
+      <div class="table-card">
+        <div class="table-head-bar">
+          <span>Historial de lecturas (<span id="row-count">0</span> registros)</span>
+          <span class="anom-badge" id="anom-count">0 anomalías</span>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Vrms (V)</th>
+                <th>Irms (A)</th>
+                <th>Potencia (W)</th>
+                <th>kWh</th>
+                <th>Joule (J)</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody id="tbody">
+              <tr>
+                <td colspan="7" style="text-align:center;color:var(--muted);padding:24px">Esperando datos...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
 
-// ── Configuración ─────────────────────────────────────────
+  </div><!-- /container -->
 
-const V_IDEAL   = 110.0;
-const V_TOL     = V_IDEAL * 0.05;
-const Z_THRESH  = 2.0;
-const MAX_PTS   = 80;
+  <script>
+    // ════════════════════════════════════════════════════════════
+    //  WATIOS — Dashboard Local WebSockets + ML
+    //  Fuente de datos: Servidor.py (misma máquina / misma red)
+    // ════════════════════════════════════════════════════════════
 
-// ── Estado global ─────────────────────────────────────────
-let ws;
-let rows = [];
-let charts = {};
-let chatHistory = [];
+    // ── Configuración ─────────────────────────────────────────
 
-// ── Tabs ─────────────────────────────────────────────────
-function switchTab(id, btn) {
-  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  btn.classList.add('active');
-}
+    const DEFAULT_SERVER_HOST = '192.168.1.13';
+    const DEFAULT_SERVER_PORT = '5000';
+    const DEFAULT_WS_URL = `ws://${DEFAULT_SERVER_HOST}:${DEFAULT_SERVER_PORT}/ws`;
 
-// ── Parseo ────────────────────────────────────────────────
-function pf(v) { return parseFloat(String(v).replace(',', '.')) || 0; }
-function parseRow(r) {
-  return { fecha:r[0]||'', vrms:pf(r[1]), irms:pf(r[2]), power:pf(r[3]), kwh:pf(r[4]), joule:pf(r[5]) };
-}
+    function httpBaseFromWsInput() {
+      const raw = (document.getElementById('ws-url') && document.getElementById('ws-url').value.trim()) || DEFAULT_WS_URL;
+      try {
+        const u = new URL(raw.replace(/^ws/i, 'http'));
+        return u.origin;
+      } catch (e) {
+        return `http://${DEFAULT_SERVER_HOST}:${DEFAULT_SERVER_PORT}`;
+      }
+    }
 
-// ── Estadísticas ─────────────────────────────────────────
-function calcStats(arr) {
-  const pos = arr.filter(v => v >= 0);
-  if (!pos.length) return { min:0, max:0, avg:0, mean:0, std:0 };
-  const min  = Math.min(...pos);
-  const max  = Math.max(...pos);
-  const mean = pos.reduce((a,b) => a+b,0) / pos.length;
-  const std  = Math.sqrt(pos.reduce((a,b) => a+(b-mean)**2,0) / pos.length);
-  return { min, max, avg:mean, mean, std };
-}
-function isAnom(row, key, hist) {
-  if (row.calibrando) return false;
-  if (key === 'vrms') return Math.abs(row.vrms - V_IDEAL) > V_TOL;
-  const vals = hist.map(r => r[key]).filter(v => v >= 0);
-  if (vals.length < 5) return false;
-  const { mean, std } = calcStats(vals);
-  if (std === 0) return false;
-  return Math.abs((row[key] - mean) / std) > Z_THRESH;
-}
+    const V_MIN = 109.0;
+    const V_MAX = 112.0;
+    const Z_THRESH = 2.0;
+    const MAX_PTS = 80;
 
-// ── Gráficas ─────────────────────────────────────────────
-const COLORS = { vrms:'#00e5ff', irms:'#ff4081', power:'#69ff47', kwh:'#ffb020', joule:'#b388ff' };
-const KEYS   = ['vrms','irms','power','kwh','joule'];
-const DECS   = { vrms:2, irms:4, power:4, kwh:6, joule:6 };
+    // ── Estado global ─────────────────────────────────────────
+    let ws;
+    let rows = [];
+    let charts = {};
+    let chatHistory = [];
+    let lastAlertTime = 0;          // cooldown para alertas proactivas
+    let prevAnomalyStates = new Set(); // registrar estados específicos de anomalía
 
-function makeChart(id, color, label) {
-  const ctx = document.getElementById(id).getContext('2d');
-  return new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: [],
-      datasets: [{
-        label, data: [],
-        borderColor: color,
-        backgroundColor: color + '14',
-        borderWidth: 1.8,
-        pointRadius: 2.5,
-        pointHoverRadius: 5,
-        pointBackgroundColor: color,
-        fill: true, tension: 0.35
-      }]
-    },
-    options: {
-      responsive:true, maintainAspectRatio:false,
-      animation:{ duration:300 },
-      plugins: {
-        legend:{ display:false },
-        tooltip:{
-          backgroundColor:'#111827', borderColor:color, borderWidth:1,
-          titleColor:'#e2e8f0', bodyColor:color,
-          titleFont:{family:'Share Tech Mono'}, bodyFont:{family:'Share Tech Mono'}
+    // ── Tabs ─────────────────────────────────────────────────
+    function switchTab(id, btn) {
+      document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      btn.classList.add('active');
+    }
+
+    // ── Parseo ────────────────────────────────────────────────
+    function pf(v) { return parseFloat(String(v).replace(',', '.')) || 0; }
+    function parseRow(r) {
+      return { fecha: r[0] || '', vrms: pf(r[1]), irms: pf(r[2]), power: pf(r[3]), kwh: pf(r[4]), joule: pf(r[5]) };
+    }
+
+    // ── Estadísticas ─────────────────────────────────────────
+    function calcStats(arr) {
+      const pos = arr.filter(v => v >= 0);
+      if (!pos.length) return { min: 0, max: 0, avg: 0, mean: 0, std: 0 };
+      const min = Math.min(...pos);
+      const max = Math.max(...pos);
+      const mean = pos.reduce((a, b) => a + b, 0) / pos.length;
+      const std = Math.sqrt(pos.reduce((a, b) => a + (b - mean) ** 2, 0) / pos.length);
+      return { min, max, avg: mean, mean, std };
+    }
+    function isAnom(row, key, hist) {
+      if (row.calibrando) return false;
+      if (key === 'vrms') return row.vrms < V_MIN || row.vrms > V_MAX;
+      const vals = hist.map(r => r[key]).filter(v => v >= 0);
+      if (vals.length < 5) return false;
+      const { mean, std } = calcStats(vals);
+      if (std === 0) return false;
+      return Math.abs((row[key] - mean) / std) > Z_THRESH;
+    }
+
+    // ── Gráficas ─────────────────────────────────────────────
+    const COLORS = { vrms: '#00e5ff', irms: '#ff4081', power: '#69ff47', kwh: '#ffb020', joule: '#b388ff' };
+    const KEYS = ['vrms', 'irms', 'power', 'kwh', 'joule'];
+    const DECS  = { vrms: 2, irms: 4, power: 4, kwh: 6, joule: 3 };
+    // SCALE: factor de visualización por variable (los datos internos NO cambian)
+    const SCALE = { vrms: 1, irms: 1, power: 1, kwh: 1, joule: 1000 };
+
+    function makeChart(id, color, label) {
+      const ctx = document.getElementById(id).getContext('2d');
+      return new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: [],
+          datasets: [{
+            label, data: [],
+            borderColor: color,
+            backgroundColor: color + '14',
+            borderWidth: 1.8,
+            pointRadius: 2.5,
+            pointHoverRadius: 5,
+            pointBackgroundColor: color,
+            fill: true, tension: 0.35
+          }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          animation: { duration: 300 },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: '#111827', borderColor: color, borderWidth: 1,
+              titleColor: '#e2e8f0', bodyColor: color,
+              titleFont: { family: 'Share Tech Mono' }, bodyFont: { family: 'Share Tech Mono' }
+            }
+          },
+          scales: {
+            x: { ticks: { color: '#4a5568', font: { family: 'Share Tech Mono', size: 9 }, maxTicksLimit: 8, maxRotation: 45 }, grid: { color: '#1e293b' } },
+            y: { ticks: { color: '#4a5568', font: { family: 'Share Tech Mono', size: 9 } }, grid: { color: '#1e293b' }, min: 0 }
+          }
         }
-      },
-      scales:{
-        x:{ ticks:{color:'#4a5568',font:{family:'Share Tech Mono',size:9},maxTicksLimit:8,maxRotation:45}, grid:{color:'#1e293b'} },
-        y:{ ticks:{color:'#4a5568',font:{family:'Share Tech Mono',size:9}}, grid:{color:'#1e293b'}, min:0 }
-      }
-    }
-  });
-}
-
-function initCharts() {
-  charts.vrms  = makeChart('ch-vrms',   COLORS.vrms,  'Vrms');
-  charts.vrmsG = makeChart('ch-vrms-g', COLORS.vrms,  'Vrms');
-  charts.irms  = makeChart('ch-irms',   COLORS.irms,  'Irms');
-  charts.power = makeChart('ch-power',  COLORS.power, 'Potencia');
-  charts.kwh   = makeChart('ch-kwh',    COLORS.kwh,   'kWh');
-  charts.joule = makeChart('ch-joule',  COLORS.joule, 'Joule');
-}
-
-function goToChart(key) {
-  const tabBtn = document.getElementById('tab-btn-charts');
-  switchTab('tab-charts', tabBtn);
-  const card = document.getElementById(key === 'vrms' ? 'chart-card-vrms' : 'chart-card-' + key);
-  if (!card) return;
-  setTimeout(() => {
-    card.scrollIntoView({ behavior:'smooth', block:'center' });
-    card.classList.add('chart-focused');
-    setTimeout(() => card.classList.remove('chart-focused'), 2000);
-  }, 80);
-}
-
-// ── Actualizar UI ─────────────────────────────────────────
-function updateUI() {
-  if (!rows.length) return;
-  const last = rows[rows.length - 1];
-
-  for (const k of KEYS) {
-    const s = calcStats(rows.map(r => r[k]));
-    document.getElementById(`v-${k}`).textContent  = last[k].toFixed(DECS[k]);
-    document.getElementById(`mn-${k}`).textContent = s.min.toFixed(DECS[k]);
-    document.getElementById(`mx-${k}`).textContent = s.max.toFixed(DECS[k]);
-    document.getElementById(`av-${k}`).textContent = s.avg.toFixed(DECS[k]);
-    const anom = isAnom(last, k, rows.slice(0,-1));
-    document.getElementById(`ck-${k}`).classList.toggle('anom', anom);
-    document.getElementById(`v-${k}`).classList.toggle('anom-val', anom);
-  }
-
-  const slice  = rows.slice(-MAX_PTS);
-  const labels = slice.map(r => {
-    const d = new Date(r.fecha);
-    return isNaN(d) ? r.fecha : d.toLocaleTimeString('es-CO');
-  });
-
-  for (const k of KEYS) {
-    const ch = charts[k];
-    ch.data.labels = labels;
-    ch.data.datasets[0].data = slice.map(r => r[k]);
-    const pts = slice.map((r,i) => {
-      const hist = rows.slice(0, rows.length - slice.length + i);
-      return isAnom(r, k, hist) ? '#ff3b3b' : COLORS[k];
-    });
-    ch.data.datasets[0].pointBackgroundColor = pts;
-    ch.update('none');
-  }
-
-  if (charts.vrmsG) {
-    charts.vrmsG.data.labels   = [...charts.vrms.data.labels];
-    charts.vrmsG.data.datasets[0].data                 = [...charts.vrms.data.datasets[0].data];
-    charts.vrmsG.data.datasets[0].pointBackgroundColor = [...charts.vrms.data.datasets[0].pointBackgroundColor];
-    charts.vrmsG.update('none');
-  }
-
-  // Tabla historial
-  const tbody = document.getElementById('tbody');
-  tbody.innerHTML = '';
-  let anomCount = 0;
-
-  [...rows].reverse().forEach((row,idx) => {
-    const hist = rows.slice(0, rows.length - idx - 1);
-    const anoms = {}; let rowAnom = false;
-    for (const k of KEYS) { anoms[k] = isAnom(row,k,hist); if(anoms[k]) rowAnom=true; }
-    if (rowAnom) anomCount++;
-    const d = new Date(row.fecha);
-    const fecha = isNaN(d) ? row.fecha : d.toLocaleString('es-CO');
-    const tr = document.createElement('tr');
-    if (rowAnom) tr.classList.add('ranom');
-    tr.innerHTML = `<td>${fecha}</td>` +
-      KEYS.map(k => `<td class="${anoms[k]?'canom':'cnorm'}">${row[k].toFixed(DECS[k])}${anoms[k]?'<span class="tag">!</span>':''}</td>`).join('') +
-      `<td>${rowAnom ? '<span class="tag">ANOMALÍA</span>' : '<span class="tok">✓ OK</span>'}</td>`;
-    tbody.appendChild(tr);
-  });
-
-  document.getElementById('anom-count').textContent = `${anomCount} anomalía${anomCount!==1?'s':''}`;
-  document.getElementById('row-count').textContent  = rows.length;
-}
-
-// ── WebSocket Local ───────────────────────────────────────
-function initWebSocket() {
-  if (ws) ws.close();
-  const url = document.getElementById('ws-url').value.trim() || 'ws://127.0.0.1:5000/ws';
-  document.getElementById('ws-url').value = url;
-  
-  setStatus('', 'Conectando...');
-  document.getElementById('ws-status').textContent = 'Conectando...';
-  
-  ws = new WebSocket(url);
-  
-  ws.onopen = () => {
-    setStatus('live', 'En vivo');
-    document.getElementById('ws-status').innerHTML = 'Conectado <span style="color:var(--ok)">✓</span>';
-    document.getElementById('overlay').classList.add('hidden');
-    let banner = document.getElementById('err-banner');
-    if(banner) banner.remove();
-  };
-  
-  ws.onmessage = (event) => {
-    const msg = JSON.parse(event.data);
-    
-    if (msg.type === 'history') {
-      rows = msg.data.map(r => ({
-        fecha: r.fecha, vrms: parseFloat(r.vrms), irms: parseFloat(r.irms),
-        power: parseFloat(r.power), kwh: parseFloat(r.kwh), joule: parseFloat(r.joule),
-        calibrando: r.anomalias && typeof r.anomalias==='string' ? r.anomalias.includes('sistema_calibrando') : (r.anomalias?.sistema_calibrando || false)
-      }));
-      updateUI();
-      document.getElementById('last-update').textContent = 'Sincronizado ' + new Date().toLocaleTimeString('es-CO');
-    } 
-    else if (msg.type === 'new_reading') {
-      const r = msg.data;
-      const isCalib = r.anomalias?.sistema_calibrando || false;
-      rows.push({
-        fecha: r.fecha, vrms: parseFloat(r.vrms), irms: parseFloat(r.irms),
-        power: parseFloat(r.power), kwh: parseFloat(r.kwh||r.kWh), joule: parseFloat(r.joule),
-        calibrando: isCalib
       });
-      if (rows.length > 5000) rows.shift(); // Evitar colapso
-      updateUI();
-      
-      const txtStatus = isCalib ? 'Calibrando Filtros (Ignorando Anomalías)...' : 'Última lectura: ' + new Date().toLocaleTimeString('es-CO');
-      document.getElementById('last-update').textContent = txtStatus;
-      if (isCalib) document.getElementById('last-update').style.color = '#ffb020';
-      else document.getElementById('last-update').style.color = '';
     }
-    else if (msg.type === 'ml_result') {
-      showBanner(` <b>Análisis IA de Python Recibido (${msg.modelo}):</b> ${msg.n_anomalias} anomalías en ${msg.n_lecturas} lecturas (Tasa: ${parseFloat(msg.tasa_pct).toFixed(1)}%)`);
-      
-      // Auto informar a DeepSeek si hay algo interesante
-      if (msg.n_anomalias > 0 && Array.isArray(chatHistory)) {
-         setTimeout(() => {
-           appendMessage('user', ` Alerta ML (${msg.modelo}): ${msg.n_anomalias} anomalías`);
-           sendToDeepSeek(`El modelo de inteligencia artificial de TensorFlow acaba de detectar ${msg.n_anomalias} anomalías en el analizador. ¿Qué tipo de fallas en el hogar pueden generar ruidos Z-Score repentinos en el muestreo de corriente/potencia? Dale una recomendación exprés al usuario.`);
-         }, 3000);
+
+    function initCharts() {
+      charts.vrms = makeChart('ch-vrms', COLORS.vrms, 'Vrms');
+      charts.vrmsG = makeChart('ch-vrms-g', COLORS.vrms, 'Vrms');
+      charts.irms = makeChart('ch-irms', COLORS.irms, 'Irms');
+      charts.power = makeChart('ch-power', COLORS.power, 'Potencia');
+      charts.kwh = makeChart('ch-kwh', COLORS.kwh, 'kWh');
+      charts.joule = makeChart('ch-joule', COLORS.joule, 'Joule');
+    }
+
+    function goToChart(key) {
+      const tabBtn = document.getElementById('tab-btn-charts');
+      switchTab('tab-charts', tabBtn);
+      const card = document.getElementById(key === 'vrms' ? 'chart-card-vrms' : 'chart-card-' + key);
+      if (!card) return;
+      setTimeout(() => {
+        card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        card.classList.add('chart-focused');
+        setTimeout(() => card.classList.remove('chart-focused'), 2000);
+      }, 80);
+    }
+
+    // ── Actualizar UI ─────────────────────────────────────────
+    function updateUI() {
+      if (!rows.length) return;
+      const last = rows[rows.length - 1];
+
+      for (const k of KEYS) {
+        const s  = calcStats(rows.map(r => r[k]));
+        const sc = SCALE[k] || 1;
+        document.getElementById(`v-${k}`).textContent  = (last[k] * sc).toFixed(DECS[k]);
+        document.getElementById(`mn-${k}`).textContent = (s.min   * sc).toFixed(DECS[k]);
+        document.getElementById(`mx-${k}`).textContent = (s.max   * sc).toFixed(DECS[k]);
+        document.getElementById(`av-${k}`).textContent = (s.avg   * sc).toFixed(DECS[k]);
+        const anom = isAnom(last, k, rows.slice(0, -1));
+        const card = document.getElementById(`ck-${k}`);
+        const val  = document.getElementById(`v-${k}`);
+        // Re-disparar animación aunque la clase ya estuviera presente
+        if (anom && !card.classList.contains('anom')) {
+          card.classList.add('anom');
+        } else if (!anom) {
+          card.classList.remove('anom');
+        } else {
+          // Ya estaba en anom: forzar replay quitando y reponiendo
+          card.classList.remove('anom');
+          void card.offsetWidth;   // reflow
+          card.classList.add('anom');
+        }
+        val.classList.toggle('anom-val', anom);
       }
+
+      const slice = rows.slice(-MAX_PTS);
+      const labels = slice.map(r => {
+        const d = new Date(r.fecha);
+        return isNaN(d) ? r.fecha : d.toLocaleTimeString('es-CO');
+      });
+
+      for (const k of KEYS) {
+        const ch = charts[k];
+        const sc = SCALE[k] || 1;
+        ch.data.labels = labels;
+        ch.data.datasets[0].data = slice.map(r => r[k] * sc);
+        const pts = slice.map((r, i) => {
+          const hist = rows.slice(0, rows.length - slice.length + i);
+          return isAnom(r, k, hist) ? '#ff3b3b' : COLORS[k];
+        });
+        ch.data.datasets[0].pointBackgroundColor = pts;
+        ch.update('none');
+      }
+
+      if (charts.vrmsG) {
+        charts.vrmsG.data.labels = [...charts.vrms.data.labels];
+        charts.vrmsG.data.datasets[0].data = [...charts.vrms.data.datasets[0].data];
+        charts.vrmsG.data.datasets[0].pointBackgroundColor = [...charts.vrms.data.datasets[0].pointBackgroundColor];
+        charts.vrmsG.update('none');
+      }
+
+      // Tabla historial
+      const tbody = document.getElementById('tbody');
+      tbody.innerHTML = '';
+      let anomCount = 0;
+
+      [...rows].reverse().forEach((row, idx) => {
+        const hist = rows.slice(0, rows.length - idx - 1);
+        const anoms = {}; let rowAnom = false;
+        for (const k of KEYS) { anoms[k] = isAnom(row, k, hist); if (anoms[k]) rowAnom = true; }
+        if (rowAnom) anomCount++;
+        const d = new Date(row.fecha);
+        const fecha = isNaN(d) ? row.fecha : d.toLocaleString('es-CO');
+        const tr = document.createElement('tr');
+        if (rowAnom) tr.classList.add('ranom');
+        tr.innerHTML = `<td>${fecha}</td>` +
+          KEYS.map(k => `<td class="${anoms[k] ? 'canom' : 'cnorm'}">${row[k].toFixed(DECS[k])}${anoms[k] ? '<span class="tag">!</span>' : ''}</td>`).join('') +
+          `<td>${rowAnom ? '<span class="tag">ANOMALÍA</span>' : '<span class="tok">✓ OK</span>'}</td>`;
+        tbody.appendChild(tr);
+      });
+
+      document.getElementById('anom-count').textContent = `${anomCount} anomalía${anomCount !== 1 ? 's' : ''}`;
+      document.getElementById('row-count').textContent = rows.length;
     }
-  };
-  
-  ws.onclose = () => {
-    setStatus('error', 'Desconectado');
-    document.getElementById('ws-status').innerHTML = 'Desconectado <span style="color:var(--danger)">✕</span>';
-    showBanner(' <b>Conexión perdida con Servidor Node.js</b><br>Intentando reconectar en 3 segundos...');
-    setTimeout(initWebSocket, 3000);
-  };
-  
-  ws.onerror = (err) => {
-    console.error("WebSocket Error: ", err);
-  };
-}
 
-function showBanner(html) {
-  document.getElementById('overlay').classList.add('hidden');
-  let banner = document.getElementById('err-banner');
-  if (!banner) {
-    banner = document.createElement('div');
-    banner.id = 'err-banner';
-    banner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:200;background:#1a0a0a;border-bottom:2px solid var(--accent);padding:12px 24px;font-family:Share Tech Mono,monospace;font-size:.75rem;color:var(--text);line-height:1.7';
-    document.body.prepend(banner);
-  }
-  banner.innerHTML = html + ' <span style="float:right;cursor:pointer;color:#4a5568" onclick="this.parentNode.remove()">✕</span>';
-}
+    // ── WebSocket Local ───────────────────────────────────────
+    function initWebSocket() {
+      if (ws) ws.close();
+      const url = document.getElementById('ws-url').value.trim() || DEFAULT_WS_URL;
+      document.getElementById('ws-url').value = url;
 
-function setStatus(cls, txt) {
-  const dot = document.getElementById('dot');
-  dot.className = 'dot' + (cls ? ' '+cls : '');
-  document.getElementById('status-txt').textContent = txt;
-}
+      setStatus('', 'Conectando...');
+      document.getElementById('ws-status').textContent = 'Conectando...';
 
-// ── Descarga CSV ──────────────────────────────────────────
-function downloadCSV() {
-  if (!rows.length) { alert('No hay datos para descargar.'); return; }
-  const headers = ['Fecha','Vrms (V)','Irms (A)','Potencia (W)','kWh','Joule (J)'];
-  const lines   = [headers.join(',')];
-  rows.forEach(r => lines.push([
-    `"${r.fecha}"`, r.vrms.toFixed(2), r.irms.toFixed(4),
-    r.power.toFixed(4), r.kwh.toFixed(6), r.joule.toFixed(6)
-  ].join(',')));
-  const blob = new Blob([lines.join('\n')], { type:'text/csv;charset=utf-8;' });
-  const url  = URL.createObjectURL(blob);
-  const a    = document.createElement('a');
-  a.href = url; a.download = `watios_${new Date().toISOString().slice(0,10)}.csv`; a.click();
-  URL.revokeObjectURL(url);
-}
+      ws = new WebSocket(url);
 
-// ════════════════════════════════════════════════════════════
-//  CHATBOT DEEPSEEK (Vía Servidor Local Seguro)
-// ════════════════════════════════════════════════════════════
+      ws.onopen = () => {
+        setStatus('live', 'En vivo');
+        document.getElementById('ws-status').innerHTML = 'Conectado <span style="color:var(--ok)">✓</span>';
+        document.getElementById('overlay').classList.add('hidden');
+        let banner = document.getElementById('err-banner');
+        if (banner) banner.remove();
+      };
 
-function buildContext() {
-  if (!rows.length) return 'No hay datos cargados del sensor aún.';
-  const last   = rows[rows.length - 1];
-  const last10 = rows.slice(-10);
-  const s = {};
-  for (const k of KEYS) s[k] = calcStats(last10.map(r => r[k]));
-  let anomRecientes = 0;
-  last10.forEach((row,i) => {
-    const hist = rows.slice(0, rows.length - 10 + i);
-    for (const k of KEYS) { if(isAnom(row,k,hist)){anomRecientes++;break;} }
-  });
-  const totalAnoms = (() => {
-    let c=0;
-    [...rows].forEach((row,idx) => {
-      const hist = rows.slice(0,rows.length-idx-1);
-      for(const k of KEYS){if(isAnom(row,k,hist)){c++;break;}}
-    });
-    return c;
-  })();
-  const d = new Date(last.fecha);
-  return `WATIOS — DATOS DEL SENSOR (${isNaN(d)?'--':d.toLocaleString('es-CO')}):
-Última lectura: Vrms=${last.vrms.toFixed(2)}V | Irms=${last.irms.toFixed(4)}A | Potencia=${last.power.toFixed(4)}W | kWh=${last.kwh.toFixed(6)} | Joule=${last.joule.toFixed(6)}J
-Últimas 10 lecturas — Vrms: min=${s.vrms.min.toFixed(2)}V avg=${s.vrms.avg.toFixed(2)}V max=${s.vrms.max.toFixed(2)}V (nominal ${V_IDEAL}V ±5%)
-Irms: min=${s.irms.min.toFixed(4)}A avg=${s.irms.avg.toFixed(4)}A max=${s.irms.max.toFixed(4)}A
-Potencia: min=${s.power.min.toFixed(4)}W avg=${s.power.avg.toFixed(4)}W max=${s.power.max.toFixed(4)}W
-kWh acumulado: ${last.kwh.toFixed(6)} | Joule inst. promedio: ${s.joule.avg.toFixed(6)}J (R_cable=0.0627Ω)
-Total registros: ${rows.length} | Anomalías detectadas: ${totalAnoms} totales, ${anomRecientes} en últimas 10
-Fuente de datos: Google Apps Script → Google Sheets (ESP32 POST JSON)`;
-}
+      ws.onmessage = (event) => {
+        const msg = JSON.parse(event.data);
 
-function appendMessage(role, text, time='') {
-  const box = document.getElementById('chat-messages');
-  const div = document.createElement('div');
-  div.className = `msg ${role}`;
-  const avatar = role === 'user' ? '' : '';
-  const ts = time || new Date().toLocaleTimeString('es-CO');
-  div.innerHTML = `
+        if (msg.type === 'history') {
+          rows = msg.data.map(r => ({
+            fecha: r.fecha, vrms: parseFloat(r.vrms), irms: parseFloat(r.irms),
+            power: parseFloat(r.power), kwh: parseFloat(r.kwh), joule: parseFloat(r.joule),
+            calibrando: r.anomalias && typeof r.anomalias === 'string' ? r.anomalias.includes('sistema_calibrando') : (r.anomalias?.sistema_calibrando || false)
+          }));
+          updateUI();
+          document.getElementById('last-update').textContent = 'Sincronizado ' + new Date().toLocaleTimeString('es-CO');
+        }
+        else if (msg.type === 'new_reading') {
+          const r = msg.data;
+          const isCalib = r.anomalias?.sistema_calibrando || false;
+          const newRow = {
+            fecha: r.fecha, vrms: parseFloat(r.vrms), irms: parseFloat(r.irms),
+            power: parseFloat(r.power), kwh: parseFloat(r.kwh || r.kWh), joule: parseFloat(r.joule),
+            calibrando: isCalib
+          };
+          rows.push(newRow);
+          if (rows.length > 5000) rows.shift();
+          updateUI();
+
+          if (!isCalib) triggerAlerta(newRow);
+
+          const txtStatus = isCalib ? 'Calibrando Filtros (Ignorando Anomalías)...' : 'Última lectura: ' + new Date().toLocaleTimeString('es-CO');
+          document.getElementById('last-update').textContent = txtStatus;
+          if (isCalib) document.getElementById('last-update').style.color = '#ffb020';
+          else document.getElementById('last-update').style.color = '';
+        }
+        else if (msg.type === 'ml_result') {
+          showBanner(` <b>Análisis IA de Python Recibido (${msg.modelo}):</b> ${msg.n_anomalias} anomalías en ${msg.n_lecturas} lecturas (Tasa: ${parseFloat(msg.tasa_pct).toFixed(1)}%)`);
+
+          // Auto informar a DeepSeek si hay algo interesante
+          if (msg.n_anomalias > 0 && Array.isArray(chatHistory)) {
+            setTimeout(() => {
+              appendMessage('user', ` Alerta ML (${msg.modelo}): ${msg.n_anomalias} anomalías`);
+              sendToDeepSeek(`El modelo de inteligencia artificial de TensorFlow acaba de detectar ${msg.n_anomalias} anomalías en el analizador. ¿Qué tipo de fallas en el hogar pueden generar ruidos Z-Score repentinos en el muestreo de corriente/potencia? Dale una recomendación exprés al usuario.`);
+            }, 3000);
+          }
+        }
+      };
+
+      ws.onclose = () => {
+        setStatus('error', 'Desconectado');
+        document.getElementById('ws-status').innerHTML = 'Desconectado <span style="color:var(--danger)">✕</span>';
+        showBanner(' <b>Conexión perdida con el servidor local</b> (Servidor.py)<br>Intentando reconectar en 3 segundos...');
+        setTimeout(initWebSocket, 3000);
+      };
+
+      ws.onerror = (err) => {
+        console.error("WebSocket Error: ", err);
+      };
+    }
+
+    function showBanner(html) {
+      document.getElementById('overlay').classList.add('hidden');
+      let banner = document.getElementById('err-banner');
+      if (!banner) {
+        banner = document.createElement('div');
+        banner.id = 'err-banner';
+        banner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:200;background:#1a0a0a;border-bottom:2px solid var(--accent);padding:12px 24px;font-family:Share Tech Mono,monospace;font-size:.75rem;color:var(--text);line-height:1.7';
+        document.body.prepend(banner);
+      }
+      banner.innerHTML = html + ' <span style="float:right;cursor:pointer;color:#4a5568" onclick="this.parentNode.remove()">✕</span>';
+    }
+
+    function setStatus(cls, txt) {
+      const dot = document.getElementById('dot');
+      dot.className = 'dot' + (cls ? ' ' + cls : '');
+      document.getElementById('status-txt').textContent = txt;
+    }
+
+    // ── Alertas proactivas ────────────────────────────────────
+    const LABELS = { vrms: 'Voltaje', irms: 'Corriente', power: 'Potencia', kwh: 'Energía', joule: 'Joule' };
+    const UNITS  = { vrms: 'V', irms: 'A', power: 'W', kwh: 'kWh', joule: 'J' };
+    const ALERT_COOLDOWN = 25000; // 25 s de cooldown para el chatbot proactivo (facilita pruebas)
+
+    function triggerAlerta(row) {
+      const hist = rows.slice(0, -1);
+      const currentStates = [];
+      const anomKeys = [];
+
+      KEYS.forEach(k => {
+        if (isAnom(row, k, hist)) {
+          anomKeys.push(k);
+          let stateName = k;
+          if (k === 'vrms') {
+            stateName = row.vrms < V_MIN ? 'vrms_low' : 'vrms_high';
+          }
+          currentStates.push(stateName);
+        }
+      });
+
+      // Diferencia de ESTADOS (así detecta si pasó de baja tensión a sobretensión sin pasar por normal)
+      const nuevas = currentStates.filter(s => !prevAnomalyStates.has(s));
+      prevAnomalyStates = new Set(currentStates);
+
+      if (!nuevas.length) return;
+
+      // Toast visual (sacar la llave original del nombre del estado)
+      const rawKeys = [...new Set(nuevas.map(s => s.replace('_low', '').replace('_high', '')))];
+      const detalles = rawKeys.map(k =>
+        `${LABELS[k]}: ${row[k].toFixed(DECS[k])} ${UNITS[k]}`
+      ).join(' | ');
+      showToast(detalles);
+
+      // Chatbot proactivo (con cooldown)
+      const now = Date.now();
+      if (now - lastAlertTime < ALERT_COOLDOWN) return;
+      lastAlertTime = now;
+
+      const pregunta = `Acabo de detectar una anomalía en: ${detalles}. ¿Está todo bien? Dame un diagnóstico breve.`;
+      // Esperar 2 s para que el usuario vea primero el toast
+      setTimeout(() => {
+        appendMessage('ai', `Anomalía detectada — ${detalles}\n¿Está todo bien?`);
+        sendToDeepSeek(pregunta);
+      }, 2000);
+    }
+
+    function showToast(detalle) {
+      // Eliminar toast anterior si existe
+      document.getElementById('anom-toast')?.remove();
+      const t = document.createElement('div');
+      t.id = 'anom-toast';
+      t.className = 'toast-anom';
+      t.innerHTML =
+        `<span class="toast-close" onclick="this.parentNode.remove()">✕</span>` +
+        `<strong>ANOMALÍA DETECTADA</strong>${detalle}`;
+      document.body.appendChild(t);
+      // Auto-cerrar en 12 s
+      setTimeout(() => t.remove(), 12000);
+    }
+
+    // ── Descarga CSV ──────────────────────────────────────────
+    function downloadCSV() {
+      if (!rows.length) { alert('No hay datos para descargar.'); return; }
+      const headers = ['Fecha', 'Vrms (V)', 'Irms (A)', 'Potencia (W)', 'kWh', 'Joule (J)'];
+      const lines = [headers.join(',')];
+      rows.forEach(r => lines.push([
+        `"${r.fecha}"`, r.vrms.toFixed(2), r.irms.toFixed(4),
+        r.power.toFixed(4), r.kwh.toFixed(6), r.joule.toFixed(6)
+      ].join(',')));
+      const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = `watios_${new Date().toISOString().slice(0, 10)}.csv`; a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    // ════════════════════════════════════════════════════════════
+    //  CHATBOT DEEPSEEK (Vía Servidor Local Seguro)
+    // ════════════════════════════════════════════════════════════
+
+    // buildContext — contexto compacto para minimizar tokens
+    function buildContext() {
+      if (!rows.length) return 'Sin datos.';
+      const last = rows[rows.length - 1];
+      const last5 = rows.slice(-5);
+      const s = {};
+      for (const k of KEYS) s[k] = calcStats(last5.map(r => r[k]));
+
+      // Contar anomalías solo en últimas 5 (suficiente para contexto inmediato)
+      let anomRec = 0;
+      last5.forEach((row, i) => {
+        const hist = rows.slice(0, rows.length - 5 + i);
+        for (const k of KEYS) { if (isAnom(row, k, hist)) { anomRec++; break; } }
+      });
+
+      const d = new Date(last.fecha);
+      const ts = isNaN(d) ? '--' : d.toLocaleTimeString('es-CO');
+
+      // Formato compacto: menos tokens, misma información útil
+      return [
+        `[Watios@${ts} n=${rows.length} anom=${anomRec}/5]`,
+        `V=${last.vrms.toFixed(2)}V I=${last.irms.toFixed(4)}A P=${last.power.toFixed(2)}W kWh=${last.kwh.toFixed(4)} J=${(last.joule*1000).toFixed(3)}mJ`,
+        `Vrms(avg=${s.vrms.avg.toFixed(2)}V min=${s.vrms.min.toFixed(2)}V max=${s.vrms.max.toFixed(2)}V | referencia=111V -> rango_OK=109V-112V)`,
+        `Irms(avg=${s.irms.avg.toFixed(4)}A min=${s.irms.min.toFixed(4)}A max=${s.irms.max.toFixed(4)}A)`,
+        `Potencia(avg=${s.power.avg.toFixed(2)}W min=${s.power.min.toFixed(2)}W max=${s.power.max.toFixed(2)}W)`,
+      ].join('\n');
+    }
+
+    function appendMessage(role, text, time = '') {
+      const box = document.getElementById('chat-messages');
+      const div = document.createElement('div');
+      div.className = `msg ${role}`;
+      const avatar = role === 'user' ? '' : '';
+      const ts = time || new Date().toLocaleTimeString('es-CO');
+      div.innerHTML = `
     <div class="msg-avatar">${avatar}</div>
     <div>
-      <div class="msg-bubble">${text.replace(/\n/g,'<br>')}</div>
+      <div class="msg-bubble">${text.replace(/\n/g, '<br>')}</div>
       <div class="msg-time">${ts}</div>
     </div>`;
-  box.appendChild(div);
-  box.scrollTop = box.scrollHeight;
-  return div;
-}
-
-function appendTyping() {
-  const box = document.getElementById('chat-messages');
-  const div = document.createElement('div');
-  div.className = 'msg ai'; div.id = 'typing-indicator';
-  div.innerHTML = `<div class="msg-avatar"></div><div><div class="msg-bubble"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></div></div>`;
-  box.appendChild(div); box.scrollTop = box.scrollHeight;
-}
-function removeTyping() {
-  const t = document.getElementById('typing-indicator');
-  if (t) t.remove();
-}
-
-async function sendToDeepSeek(userMsg) {
-  chatHistory.push({ role:'user', content: userMsg });
-  appendTyping();
-  document.getElementById('chat-send').disabled = true;
-
-  const systemMsg = {
-    role: 'system',
-    content: `Eres un ingeniero eléctrico experto analizando datos del sistema de monitoreo Watios. Responde en español, de forma concisa y técnica.\n\n${buildContext()}`
-  };
-
-  // Se envía al Node.js, quien guarda el SECRETO localmente (.env)
-  try {
-    const res = await fetch('http://127.0.0.1:5000/chat', {
-      method:'POST',
-      headers:{ 'Content-Type':'application/json' },
-      body: JSON.stringify({
-        messages: [systemMsg, ...chatHistory.slice(-8)]
-      })
-    });
-    
-    const data = await res.json();
-    removeTyping();
-    
-    if (data.error) {
-      appendMessage('ai', ` Error del Servidor: ${data.error.message}`);
-      chatHistory.pop(); return;
+      box.appendChild(div);
+      box.scrollTop = box.scrollHeight;
+      return div;
     }
-    const respuesta = data.choices?.[0]?.message?.content || 'Sin respuesta.';
-    const tokens    = data.usage?.total_tokens || '?';
-    chatHistory.push({ role:'assistant', content: respuesta });
-    appendMessage('ai', respuesta + `\n\n<span style="color:var(--muted);font-size:.58rem">tokens: ${tokens}</span>`);
-  } catch(err) {
-    removeTyping();
-    appendMessage('ai', ` Error de conexión: ${err.message}`);
-    chatHistory.pop();
-  }
-  document.getElementById('chat-send').disabled = false;
-  document.getElementById('chat-input').focus();
-}
 
-function sendChatMessage() {
-  const input = document.getElementById('chat-input');
-  const msg   = input.value.trim();
-  if (!msg) return;
-  appendMessage('user', msg);
-  input.value = '';
-  sendToDeepSeek(msg);
-}
-function chatKeydown(e) {
-  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChatMessage(); }
-}
-function sendSuggestion(btn) {
-  const msg = btn.textContent;
-  appendMessage('user', msg);
-  sendToDeepSeek(msg);
-}
-function autoAnalyze() {
-  const msg = `Dame un análisis completo del estado actual del circuito. Incluye: 1) Estado del voltaje, 2) Consumo de corriente, 3) Potencia y eficiencia, 4) Anomalías detectadas, 5) Recomendación.`;
-  appendMessage('user', ' Auto-análisis solicitado');
-  sendToDeepSeek(msg);
-}
-function clearChat() {
-  chatHistory = [];
-  document.getElementById('chat-messages').innerHTML = '';
-  appendMessage('ai', 'Chat reiniciado. ¿En qué puedo ayudarte con los datos del sensor?');
-}
+    function appendTyping() {
+      const box = document.getElementById('chat-messages');
+      const div = document.createElement('div');
+      div.className = 'msg ai'; div.id = 'typing-indicator';
+      div.innerHTML = `<div class="msg-avatar"></div><div><div class="msg-bubble"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></div></div>`;
+      box.appendChild(div); box.scrollTop = box.scrollHeight;
+    }
+    function removeTyping() {
+      const t = document.getElementById('typing-indicator');
+      if (t) t.remove();
+    }
 
-// ── Boot ──────────────────────────────────────────────────
-initCharts();
-initWebSocket();
-</script>
+    async function sendToDeepSeek(userMsg) {
+      chatHistory.push({ role: 'user', content: userMsg });
+      appendTyping();
+      document.getElementById('chat-send').disabled = true;
+
+      // Sistema compacto: rol + contexto en un solo bloque corto
+      const systemMsg = {
+        role: 'system',
+        content: 'Eres ingeniero eléctrico experto. Responde en español, conciso y técnico. Datos del sensor:\n' + buildContext()
+      };
+
+      // Historial limitado a 6 mensajes (3 turnos) para reducir tokens
+      const historySlice = chatHistory.slice(-6);
+
+      try {
+        const res = await fetch(httpBaseFromWsInput() + '/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ messages: [systemMsg, ...historySlice] })
+        });
+
+        const data = await res.json();
+        removeTyping();
+
+        if (data.error) {
+          appendMessage('ai', '⚠️ Error: ' + (data.error.message || JSON.stringify(data.error)));
+          chatHistory.pop(); return;
+        }
+
+        const respuesta = data.choices?.[0]?.message?.content || 'Sin respuesta.';
+        const tkIn = data.usage?.prompt_tokens || 0;
+        const tkOut = data.usage?.completion_tokens || 0;
+        const tkTotal = data.usage?.total_tokens || '?';
+        chatHistory.push({ role: 'assistant', content: respuesta });
+        appendMessage('ai',
+          respuesta +
+          `\n\n<span style="color:var(--muted);font-size:.58rem">` +
+          `↑${tkIn} ↓${tkOut} tokens (total ${tkTotal})</span>`
+        );
+      } catch (err) {
+        removeTyping();
+        appendMessage('ai', '⚠️ Error de conexión: ' + err.message);
+        chatHistory.pop();
+      }
+      document.getElementById('chat-send').disabled = false;
+      document.getElementById('chat-input').focus();
+    }
+
+    function sendChatMessage() {
+      const input = document.getElementById('chat-input');
+      const msg = input.value.trim();
+      if (!msg) return;
+      appendMessage('user', msg);
+      input.value = '';
+      sendToDeepSeek(msg);
+    }
+    function chatKeydown(e) {
+      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChatMessage(); }
+    }
+    function sendSuggestion(btn) {
+      const msg = btn.textContent;
+      appendMessage('user', msg);
+      sendToDeepSeek(msg);
+    }
+    function autoAnalyze() {
+      const msg = `Dame un análisis completo del estado actual del circuito. Incluye: 1) Estado del voltaje, 2) Consumo de corriente, 3) Potencia y eficiencia, 4) Anomalías detectadas, 5) Recomendación.`;
+      appendMessage('user', ' Auto-análisis solicitado');
+      sendToDeepSeek(msg);
+    }
+    function clearChat() {
+      chatHistory = [];
+      document.getElementById('chat-messages').innerHTML = '';
+      appendMessage('ai', 'Chat reiniciado. ¿En qué puedo ayudarte con los datos del sensor?');
+    }
+
+    // ── Boot ──────────────────────────────────────────────────
+    initCharts();
+    initWebSocket();
+  </script>
 </body>
+
 </html>

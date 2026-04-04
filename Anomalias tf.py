@@ -14,7 +14,8 @@ from tensorflow import keras
 from tensorflow.keras import layers
 
 # ── Configuracion ─────────────────────────────────────────
-LOCAL_SERVER   = "http://127.0.0.1:5000"
+# Lee datos del Servidor.py (GET /data), mismo origen que alimenta el dashboard por WebSocket.
+LOCAL_SERVER   = os.environ.get("LOCAL_SERVER", "http://192.168.1.13:5000").rstrip("/")
 SCRIPT_URL     = f"{LOCAL_SERVER}/data"
 MODELO_DIR     = "modelo_autoencoder"
 WINDOW_SIZE    = 10      # ventana de tiempo para el LSTM
@@ -22,15 +23,15 @@ EPOCHS         = 50
 BATCH_SIZE     = 16
 LATENT_DIM     = 8       # dimension del espacio latente
 ZSCORE_UMBRAL  = 2.0     # umbral Z-score para anomalias (igual que Apps Script)
-VRMS_IDEAL     = 110.0   # tension ideal de referencia en voltios
-VRMS_TOL_PCT   = 0.05    # tolerancia ± 5% sobre VRMS_IDEAL
+VRMS_MIN       = 109.0   # voltaje mínimo normal (igual que dashboard y Apps Script)
+VRMS_MAX       = 112.0   # voltaje máximo normal (igual que dashboard y Apps Script)
 FEATURES       = ['vrms', 'irms', 'power', 'kwh', 'joule']
 FEATURES_LSTM  = ['irms', 'power', 'kwh', 'joule']  # vrms usa umbral fijo, no LSTM
 R_CABLE        = 0.0627  # resistencia del cable en ohmios (igual que Apps Script)
 
-# ── 1. Cargar datos desde Google Sheets ──────────────────
+# ── 1. Cargar datos desde el servidor (FastAPI) ──────────
 def cargar_datos(url):
-    print("Descargando datos desde Apps Script...")
+    print("Descargando datos desde el servidor (GET /data)...")
     try:
         res  = requests.get(url, allow_redirects=True, timeout=15)
         data = res.json()
@@ -122,7 +123,7 @@ def generar_reporte(df, errores, anomalias, umbral, historia):
     ax = axes[0]
     ax.set_facecolor('#111827')
     ax.plot(fechas_slice, errores, color='#ffffff', linewidth=0.8, alpha=0.7, label='Error reconstruccion')
-    ax.axhline(umbral, color='#ff3b3b', linestyle='--', linewidth=1, label=f'Umbral p{Z_PERCENTILE}={umbral:.6f}')
+    ax.axhline(umbral, color='#ff3b3b', linestyle='--', linewidth=1, label=f'Umbral Z={ZSCORE_UMBRAL:.2f}')
     anom_fechas  = fechas_slice[anomalias]
     anom_errores = errores[anomalias]
     ax.scatter(anom_fechas, anom_errores, color='#ff3b3b', s=20, zorder=5, label='Anomalias')
@@ -217,7 +218,7 @@ def generar_reporte(df, errores, anomalias, umbral, historia):
   <div class="kpi kpi-anom"><div class="kpi-val">{n_anom}</div><div class="kpi-lbl">Anomalias detectadas</div></div>
   <div class="kpi"><div class="kpi-val">{pct:.1f}%</div><div class="kpi-lbl">Tasa de anomalias</div></div>
   <div class="kpi"><div class="kpi-val">{umbral:.6f}</div><div class="kpi-lbl">Umbral MSE (Z&gt;{ZSCORE_UMBRAL})</div></div>
-  <div class="kpi"><div class="kpi-val">{VRMS_IDEAL}V ±{int(VRMS_TOL_PCT*100)}%</div><div class="kpi-lbl">Umbral Voltaje fijo</div></div>
+  <div class="kpi"><div class="kpi-val">{VRMS_MIN}V–{VRMS_MAX}V</div><div class="kpi-lbl">Umbral Voltaje fijo</div></div>
   <div class="kpi"><div class="kpi-val">{EPOCHS}</div><div class="kpi-lbl">Epocas entrenamiento</div></div>
 </div>
 
@@ -232,7 +233,7 @@ def generar_reporte(df, errores, anomalias, umbral, historia):
 
 <div class="footer">
   Features usadas: {', '.join(FEATURES)} · 
-  Encoder: Z-score (LSTM) + Umbral fijo {VRMS_IDEAL}V ±{int(VRMS_TOL_PCT*100)}% (Vrms) · Z-score umbral LSTM: {ZSCORE_UMBRAL} · 
+  Encoder: Z-score (LSTM) + Umbral fijo Vrms {VRMS_MIN}V–{VRMS_MAX}V · Z-score umbral LSTM: {ZSCORE_UMBRAL} · 
   Arquitectura: LSTM(32) → LSTM({LATENT_DIM}) → RepeatVector → LSTM({LATENT_DIM}) → LSTM(32) → Dense
 </div>
 </body>
@@ -259,9 +260,9 @@ def enviar_resultados_al_servidor(df, errores, anomalias, umbral_lstm):
         }
         res = requests.post(f"{LOCAL_SERVER}/ml/result", json=payload, timeout=5)
         if res.status_code == 200:
-            print("  Resultados sincronizados con Node.js exitosamente.")
+            print("  Resultados enviados al servidor (WebSocket → dashboard).")
     except Exception as e:
-        print(f"  Error sincronizando al servidor Node: {e}")
+        print(f"  Error al notificar al servidor: {e}")
 
 # ── Main ──────────────────────────────────────────────────
 def ejecutar_analisis():
@@ -317,9 +318,9 @@ def ejecutar_analisis():
     # — Anomalias LSTM: Z-score del error de reconstruccion (irms, power, kwh, joule)
     anom_lstm, umbral_lstm, zscores = detectar_anomalias(errores)
 
-    # — Anomalias de voltaje: umbral fijo 110 V ± 5% (vrms)
+    # — Anomalias de voltaje: umbral fijo exacto 109V–112V (igual que dashboard y Apps Script)
     vrms_slice = df['vrms'].values[WINDOW_SIZE:]
-    anom_vrms  = np.abs(vrms_slice - VRMS_IDEAL) > (VRMS_IDEAL * VRMS_TOL_PCT)
+    anom_vrms  = (vrms_slice < VRMS_MIN) | (vrms_slice > VRMS_MAX)
 
     # Combinar ambas fuentes
     anomalias = anom_lstm | anom_vrms
@@ -329,7 +330,7 @@ def ejecutar_analisis():
     n_anom_vrms = int(np.sum(anom_vrms))
     print(f"  Umbral Z-score LSTM : {ZSCORE_UMBRAL}  (MSE equiv: {umbral_lstm:.6f})")
     print(f"  Anomalias LSTM (Z-score):                  {n_anom_lstm}")
-    print(f"  Anomalias Vrms ({VRMS_IDEAL}V ±{int(VRMS_TOL_PCT*100)}%): {n_anom_vrms}")
+    print(f"  Anomalias Vrms (fuera de {VRMS_MIN}V–{VRMS_MAX}V): {n_anom_vrms}")
     print(f"  Anomalias totales: {n_anom} de {len(errores)} ({n_anom/len(errores)*100:.1f}%)")
 
     # Indices en df original

@@ -1,0 +1,6 @@
+.env
+config.h
+__pycache__/
+*.pyc
+.python-version
+modelo_autoencoder/
