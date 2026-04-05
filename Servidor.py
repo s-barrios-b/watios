@@ -188,7 +188,7 @@ async def chat_proxy(request: Request):
     if not DEEPSEEK_API_KEY:
         return JSONResponse({
             "choices": [{"message": {"content":
-                "⚠️ No hay DEEPSEEK_API_KEY en el archivo .env del servidor."
+                "No hay DEEPSEEK_API_KEY en el archivo .env del servidor."
             }}],
             "usage": {"total_tokens": 0}
         })

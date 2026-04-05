@@ -931,6 +931,7 @@
         gap: 10px;
       }
     }
+
     /* ── Toast de alerta ── */
     .toast-anom {
       position: fixed;
@@ -945,18 +946,36 @@
       font-size: 0.76rem;
       color: var(--text);
       max-width: 340px;
-      box-shadow: 0 0 24px rgba(255,59,59,.25);
+      box-shadow: 0 0 24px rgba(255, 59, 59, .25);
       animation: slideIn .3s ease;
       line-height: 1.6;
     }
-    .toast-anom strong { color: var(--danger); display: block; margin-bottom: 4px; }
-    .toast-anom .toast-close {
-      position: absolute; top: 8px; right: 10px;
-      cursor: pointer; color: var(--muted); font-size: 0.8rem;
+
+    .toast-anom strong {
+      color: var(--danger);
+      display: block;
+      margin-bottom: 4px;
     }
+
+    .toast-anom .toast-close {
+      position: absolute;
+      top: 8px;
+      right: 10px;
+      cursor: pointer;
+      color: var(--muted);
+      font-size: 0.8rem;
+    }
+
     @keyframes slideIn {
-      from { opacity: 0; transform: translateY(16px); }
-      to   { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(16px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
   </style>
 </head>
@@ -965,7 +984,8 @@
 
   <div class="overlay" id="overlay">
     <div class="ring"></div>
-    <p id="overlay-msg">Conectando con Servidor Local Node.js...</p>
+    <p id="overlay-msg">Conectando con Servidor Local FastAPI (Servidor.py)...</p>
+    <button onclick="document.getElementById('overlay').classList.add('hidden')" style="margin-top:18px;font-family:var(--mono);font-size:.7rem;padding:6px 18px;border-radius:6px;border:1px solid var(--muted);background:transparent;color:var(--muted);cursor:pointer;">Saltar ✕</button>
   </div>
 
   <div class="container">
@@ -987,7 +1007,7 @@
     <!-- Config -->
     <div class="config-bar">
       <label>Servidor WebSocket</label>
-      <input type="text" id="ws-url" value="ws://192.168.1.13:5000/ws" placeholder="ws://192.168.1.13:5000/ws">
+      <input type="text" id="ws-url" value="ws://192.168.1.7:5000/ws" placeholder="ws://192.168.1.7:5000/ws">
       <button class="btn" id="btn-fetch" onclick="initWebSocket()">↻ Reconectar</button>
       <button class="btn btn-warn" onclick="downloadCSV()">⬇ CSV</button>
       <div class="countdown-wrap"><span id="ws-status">Desconectado</span></div>
@@ -1230,7 +1250,7 @@
 
     // ── Configuración ─────────────────────────────────────────
 
-    const DEFAULT_SERVER_HOST = '192.168.1.13';
+    const DEFAULT_SERVER_HOST = '192.168.1.7';
     const DEFAULT_SERVER_PORT = '5000';
     const DEFAULT_WS_URL = `ws://${DEFAULT_SERVER_HOST}:${DEFAULT_SERVER_PORT}/ws`;
 
@@ -1294,7 +1314,7 @@
     // ── Gráficas ─────────────────────────────────────────────
     const COLORS = { vrms: '#00e5ff', irms: '#ff4081', power: '#69ff47', kwh: '#ffb020', joule: '#b388ff' };
     const KEYS = ['vrms', 'irms', 'power', 'kwh', 'joule'];
-    const DECS  = { vrms: 2, irms: 4, power: 4, kwh: 6, joule: 3 };
+    const DECS = { vrms: 2, irms: 4, power: 4, kwh: 6, joule: 3 };
     // SCALE: factor de visualización por variable (los datos internos NO cambian)
     const SCALE = { vrms: 1, irms: 1, power: 1, kwh: 1, joule: 1000 };
 
@@ -1361,15 +1381,15 @@
       const last = rows[rows.length - 1];
 
       for (const k of KEYS) {
-        const s  = calcStats(rows.map(r => r[k]));
+        const s = calcStats(rows.map(r => r[k]));
         const sc = SCALE[k] || 1;
-        document.getElementById(`v-${k}`).textContent  = (last[k] * sc).toFixed(DECS[k]);
-        document.getElementById(`mn-${k}`).textContent = (s.min   * sc).toFixed(DECS[k]);
-        document.getElementById(`mx-${k}`).textContent = (s.max   * sc).toFixed(DECS[k]);
-        document.getElementById(`av-${k}`).textContent = (s.avg   * sc).toFixed(DECS[k]);
+        document.getElementById(`v-${k}`).textContent = (last[k] * sc).toFixed(DECS[k]);
+        document.getElementById(`mn-${k}`).textContent = (s.min * sc).toFixed(DECS[k]);
+        document.getElementById(`mx-${k}`).textContent = (s.max * sc).toFixed(DECS[k]);
+        document.getElementById(`av-${k}`).textContent = (s.avg * sc).toFixed(DECS[k]);
         const anom = isAnom(last, k, rows.slice(0, -1));
         const card = document.getElementById(`ck-${k}`);
-        const val  = document.getElementById(`v-${k}`);
+        const val = document.getElementById(`v-${k}`);
         // Re-disparar animación aunque la clase ya estuviera presente
         if (anom && !card.classList.contains('anom')) {
           card.classList.add('anom');
@@ -1529,7 +1549,7 @@
 
     // ── Alertas proactivas ────────────────────────────────────
     const LABELS = { vrms: 'Voltaje', irms: 'Corriente', power: 'Potencia', kwh: 'Energía', joule: 'Joule' };
-    const UNITS  = { vrms: 'V', irms: 'A', power: 'W', kwh: 'kWh', joule: 'J' };
+    const UNITS = { vrms: 'V', irms: 'A', power: 'W', kwh: 'kWh', joule: 'J' };
     const ALERT_COOLDOWN = 25000; // 25 s de cooldown para el chatbot proactivo (facilita pruebas)
 
     function triggerAlerta(row) {
@@ -1629,7 +1649,7 @@
       // Formato compacto: menos tokens, misma información útil
       return [
         `[Watios@${ts} n=${rows.length} anom=${anomRec}/5]`,
-        `V=${last.vrms.toFixed(2)}V I=${last.irms.toFixed(4)}A P=${last.power.toFixed(2)}W kWh=${last.kwh.toFixed(4)} J=${(last.joule*1000).toFixed(3)}mJ`,
+        `V=${last.vrms.toFixed(2)}V I=${last.irms.toFixed(4)}A P=${last.power.toFixed(2)}W kWh=${last.kwh.toFixed(4)} J=${(last.joule * 1000).toFixed(3)}mJ`,
         `Vrms(avg=${s.vrms.avg.toFixed(2)}V min=${s.vrms.min.toFixed(2)}V max=${s.vrms.max.toFixed(2)}V | referencia=111V -> rango_OK=109V-112V)`,
         `Irms(avg=${s.irms.avg.toFixed(4)}A min=${s.irms.min.toFixed(4)}A max=${s.irms.max.toFixed(4)}A)`,
         `Potencia(avg=${s.power.avg.toFixed(2)}W min=${s.power.min.toFixed(2)}W max=${s.power.max.toFixed(2)}W)`,

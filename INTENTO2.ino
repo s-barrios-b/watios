@@ -9,9 +9,7 @@ const char *ssid = "Saira_Sofia";
 const char *password = "1043154303";
 
 // ── Google Apps Script — destino principal ───────────────────
-const char *scriptURL = "https://script.google.com/macros/s/"
-                        "AKfycbz_wMGcjBVCWe-Aupx1TwA_bagBBEB3yoPfW9B1S_"
-                        "eDu1jKa1Wv0NEiedUUNZNjxkAUUg/exec";
+const char *scriptURL = "https://script.google.com/macros/s/AKfycbz_wMGcjBVCWe-Aupx1TwA_bagBBEB3yoPfW9B1S_eDu1jKa1Wv0NEiedUUNZNjxkAUUg/exec";
 
 // ── Calibración sensores ─────────────────────────────────────
 #define vCalibration 145
