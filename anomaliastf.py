@@ -1,4 +1,4 @@
-﻿import numpy as np
+import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
@@ -30,8 +30,8 @@ EPOCHS         = 50
 BATCH_SIZE     = 16
 LATENT_DIM     = 8
 ZSCORE_UMBRAL  = 2.0
-VRMS_MIN       = 109.0
-VRMS_MAX       = 112.0
+VRMS_MIN       = 99.0
+VRMS_MAX       = 121.0
 FEATURES       = ['vrms', 'irms', 'power', 'kwh', 'joule']
 FEATURES_LSTM  = ['irms', 'power', 'kwh', 'joule']
 R_CABLE        = float(os.environ.get("R_CABLE", "0.0627"))
