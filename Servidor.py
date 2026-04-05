@@ -154,7 +154,7 @@ async def get_data():
 
 @app.post("/ml/result")
 async def ml_result(request: Request):
-    """Recibe resultados del modulo Anomalias tf.py y los reenvía al dashboard."""
+    """Recibe resultados del modulo anomaliastf.py y los reenvía al dashboard."""
     try:
         payload = await request.json()
     except Exception:

@@ -1,10 +1,10 @@
-﻿# Servidor.py (dashboard / API)
+# Servidor.py (dashboard / API)
 fastapi>=0.100.0
 uvicorn[standard]>=0.22.0
 python-dotenv>=1.0.0
 httpx>=0.27.0
 
-# Anomalias tf.py (ML)
+# anomaliastf.py (ML)
 numpy>=1.23.0
 pandas>=2.0.0
 matplotlib>=3.7.0
