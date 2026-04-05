@@ -1,26 +1,28 @@
 #!/usr/bin/env python3
 """
-Watios — Servidor local (FastAPI)
-──────────────────────────────────
-• POST /data   → recibe JSON del ESP32, guarda en RAM, broadcast WebSocket
-• GET  /data   → entrega historial como { rows: [[encabezado], [fila], ...] }
-• WS   /ws     → WebSocket en tiempo real para el dashboard
-• POST /chat   → proxy seguro a DeepSeek (la API key nunca va al browser)
+Watios -- Servidor local (FastAPI)
+----------------------------------
+* POST /data      -> recibe JSON del ESP32, guarda en RAM, broadcast WebSocket
+* GET  /data      -> entrega historial como { rows: [[encabezado], [fila], ...] }
+* WS   /ws        -> WebSocket en tiempo real para el dashboard
+* POST /chat      -> proxy seguro a DeepSeek (la API key nunca va al browser)
+* POST /ml/result -> recibe resultados del modulo ML y los reenvía al dashboard
 """
 
 import os, json, asyncio
+from collections import deque
 from datetime import datetime
 from typing import List, Dict, Any
 
-import requests
+import httpx
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Request
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(override=True)
 
-# ── Configuración (editar en .env) ─────────────────────────────
+# -- Configuracion (editar en .env) ------------------------------------
 PORT             = int(os.getenv("PORT", "5000"))
 MAX_ROWS         = int(os.getenv("MAX_ROWS", "10000"))
 R_CABLE          = float(os.getenv("R_CABLE", "0.0627"))
@@ -30,10 +32,10 @@ DEEPSEEK_MODEL   = os.getenv("DEEPSEEK_MODEL", "deepseek-chat")
 
 HEADER = ["fecha", "vrms", "irms", "power", "kwh", "joule"]
 
-# ── Estado en RAM ──────────────────────────────────────────────
-ROWS: List[Dict[str, Any]] = []
+# -- Estado en RAM (deque O(1) en ambos extremos) ----------------------
+ROWS: deque = deque(maxlen=MAX_ROWS)
 
-# ── FastAPI ────────────────────────────────────────────────────
+# -- FastAPI -----------------------------------------------------------
 app = FastAPI(title="Watios Server")
 
 app.add_middleware(
@@ -43,7 +45,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ── Gestor WebSocket ───────────────────────────────────────────
+# -- Gestor WebSocket --------------------------------------------------
 class ConnectionManager:
     def __init__(self):
         self._conns: List[WebSocket] = []
@@ -63,14 +65,15 @@ class ConnectionManager:
         for ws in list(self._conns):
             try:
                 await ws.send_text(text)
-            except Exception:
+            except Exception as e:
+                print(f"[WS] Error en broadcast: {e}")
                 dead.append(ws)
         for ws in dead:
             self.disconnect(ws)
 
 manager = ConnectionManager()
 
-# ── Helpers ────────────────────────────────────────────────────
+# -- Helpers -----------------------------------------------------------
 def _to_float(payload, *names, default=0.0) -> float:
     for name in names:
         v = payload.get(name)
@@ -112,7 +115,7 @@ def parse_row(payload: dict) -> dict:
         "anomalias": {"sistema_calibrando": calibrando},
     }
 
-# ── Rutas HTTP ─────────────────────────────────────────────────
+# -- Rutas HTTP --------------------------------------------------------
 
 @app.post("/data")
 async def post_data(request: Request):
@@ -127,9 +130,7 @@ async def post_data(request: Request):
         payload = payload[0]
 
     row = parse_row(payload)
-    ROWS.append(row)
-    if len(ROWS) > MAX_ROWS:
-        ROWS.pop(0)
+    ROWS.append(row)   # deque descarta automaticamente los mas antiguos si llega a maxlen
 
     asyncio.create_task(manager.broadcast({"type": "new_reading", "data": row}))
     return JSONResponse({"status": "ok", "row": row})
@@ -153,7 +154,7 @@ async def get_data():
 
 @app.post("/ml/result")
 async def ml_result(request: Request):
-    """Recibe resultados del módulo Anomalias tf.py y los reenvía al dashboard."""
+    """Recibe resultados del modulo Anomalias tf.py y los reenvía al dashboard."""
     try:
         payload = await request.json()
     except Exception:
@@ -174,7 +175,7 @@ async def ml_result(request: Request):
 @app.post("/chat")
 async def chat_proxy(request: Request):
     """
-    Proxy seguro hacia DeepSeek.
+    Proxy async hacia DeepSeek (no bloquea el event loop).
     El dashboard envía { messages: [...] }, el servidor añade la API key.
     """
     try:
@@ -202,40 +203,42 @@ async def chat_proxy(request: Request):
             "model":       DEEPSEEK_MODEL,
             "messages":    messages,
             "max_tokens":  int(os.getenv("DEEPSEEK_MAX_TOKENS", "600")),
-            "temperature": float(os.getenv("DEEPSEEK_TEMPERATURE", "0.3")),  # respuestas enfocadas
+            "temperature": float(os.getenv("DEEPSEEK_TEMPERATURE", "0.3")),
         }
-        r = requests.post(DEEPSEEK_API_URL, json=body_payload, headers=headers, timeout=30)
+        # httpx.AsyncClient: no bloquea el event loop de FastAPI
+        async with httpx.AsyncClient(timeout=30) as client:
+            r = await client.post(DEEPSEEK_API_URL, json=body_payload, headers=headers)
         result = r.json()
-        # Log uso de tokens en consola
-        usage = result.get("usage", {})
-        print(f"[DeepSeek] ↑{usage.get('prompt_tokens','?')} ↓{usage.get('completion_tokens','?')} tokens")
+        usage  = result.get("usage", {})
+        print(f"[DeepSeek] prompt={usage.get('prompt_tokens','?')} completion={usage.get('completion_tokens','?')} tokens")
         return JSONResponse(result, status_code=r.status_code)
     except Exception as ex:
+        print(f"[DeepSeek] Error: {ex}")
         return JSONResponse({"error": str(ex)}, status_code=500)
 
 
-# ── WebSocket ──────────────────────────────────────────────────
+# -- WebSocket ---------------------------------------------------------
 
 @app.websocket("/ws")
 async def ws_endpoint(websocket: WebSocket):
     await manager.connect(websocket)
     try:
-        # Enviar historial al conectarse
         await websocket.send_text(json.dumps(
-            {"type": "history", "data": ROWS}, default=str
+            {"type": "history", "data": list(ROWS)}, default=str
         ))
         while True:
-            await websocket.receive_text()   # mantener viva la conexión
+            await websocket.receive_text()
     except WebSocketDisconnect:
         manager.disconnect(websocket)
-    except Exception:
+    except Exception as e:
+        print(f"[WS] Conexion cerrada: {e}")
         manager.disconnect(websocket)
 
 
-# ── Arranque ───────────────────────────────────────────────────
+# -- Arranque ----------------------------------------------------------
 if __name__ == "__main__":
     import uvicorn
     print(f"Watios Server  -> http://0.0.0.0:{PORT}")
     print(f"WebSocket      -> ws://0.0.0.0:{PORT}/ws")
     print(f"DeepSeek       -> {'OK' if DEEPSEEK_API_KEY else 'SIN CLAVE - agrega DEEPSEEK_API_KEY en .env'}")
-    uvicorn.run("Servidor:app", host="0.0.0.0", port=PORT, log_level="info", reload=False)
+    uvicorn.run(app, host="0.0.0.0", port=PORT, log_level="info")

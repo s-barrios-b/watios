@@ -10,6 +10,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Syne:wght@400;700;800&display=swap"
     rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <!-- config.js: generado por generar_config.py a partir del .env -->
+  <!-- Expone: WATIOS_WS_URL, WATIOS_SERVER_URL -->
+  <script src="config.js"></script>
   <style>
     :root {
       --bg: #0a0e17;
@@ -1007,7 +1010,7 @@
     <!-- Config -->
     <div class="config-bar">
       <label>Servidor WebSocket</label>
-      <input type="text" id="ws-url" value="ws://192.168.1.7:5000/ws" placeholder="ws://192.168.1.7:5000/ws">
+      <input type="text" id="ws-url" placeholder="ws://…/ws">
       <button class="btn" id="btn-fetch" onclick="initWebSocket()">↻ Reconectar</button>
       <button class="btn btn-warn" onclick="downloadCSV()">⬇ CSV</button>
       <div class="countdown-wrap"><span id="ws-status">Desconectado</span></div>
@@ -1131,11 +1134,6 @@
           </div>
         </div>
       </div>
-      <div class="chart-card wide" style="margin-bottom:14px">
-        <div class="chart-head"><span class="chart-title">Voltaje vs Tiempo</span><span class="chart-badge"
-            style="color:var(--volt)">V rms</span></div>
-        <div class="chart-wrap tall"><canvas id="ch-vrms"></canvas></div>
-      </div>
     </div>
 
     <!-- TAB: Gráficas -->
@@ -1250,9 +1248,20 @@
 
     // ── Configuración ─────────────────────────────────────────
 
-    const DEFAULT_SERVER_HOST = '192.168.1.7';
+    // WATIOS_WS_URL y WATIOS_SERVER_URL vienen de config.js,
+    // generado automáticamente por generar_config.py desde el .env.
+    // Si config.js no existe, el campo muestra un aviso.
     const DEFAULT_SERVER_PORT = '5000';
-    const DEFAULT_WS_URL = `ws://${DEFAULT_SERVER_HOST}:${DEFAULT_SERVER_PORT}/ws`;
+    const DEFAULT_WS_URL = (typeof WATIOS_WS_URL !== 'undefined') ? WATIOS_WS_URL : '';
+    document.addEventListener('DOMContentLoaded', function () {
+      const _inp = document.getElementById('ws-url');
+      if (_inp && DEFAULT_WS_URL) {
+        _inp.value = DEFAULT_WS_URL;
+      } else if (_inp) {
+        _inp.placeholder = '⚠ Ejecuta: python generar_config.py';
+        _inp.style.borderColor = 'var(--warn)';
+      }
+    });
 
     function httpBaseFromWsInput() {
       const raw = (document.getElementById('ws-url') && document.getElementById('ws-url').value.trim()) || DEFAULT_WS_URL;
@@ -1260,7 +1269,7 @@
         const u = new URL(raw.replace(/^ws/i, 'http'));
         return u.origin;
       } catch (e) {
-        return `http://${DEFAULT_SERVER_HOST}:${DEFAULT_SERVER_PORT}`;
+        return (typeof WATIOS_SERVER_URL !== 'undefined') ? WATIOS_SERVER_URL : '';
       }
     }
 
@@ -1355,8 +1364,7 @@
     }
 
     function initCharts() {
-      charts.vrms = makeChart('ch-vrms', COLORS.vrms, 'Vrms');
-      charts.vrmsG = makeChart('ch-vrms-g', COLORS.vrms, 'Vrms');
+      charts.vrms = makeChart('ch-vrms-g', COLORS.vrms, 'Vrms');
       charts.irms = makeChart('ch-irms', COLORS.irms, 'Irms');
       charts.power = makeChart('ch-power', COLORS.power, 'Potencia');
       charts.kwh = makeChart('ch-kwh', COLORS.kwh, 'kWh');
@@ -1421,13 +1429,6 @@
         });
         ch.data.datasets[0].pointBackgroundColor = pts;
         ch.update('none');
-      }
-
-      if (charts.vrmsG) {
-        charts.vrmsG.data.labels = [...charts.vrms.data.labels];
-        charts.vrmsG.data.datasets[0].data = [...charts.vrms.data.datasets[0].data];
-        charts.vrmsG.data.datasets[0].pointBackgroundColor = [...charts.vrms.data.datasets[0].pointBackgroundColor];
-        charts.vrmsG.update('none');
       }
 
       // Tabla historial

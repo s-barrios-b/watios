@@ -1,20 +1,13 @@
-#include "EmonLib.h"
-#include "config.h" // NODE_SERVER_URL  →  http://<IP>:5000/data
+﻿#include "EmonLib.h"
+#include "config.h" // WIFI_SSID, WIFI_PASS, NODE_SERVER_URL, APPS_SCRIPT_URL
 #include <HTTPClient.h>
 #include <WiFi.h>
 #include <WiFiClientSecure.h>
 
-// ── Credenciales WiFi ────────────────────────────────────────
-const char *ssid = "Saira_Sofia";
-const char *password = "1043154303";
-
-// ── Google Apps Script — destino principal ───────────────────
-const char *scriptURL = "https://script.google.com/macros/s/AKfycbz_wMGcjBVCWe-Aupx1TwA_bagBBEB3yoPfW9B1S_eDu1jKa1Wv0NEiedUUNZNjxkAUUg/exec";
-
 // ── Calibración sensores ─────────────────────────────────────
-#define vCalibration 145
+#define vCalibration 151
 #define currCalibration 0.06
-#define NUM_MUESTRAS 5 // promedia 3 lecturas por envío
+#define NUM_MUESTRAS 5 // promedia 5 lecturas por envío
 
 EnergyMonitor emon;
 float kWh = 0;
@@ -38,7 +31,7 @@ void sendToAppsScript(float vrms, float irms, float power) {
   client.setInsecure(); // Apps Script no requiere validación de cert
 
   HTTPClient http;
-  http.begin(client, scriptURL);
+  http.begin(client, APPS_SCRIPT_URL); // ← viene de config.h / .env
   http.setFollowRedirects(HTTPC_STRICT_FOLLOW_REDIRECTS);
   http.addHeader("Content-Type", "application/json");
   http.setTimeout(10000); // 10s — Apps Script puede tardar en redireccionar
@@ -71,7 +64,7 @@ void sendToLocalServer(float vrms, float irms, float power) {
 
   WiFiClient client;
   HTTPClient http;
-  http.begin(client, NODE_SERVER_URL);
+  http.begin(client, NODE_SERVER_URL); // ← viene de config.h / .env
   http.addHeader("Content-Type", "application/json");
   http.setTimeout(3000); // timeout corto — servidor local debe responder rápido
 
@@ -79,7 +72,8 @@ void sendToLocalServer(float vrms, float irms, float power) {
   if (code > 0) {
     Serial.printf("[Local] HTTP %d\n", code);
   } else {
-    Serial.printf("[Local] ERR %d — revisa IP en config.h\n", code);
+    Serial.printf("[Local] ERR %d — edita .env y ejecuta generar_config.py\n",
+                  code);
   }
   http.end();
 }
@@ -119,7 +113,7 @@ void setup() {
   emon.voltage(35, vCalibration, 1.7);
   emon.current(34, currCalibration);
 
-  WiFi.begin(ssid, password);
+  WiFi.begin(WIFI_SSID, WIFI_PASS); // ← vienen de config.h / .env
   WiFi.setAutoReconnect(true);
   Serial.print("Conectando WiFi");
   while (WiFi.status() != WL_CONNECTED) {
