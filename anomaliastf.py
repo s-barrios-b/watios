@@ -1,4 +1,4 @@
-import numpy as np
+﻿import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
@@ -34,7 +34,10 @@ VRMS_MIN       = 99.0
 VRMS_MAX       = 121.0
 FEATURES       = ['vrms', 'irms', 'power', 'kwh', 'joule']
 FEATURES_LSTM  = ['irms', 'power', 'kwh', 'joule']
-R_CABLE        = float(os.environ.get("R_CABLE", "0.0627"))
+_r_cable = os.environ.get("R_CABLE")
+if _r_cable is None:
+    raise RuntimeError("R_CABLE no definido en .env — agrega R_CABLE=0.066 y reinicia el script.")
+R_CABLE        = float(_r_cable)             # editar SOLO en .env
 
 # ── 1. Cargar datos desde el servidor (FastAPI) ───────────────
 def cargar_datos(url):

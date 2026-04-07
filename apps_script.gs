@@ -110,7 +110,7 @@ function doPost(e) {
     datos.setFrozenRows(1);
   }
 
-  var R_cable   = 0.0627;
+  var R_cable   = 0.066;
   var jouleInst = Math.pow(data.irms, 2) * R_cable;
 
   // Una sola escritura atomica — sin lecturas previas

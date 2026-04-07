@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 """
 Watios -- Servidor local (FastAPI)
 ----------------------------------
@@ -25,7 +25,10 @@ load_dotenv(override=True)
 # -- Configuracion (editar en .env) ------------------------------------
 PORT             = int(os.getenv("PORT", "5000"))
 MAX_ROWS         = int(os.getenv("MAX_ROWS", "10000"))
-R_CABLE          = float(os.getenv("R_CABLE", "0.0627"))
+_r_cable = os.getenv("R_CABLE")
+if _r_cable is None:
+    raise RuntimeError("R_CABLE no definido en .env — agrega R_CABLE=0.066 y reinicia el servidor.")
+R_CABLE          = float(_r_cable)           # editar SOLO en .env
 DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY", "").strip() or None
 DEEPSEEK_API_URL = os.getenv("DEEPSEEK_API_URL", "https://api.deepseek.com/v1/chat/completions").strip()
 DEEPSEEK_MODEL   = os.getenv("DEEPSEEK_MODEL", "deepseek-chat")

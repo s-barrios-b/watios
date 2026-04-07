@@ -1,4 +1,4 @@
-﻿#include "EmonLib.h"
+#include "EmonLib.h"
 #include "config.h" // WIFI_SSID, WIFI_PASS, NODE_SERVER_URL, APPS_SCRIPT_URL
 #include <HTTPClient.h>
 #include <WiFi.h>
