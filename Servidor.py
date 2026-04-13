@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 Watios -- Servidor local (FastAPI)
 ----------------------------------
@@ -221,20 +221,28 @@ async def chat_proxy(request: Request):
 
 
 # -- WebSocket ---------------------------------------------------------
+KEEPALIVE_INTERVAL = 20   # segundos entre pings para mantener la conexion abierta
 
 @app.websocket("/ws")
 async def ws_endpoint(websocket: WebSocket):
     await manager.connect(websocket)
+    print("[WS] Conexion abierta")
     try:
         await websocket.send_text(json.dumps(
             {"type": "history", "data": list(ROWS)}, default=str
         ))
         while True:
-            await websocket.receive_text()
+            try:
+                # Espera un mensaje del cliente hasta KEEPALIVE_INTERVAL segundos
+                await asyncio.wait_for(websocket.receive_text(), timeout=KEEPALIVE_INTERVAL)
+            except asyncio.TimeoutError:
+                # No llegó mensaje: enviar ping para mantener la conexion viva
+                await websocket.send_text(json.dumps({"type": "ping"}))
     except WebSocketDisconnect:
+        print("[WS] Cliente desconectado normalmente")
         manager.disconnect(websocket)
     except Exception as e:
-        print(f"[WS] Conexion cerrada: {e}")
+        print(f"[WS] Conexion cerrada inesperadamente: {e}")
         manager.disconnect(websocket)
 
 

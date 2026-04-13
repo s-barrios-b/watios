@@ -1477,6 +1477,7 @@
       ws.onmessage = (event) => {
         const msg = JSON.parse(event.data);
 
+        if (msg.type === 'ping') return; // keepalive del servidor, ignorar
         if (msg.type === 'history') {
           rows = msg.data.map(r => ({
             fecha: r.fecha, vrms: parseFloat(r.vrms), irms: parseFloat(r.irms),

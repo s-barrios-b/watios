@@ -33,6 +33,26 @@ function crearHojas() {
   );
 }
 
+// ════════════════════════════════════════════════════════════
+//  actualizarEncabezados — fuerza el encabezado correcto en
+//  la fila 1 sin tocar los datos existentes.
+//  Ejecutar UNA SOLA VEZ desde el editor de Apps Script.
+// ════════════════════════════════════════════════════════════
+function actualizarEncabezados() {
+  var ss    = SpreadsheetApp.getActiveSpreadsheet();
+  var datos = ss.getSheetByName("Datos");
+  if (!datos) { SpreadsheetApp.getUi().alert("No existe la hoja 'Datos'."); return; }
+
+  var encabezados = ["Fecha","Vrms (V)","Irms (A)","Potencia (W)","kWh","P. Joule (W)"];
+  datos.getRange(1, 1, 1, encabezados.length).setValues([encabezados]);
+  datos.getRange(1, 1, 1, encabezados.length)
+    .setFontWeight("bold").setBackground("#1a73e8").setFontColor("#ffffff");
+  datos.setFrozenRows(1);
+
+  SpreadsheetApp.getUi().alert("Encabezados actualizados.\nFila 1: " + encabezados.join(" | "));
+}
+
+
 function _crearGraficas(ss, datos, graficas) {
   var MAX = 1000;
   var configs = [
