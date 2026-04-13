@@ -1114,10 +1114,10 @@
           </div>
         </div>
         <div class="kpi-card" style="--cc:var(--joule)" id="ck-joule" onclick="goToChart('joule')"
-          title="Ver gráfica Joule">
-          <div class="kpi-label">Joule Inst.</div>
+          title="Ver gráfica P. Joule disipada">
+          <div class="kpi-label">P. Joule Dis.</div>
           <div class="kpi-value" id="v-joule">--</div>
-          <div class="kpi-unit">mJ = I²R × 10³</div>
+          <div class="kpi-unit">mW = I²·R·10³</div>
           <div class="kpi-stats">
             <div class="kpi-stat">
               <div class="ksl">Min</div>
@@ -1160,8 +1160,8 @@
           <div class="chart-wrap"><canvas id="ch-kwh"></canvas></div>
         </div>
         <div class="chart-card" id="chart-card-joule">
-          <div class="chart-head"><span class="chart-title">Joule Instantáneo vs Tiempo</span><span class="chart-badge"
-              style="color:var(--joule)">J</span></div>
+          <div class="chart-head"><span class="chart-title">P. Joule Disipada vs Tiempo</span><span class="chart-badge"
+              style="color:var(--joule)">W</span></div>
           <div class="chart-wrap"><canvas id="ch-joule"></canvas></div>
         </div>
       </div>
@@ -1189,7 +1189,7 @@
           <button class="suggest-chip" onclick="sendSuggestion(this)">Resumen del circuito</button>
           <button class="suggest-chip" onclick="sendSuggestion(this)">¿Consumo normal?</button>
           <button class="suggest-chip" onclick="sendSuggestion(this)">Tendencia de voltaje</button>
-          <button class="suggest-chip" onclick="sendSuggestion(this)">¿Qué significa el Joule?</button>
+          <button class="suggest-chip" onclick="sendSuggestion(this)">¿Qué es la P. Joule disipada?</button>
         </div>
         <div class="chat-messages" id="chat-messages">
           <div class="msg ai">
@@ -1224,7 +1224,7 @@
                 <th>Irms (A)</th>
                 <th>Potencia (W)</th>
                 <th>kWh</th>
-                <th>Joule (J)</th>
+                <th>P. Joule (W)</th>
                 <th>Estado</th>
               </tr>
             </thead>
@@ -1368,7 +1368,7 @@
       charts.irms = makeChart('ch-irms', COLORS.irms, 'Irms');
       charts.power = makeChart('ch-power', COLORS.power, 'Potencia');
       charts.kwh = makeChart('ch-kwh', COLORS.kwh, 'kWh');
-      charts.joule = makeChart('ch-joule', COLORS.joule, 'Joule');
+      charts.joule = makeChart('ch-joule', COLORS.joule, 'P. Joule (W)');
     }
 
     function goToChart(key) {
@@ -1549,8 +1549,8 @@
     }
 
     // ── Alertas proactivas ────────────────────────────────────
-    const LABELS = { vrms: 'Voltaje', irms: 'Corriente', power: 'Potencia', kwh: 'Energía', joule: 'Joule' };
-    const UNITS = { vrms: 'V', irms: 'A', power: 'W', kwh: 'kWh', joule: 'J' };
+    const LABELS = { vrms: 'Voltaje', irms: 'Corriente', power: 'Potencia', kwh: 'Energía', joule: 'P. Joule' };
+    const UNITS = { vrms: 'V', irms: 'A', power: 'W', kwh: 'kWh', joule: 'W' };
     const ALERT_COOLDOWN = 25000; // 25 s de cooldown para el chatbot proactivo (facilita pruebas)
 
     function triggerAlerta(row) {
@@ -1612,7 +1612,7 @@
     // ── Descarga CSV ──────────────────────────────────────────
     function downloadCSV() {
       if (!rows.length) { alert('No hay datos para descargar.'); return; }
-      const headers = ['Fecha', 'Vrms (V)', 'Irms (A)', 'Potencia (W)', 'kWh', 'Joule (J)'];
+      const headers = ['Fecha', 'Vrms (V)', 'Irms (A)', 'Potencia (W)', 'kWh', 'P. Joule (W)'];
       const lines = [headers.join(',')];
       rows.forEach(r => lines.push([
         `"${r.fecha}"`, r.vrms.toFixed(2), r.irms.toFixed(4),
@@ -1650,8 +1650,8 @@
       // Formato compacto: menos tokens, misma información útil
       return [
         `[Watios@${ts} n=${rows.length} anom=${anomRec}/5]`,
-        `V=${last.vrms.toFixed(2)}V I=${last.irms.toFixed(4)}A P=${last.power.toFixed(2)}W kWh=${last.kwh.toFixed(4)} J=${(last.joule * 1000).toFixed(3)}mJ`,
-        `Vrms(avg=${s.vrms.avg.toFixed(2)}V min=${s.vrms.min.toFixed(2)}V max=${s.vrms.max.toFixed(2)}V | referencia=111V -> rango_OK=109V-112V)`,
+        `V=${last.vrms.toFixed(2)}V I=${last.irms.toFixed(4)}A P=${last.power.toFixed(2)}W kWh=${last.kwh.toFixed(4)} P_joule=${(last.joule * 1000).toFixed(3)}mW`,
+        `Vrms(avg=${s.vrms.avg.toFixed(2)}V min=${s.vrms.min.toFixed(2)}V max=${s.vrms.max.toFixed(2)}V | referencia=110V umbral=±10% rango_OK=99V-121V)`,
         `Irms(avg=${s.irms.avg.toFixed(4)}A min=${s.irms.min.toFixed(4)}A max=${s.irms.max.toFixed(4)}A)`,
         `Potencia(avg=${s.power.avg.toFixed(2)}W min=${s.power.min.toFixed(2)}W max=${s.power.max.toFixed(2)}W)`,
       ].join('\n');

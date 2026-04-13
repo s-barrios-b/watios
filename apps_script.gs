@@ -10,7 +10,7 @@ function crearHojas() {
   if (!datos) datos = ss.insertSheet("Datos");
 
   if (esNueva || datos.getLastRow() === 0) {
-    datos.appendRow(["Fecha","Vrms (V)","Irms (A)","Potencia (W)","kWh","Joule (J)"]);
+    datos.appendRow(["Fecha","Vrms (V)","Irms (A)","Potencia (W)","kWh","P. Joule (W)"]);
   }
   datos.getRange(1,1,1,6)
     .setFontWeight("bold").setBackground("#1a73e8").setFontColor("#ffffff");
@@ -40,7 +40,7 @@ function _crearGraficas(ss, datos, graficas) {
     { col:3, titulo:"Corriente vs Tiempo (A)",         color:"#e53935", fila:1,  col_anchor:8 },
     { col:4, titulo:"Potencia Aparente vs Tiempo (W)", color:"#43a047", fila:23, col_anchor:1 },
     { col:5, titulo:"Energia vs Tiempo (kWh)",         color:"#fb8c00", fila:23, col_anchor:8 },
-    { col:6, titulo:"Joule Instantaneo vs Tiempo (J)", color:"#8e24aa", fila:45, col_anchor:1 }
+    { col:6, titulo:"P. Joule Disipada vs Tiempo (W)", color:"#8e24aa", fila:45, col_anchor:1 }
   ];
   configs.forEach(function(cfg) {
     var chart = graficas.newChart()
@@ -73,7 +73,7 @@ function _crearResumen(graficas) {
   graficas.getRange(startRow+1,1,1,4)
     .setValues([["Variable","Minimo","Maximo","Promedio"]])
     .setFontWeight("bold").setBackground("#e8f0fe").setFontColor("#1a73e8");
-  ["Vrms (V)","Irms (A)","Potencia (W)","kWh","Joule (J)"].forEach(function(nombre,i) {
+  ["Vrms (V)","Irms (A)","Potencia (W)","kWh","P. Joule (W)"].forEach(function(nombre,i) {
     var fila = startRow+2+i;
     graficas.getRange(fila,1).setValue(nombre).setFontWeight("bold");
     graficas.getRange(fila,2,1,3).setValue("--");
@@ -105,7 +105,7 @@ function doPost(e) {
   var datos = ss.getSheetByName("Datos");
   if (!datos) {
     datos = ss.insertSheet("Datos");
-    datos.appendRow(["Fecha","Vrms (V)","Irms (A)","Potencia (W)","kWh","Joule (J)"]);
+    datos.appendRow(["Fecha","Vrms (V)","Irms (A)","Potencia (W)","kWh","P. Joule (W)"]);
     datos.getRange(1,1,1,6).setFontWeight("bold");
     datos.setFrozenRows(1);
   }

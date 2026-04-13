@@ -1,4 +1,4 @@
-﻿import numpy as np
+import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
@@ -130,7 +130,8 @@ def generar_reporte(df, errores, anomalias, umbral, historia):
         ax.plot(fechas_slice, vals, color=color, linewidth=0.9, alpha=0.8)
         if anom_fechas.any():
             ax.scatter(anom_fechas, vals[anomalias], color='#ff3b3b', s=18, zorder=5)
-        ax.set_title(feat.upper(), color='#e2e8f0', fontsize=9)
+        label = 'P. Joule (W)' if feat == 'joule' else feat.upper()
+        ax.set_title(label, color='#e2e8f0', fontsize=9)
         ax.tick_params(colors='#4a5568', labelsize=7)
         ax.spines[:].set_color('#1e293b')
         ax.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
@@ -213,7 +214,7 @@ def generar_reporte(df, errores, anomalias, umbral, historia):
 {tabla_html}
 
 <div class="footer">
-  Features: {', '.join(FEATURES)} ·
+  Features: {', '.join('P. Joule (W)' if f == 'joule' else f for f in FEATURES)} ·
   Encoder: Z-score (LSTM) + Umbral fijo Vrms {VRMS_MIN}V-{VRMS_MAX}V · Z-score LSTM: {ZSCORE_UMBRAL} ·
   Arquitectura: LSTM(32) -> LSTM({LATENT_DIM}) -> RepeatVector -> LSTM({LATENT_DIM}) -> LSTM(32) -> Dense
 </div>
