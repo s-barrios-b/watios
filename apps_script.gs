@@ -115,11 +115,109 @@ function reiniciarTodo() {
   crearHojas();
 }
 
+function _toNumber(value, fallback) {
+  if (fallback === undefined) fallback = 0;
+  if (value === null || value === undefined || value === "") return fallback;
+  var n = Number(String(value).replace(",", "."));
+  return isFinite(n) ? n : fallback;
+}
+
+function _firstValue(data, names) {
+  for (var i = 0; i < names.length; i++) {
+    var name = names[i];
+    if (Object.prototype.hasOwnProperty.call(data, name) &&
+        data[name] !== null && data[name] !== undefined && data[name] !== "") {
+      return data[name];
+    }
+  }
+  return null;
+}
+
+function _numberOrNull(value) {
+  if (value === null || value === undefined || value === "") return null;
+  var n = Number(String(value).replace(",", "."));
+  return isFinite(n) ? n : null;
+}
+
+function _sheetNumberOk(value) {
+  return _numberOrNull(value) !== null;
+}
+
+function _normalizarLectura(data) {
+  var R_cable   = 0.066;
+  var vrms = _numberOrNull(_firstValue(data, ["vrms", "Vrms", "Vrms (V)"]));
+  var irms = _numberOrNull(_firstValue(data, ["irms", "Irms", "Irms (A)"]));
+  var power = _numberOrNull(_firstValue(data, ["power", "apparentPower", "Potencia (W)"]));
+  var kWh = _numberOrNull(_firstValue(data, ["kWh", "kwh"]));
+
+  if (vrms === null || irms === null || power === null || kWh === null || vrms <= 0) {
+    return null;
+  }
+
+  var jouleRaw = _firstValue(data, ["joule", "P. Joule (W)"]);
+  var joule = _numberOrNull(jouleRaw);
+  if (joule === null) {
+    joule = Math.pow(irms, 2) * R_cable;
+  }
+  if (!isFinite(joule)) return null;
+
+  var fechaRaw = _firstValue(data, ["fecha", "timestamp"]);
+  var fecha = fechaRaw ? new Date(fechaRaw) : new Date();
+  if (isNaN(fecha.getTime())) fecha = new Date();
+
+  return {
+    fecha: fecha,
+    vrms: vrms,
+    irms: irms,
+    power: power,
+    kWh: kWh,
+    joule: joule,
+    uptime: _toNumber(data.uptime)
+  };
+}
+
+function limpiarFilasInvalidas() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var datos = ss.getSheetByName("Datos");
+  if (!datos) {
+    SpreadsheetApp.getUi().alert("No existe la hoja 'Datos'.");
+    return;
+  }
+
+  var valores = datos.getDataRange().getValues();
+  var borradas = 0;
+  for (var fila = valores.length; fila >= 2; fila--) {
+    var row = valores[fila - 1];
+    var invalida =
+      !row[0] ||
+      !_sheetNumberOk(row[1]) ||
+      !_sheetNumberOk(row[2]) ||
+      !_sheetNumberOk(row[3]) ||
+      !_sheetNumberOk(row[4]) ||
+      !_sheetNumberOk(row[5]);
+
+    if (invalida) {
+      datos.deleteRow(fila);
+      borradas++;
+    }
+  }
+
+  SpreadsheetApp.getUi().alert("Filas invalidas eliminadas: " + borradas);
+}
+
 // ════════════════════════════════════════════════════════════
 //  doPost — responde inmediatamente, difiere el trabajo pesado
 // ════════════════════════════════════════════════════════════
 function doPost(e) {
-  var data = JSON.parse(e.postData.contents);
+  var raw = (e && e.postData && e.postData.contents) ? e.postData.contents : "{}";
+  var data;
+  try {
+    data = JSON.parse(raw);
+  } catch (err) {
+    return ContentService
+      .createTextOutput("JSON_INVALIDO")
+      .setMimeType(ContentService.MimeType.TEXT);
+  }
 
   var ss    = SpreadsheetApp.getActiveSpreadsheet();
   var datos = ss.getSheetByName("Datos");
@@ -130,21 +228,72 @@ function doPost(e) {
     datos.setFrozenRows(1);
   }
 
-  var R_cable   = 0.066;
-  var jouleInst = Math.pow(data.irms, 2) * R_cable;
+  if (Array.isArray(data.rows) || Array.isArray(data)) {
+    var lecturas = Array.isArray(data.rows) ? data.rows : data;
+    var filas = [];
+    var ultima = null;
+    lecturas.forEach(function(item) {
+      var lectura = _normalizarLectura(item || {});
+      if (!lectura) return;
+      ultima = lectura;
+      filas.push([lectura.fecha, lectura.vrms, lectura.irms, lectura.power, lectura.kWh, lectura.joule]);
+    });
+
+    if (!filas.length) {
+      return ContentService
+        .createTextOutput("SIN_DATOS")
+        .setMimeType(ContentService.MimeType.TEXT);
+    }
+
+    var filaInicial = datos.getLastRow() + 1;
+    datos.getRange(filaInicial, 1, filas.length, 6).setValues(filas);
+    var filaFinal = filaInicial + filas.length - 1;
+
+    var propsLote = PropertiesService.getScriptProperties();
+    propsLote.setProperties({
+      "pendiente_vrms"   : String(ultima.vrms),
+      "pendiente_irms"   : String(ultima.irms),
+      "pendiente_power"  : String(ultima.power),
+      "pendiente_kWh"    : String(ultima.kWh),
+      "pendiente_joule"  : String(ultima.joule),
+      "pendiente_uptime" : String(ultima.uptime || 0),
+      "pendiente_fila"   : String(filaFinal)
+    });
+
+    ScriptApp.getProjectTriggers()
+      .filter(function(t){ return t.getHandlerFunction() === "tareasDiferidas"; })
+      .forEach(function(t){ ScriptApp.deleteTrigger(t); });
+
+    ScriptApp.newTrigger("tareasDiferidas")
+      .timeBased()
+      .after(60000)
+      .create();
+
+    return ContentService
+      .createTextOutput("OK")
+      .setMimeType(ContentService.MimeType.TEXT);
+  }
+
+  var lectura = _normalizarLectura(data);
+  if (!lectura) {
+    return ContentService
+      .createTextOutput("SIN_DATOS")
+      .setMimeType(ContentService.MimeType.TEXT);
+  }
+  var jouleInst = lectura.joule;
 
   // Una sola escritura atomica — sin lecturas previas
-  datos.appendRow([new Date(), data.vrms, data.irms, data.power, data.kWh, jouleInst]);
+  datos.appendRow([lectura.fecha, lectura.vrms, lectura.irms, lectura.power, lectura.kWh, jouleInst]);
 
   // Guardar payload en PropertiesService para la tarea diferida
   var props = PropertiesService.getScriptProperties();
   props.setProperties({
-    "pendiente_vrms"   : String(data.vrms),
-    "pendiente_irms"   : String(data.irms),
-    "pendiente_power"  : String(data.power),
-    "pendiente_kWh"    : String(data.kWh),
+    "pendiente_vrms"   : String(lectura.vrms),
+    "pendiente_irms"   : String(lectura.irms),
+    "pendiente_power"  : String(lectura.power),
+    "pendiente_kWh"    : String(lectura.kWh),
     "pendiente_joule"  : String(jouleInst),
-    "pendiente_uptime" : String(data.uptime || 0),
+    "pendiente_uptime" : String(lectura.uptime || 0),
     "pendiente_fila"   : String(datos.getLastRow())
   });
 

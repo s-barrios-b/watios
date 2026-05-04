@@ -9,6 +9,7 @@ import argparse
 import time
 import joblib
 from datetime import datetime
+from decimal import Decimal, InvalidOperation
 from dotenv import load_dotenv
 from sklearn.preprocessing import StandardScaler
 import tensorflow as tf
@@ -19,11 +20,19 @@ load_dotenv(override=True)
 
 # ── Configuracion ─────────────────────────────────────────────
 # Todas las URLs se leen del .env (igual que Servidor.py)
-LOCAL_SERVER   = os.environ.get("LOCAL_SERVER", "http://192.168.1.7:5000").rstrip("/")
+BASE_DIR       = os.path.dirname(os.path.abspath(__file__))
+LOCAL_SERVER   = os.environ.get("LOCAL_SERVER", "http://127.0.0.1:5000").rstrip("/")
 SCRIPT_URL     = f"{LOCAL_SERVER}/data"
-MODELO_DIR     = "modelo_autoencoder"
+MODELO_DIR     = os.path.join(BASE_DIR, "modelo_autoencoder")
+MODEL_PATH     = os.path.join(MODELO_DIR, "model.keras")
 SCALER_PATH    = os.path.join(MODELO_DIR, "scaler.pkl")   # scaler persistido
 UMBRAL_PATH    = os.path.join(MODELO_DIR, "umbral.json")  # umbral MSE persistido
+ARTIFACTS_DIR  = os.path.join(BASE_DIR, "analisis_anomalias")
+REPORT_PATH    = os.path.join(ARTIFACTS_DIR, "reporte_anomalias.html")
+GRAPH_PATH     = os.path.join(ARTIFACTS_DIR, "graficas_anomalias.png")
+LOSS_PATH      = os.path.join(ARTIFACTS_DIR, "loss_curve.png")
+TRAINING_DATA_PATH      = os.path.join(ARTIFACTS_DIR, "datos_entrenamiento.csv")
+LATEST_CONCLUSIONS_PATH = os.path.join(ARTIFACTS_DIR, "conclusiones_ultimas.json")
 
 WINDOW_SIZE    = 10
 EPOCHS         = 50
@@ -32,12 +41,63 @@ LATENT_DIM     = 8
 ZSCORE_UMBRAL  = 2.0
 VRMS_MIN       = 99.0
 VRMS_MAX       = 121.0
+DAEMON_INTERVAL = int(os.environ.get("ML_DAEMON_INTERVAL", "15"))
 FEATURES       = ['vrms', 'irms', 'power', 'kwh', 'joule']
 FEATURES_LSTM  = ['irms', 'power', 'kwh', 'joule']
 _r_cable = os.environ.get("R_CABLE")
 if _r_cable is None:
     raise RuntimeError("R_CABLE no definido en .env — agrega R_CABLE=0.066 y reinicia el script.")
 R_CABLE        = float(_r_cable)             # editar SOLO en .env
+os.makedirs(ARTIFACTS_DIR, exist_ok=True)
+
+
+def timestamp_archivo():
+    return datetime.now().strftime("%Y%m%d_%H%M%S")
+
+
+def parsear_fechas(values):
+    return pd.to_datetime(values, errors='coerce', dayfirst=True)
+
+
+def formatear_fecha_csv(value):
+    fecha = pd.to_datetime(value, errors='coerce', dayfirst=True)
+    if pd.isna(fecha):
+        return "" if pd.isna(value) else str(value)
+    return f"{fecha.day}/{fecha.month:02d}/{fecha.year} {fecha:%H:%M:%S}"
+
+
+def formatear_numero_csv(value):
+    if pd.isna(value):
+        return ""
+    try:
+        number = Decimal(str(value).strip().replace(",", "."))
+    except (InvalidOperation, ValueError):
+        return str(value)
+    if not number.is_finite():
+        return str(value)
+    text = format(number.normalize(), "f")
+    if "." in text:
+        text = text.rstrip("0").rstrip(".")
+    return text or "0"
+
+
+def guardar_dataframe_entrenamiento_csv(df, path=TRAINING_DATA_PATH):
+    df_csv = df[['fecha'] + FEATURES].copy()
+    df_csv['fecha'] = df_csv['fecha'].apply(formatear_fecha_csv)
+    for col in FEATURES:
+        df_csv[col] = df_csv[col].apply(formatear_numero_csv)
+    df_csv.to_csv(path, index=False, encoding="utf-8")
+
+
+def preparar_csv_entrenamiento():
+    """Crea el CSV editable si todavia no existe."""
+    if not os.path.exists(TRAINING_DATA_PATH):
+        pd.DataFrame(columns=['fecha', 'vrms', 'irms', 'power', 'kwh', 'joule']).to_csv(
+            TRAINING_DATA_PATH, index=False, encoding="utf-8"
+        )
+
+
+preparar_csv_entrenamiento()
 
 # ── 1. Cargar datos desde el servidor (FastAPI) ───────────────
 def cargar_datos(url):
@@ -50,7 +110,7 @@ def cargar_datos(url):
             raise ValueError("No hay suficientes datos en el servidor.")
 
         df = pd.DataFrame(rows[1:], columns=['fecha','vrms','irms','power','kwh','joule'])
-        df['fecha'] = pd.to_datetime(df['fecha'], errors='coerce')
+        df['fecha'] = parsear_fechas(df['fecha'])
         for col in FEATURES:
             df[col] = pd.to_numeric(df[col].astype(str).str.replace(',', '.'), errors='coerce')
         df = df.dropna().reset_index(drop=True)
@@ -62,6 +122,28 @@ def cargar_datos(url):
     except Exception as e:
         print(f"Error al cargar datos: {e}")
         raise
+
+
+def normalizar_dataframe(df):
+    df = df.copy()
+    df['fecha'] = parsear_fechas(df['fecha'])
+    for col in FEATURES:
+        df[col] = pd.to_numeric(df[col].astype(str).str.replace(',', '.'), errors='coerce')
+    df = df.dropna().reset_index(drop=True)
+    df = df[df['vrms'] > 0].reset_index(drop=True)
+    return df
+
+
+def cargar_datos_entrenamiento_editables():
+    """Lee el CSV editable que puedes modificar manualmente."""
+    if not os.path.exists(TRAINING_DATA_PATH):
+        preparar_csv_entrenamiento()
+        return pd.DataFrame(columns=['fecha'] + FEATURES)
+
+    df = pd.read_csv(TRAINING_DATA_PATH)
+    if df.empty:
+        return pd.DataFrame(columns=['fecha'] + FEATURES)
+    return normalizar_dataframe(df)
 
 # ── 2. Crear ventanas deslizantes para LSTM ───────────────────
 def crear_ventanas(data, window_size):
@@ -128,7 +210,7 @@ def generar_reporte(df, errores, anomalias, umbral, historia):
         color = colores.get(feat, '#ffffff')
         vals  = df[feat].iloc[offset:].reset_index(drop=True)
         ax.plot(fechas_slice, vals, color=color, linewidth=0.9, alpha=0.8)
-        if anom_fechas.any():
+        if len(anom_fechas) > 0:
             ax.scatter(anom_fechas, vals[anomalias], color='#ff3b3b', s=18, zorder=5)
         label = 'P. Joule (W)' if feat == 'joule' else feat.upper()
         ax.set_title(label, color='#e2e8f0', fontsize=9)
@@ -137,7 +219,7 @@ def generar_reporte(df, errores, anomalias, umbral, historia):
         ax.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
 
     plt.tight_layout(pad=2.0)
-    plt.savefig('graficas_anomalias.png', dpi=120, bbox_inches='tight', facecolor='#0a0e17')
+    plt.savefig(GRAPH_PATH, dpi=120, bbox_inches='tight', facecolor='#0a0e17')
     plt.close()
 
     # Curva de loss — solo si el modelo se entrenó en esta sesión
@@ -154,7 +236,7 @@ def generar_reporte(df, errores, anomalias, umbral, historia):
         loss_ax.spines[:].set_color('#1e293b')
         loss_ax.legend(fontsize=7, facecolor='#111827', labelcolor='#e2e8f0')
         plt.tight_layout()
-        plt.savefig('loss_curve.png', dpi=120, bbox_inches='tight', facecolor='#0a0e17')
+        plt.savefig(LOSS_PATH, dpi=120, bbox_inches='tight', facecolor='#0a0e17')
         plt.close()
         loss_html = '<h2>Curva de entrenamiento</h2><img src="loss_curve.png" alt="Loss curve">'
     else:
@@ -221,9 +303,65 @@ def generar_reporte(df, errores, anomalias, umbral, historia):
 </body>
 </html>"""
 
-    with open('reporte_anomalias.html', 'w', encoding='utf-8') as f:
+    with open(REPORT_PATH, 'w', encoding='utf-8') as f:
         f.write(html)
     print("  Reporte HTML actualizado.")
+
+
+def guardar_datos_entrenamiento(df):
+    """Guarda el dataset editable solo cuando esta vacio o no existe."""
+    datos_editables = cargar_datos_entrenamiento_editables()
+    if datos_editables.empty:
+        guardar_dataframe_entrenamiento_csv(df)
+    return TRAINING_DATA_PATH
+
+
+def guardar_conclusiones(df, errores, anomalias, umbral_lstm, modelo_reentrenado, dataset_path):
+    """Persiste el resumen operativo del analisis para consulta posterior."""
+    stamp = timestamp_archivo()
+    idx_anomalias = np.where(anomalias)[0] + WINDOW_SIZE
+    filas_anomalas = []
+    for idx in idx_anomalias[:50]:
+        row = df.iloc[idx]
+        filas_anomalas.append({
+            "fecha": str(row["fecha"]),
+            "vrms": float(row["vrms"]),
+            "irms": float(row["irms"]),
+            "power": float(row["power"]),
+            "kwh": float(row["kwh"]),
+            "joule": float(row["joule"]),
+            "error_mse": float(errores[idx - WINDOW_SIZE]),
+        })
+
+    n_anom = int(np.sum(anomalias))
+    conclusiones = {
+        "generado_en": datetime.now().isoformat(timespec="seconds"),
+        "servidor_origen": LOCAL_SERVER,
+        "modelo": "Autoencoder LSTM",
+        "tensorflow": tf.__version__,
+        "modelo_reentrenado": bool(modelo_reentrenado),
+        "total_lecturas": int(len(df)),
+        "ventanas_evaluadas": int(len(errores)),
+        "anomalias_detectadas": n_anom,
+        "tasa_anomalias_pct": float((n_anom / len(errores) * 100) if len(errores) else 0),
+        "umbral_mse": float(umbral_lstm),
+        "zscore_umbral": float(ZSCORE_UMBRAL),
+        "vrms_min": float(VRMS_MIN),
+        "vrms_max": float(VRMS_MAX),
+        "features_lstm": FEATURES_LSTM,
+        "dataset_entrenamiento": dataset_path,
+        "reporte_html": REPORT_PATH,
+        "grafica": GRAPH_PATH,
+        "primeras_anomalias": filas_anomalas,
+    }
+
+    historico_path = os.path.join(ARTIFACTS_DIR, f"conclusiones_{stamp}.json")
+    with open(LATEST_CONCLUSIONS_PATH, "w", encoding="utf-8") as f:
+        json.dump(conclusiones, f, ensure_ascii=False, indent=2)
+    with open(historico_path, "w", encoding="utf-8") as f:
+        json.dump(conclusiones, f, ensure_ascii=False, indent=2)
+    return historico_path
+
 
 # ── 7. Notificar al servidor ───────────────────────────────────
 def enviar_resultados_al_servidor(df, errores, anomalias, umbral_lstm):
@@ -253,14 +391,21 @@ def ejecutar_analisis():
     if len(df) < WINDOW_SIZE + 10:
         print(f"Necesitas al menos {WINDOW_SIZE + 10} filas. Tienes {len(df)}.")
         return
+    dataset_path = guardar_datos_entrenamiento(df)
+    df_entrenamiento = cargar_datos_entrenamiento_editables()
+    print(f"  Datos de entrenamiento editables: {dataset_path}")
 
     # 2. Scaler + modelo
-    modelo_existe  = os.path.exists(MODELO_DIR) and os.path.exists(SCALER_PATH)
+    modelo_existe = os.path.exists(MODEL_PATH) and os.path.exists(SCALER_PATH)
+    legacy_saved_model = os.path.join(MODELO_DIR, "saved_model.pb")
+    modelo_legacy = os.path.exists(legacy_saved_model) and os.path.exists(SCALER_PATH) and not os.path.exists(MODEL_PATH)
+    modelo_reentrenado = False
 
-    if modelo_existe:
+    if modelo_existe or modelo_legacy:
         # ── Cargar modelo Y scaler guardados ─────────────────
-        print(f"Cargando modelo y scaler desde '{MODELO_DIR}'...")
-        model     = keras.models.load_model(MODELO_DIR)
+        modelo_a_cargar = MODEL_PATH if modelo_existe else MODELO_DIR
+        print(f"Cargando modelo y scaler desde '{modelo_a_cargar}'...")
+        model     = keras.models.load_model(modelo_a_cargar)
         scaler    = joblib.load(SCALER_PATH)
         historia  = None
         # Solo transformar, NO re-entrenar el scaler
@@ -270,9 +415,12 @@ def ejecutar_analisis():
         # ── Primer arranque: entrenar y persistir todo ────────
         print("Construyendo y entrenando Autoencoder LSTM...")
         scaler    = StandardScaler()
-        data_norm = scaler.fit_transform(df[FEATURES_LSTM].values)
+        if len(df_entrenamiento) < WINDOW_SIZE + 10:
+            print(f"El CSV de entrenamiento necesita al menos {WINDOW_SIZE + 10} filas. Tienes {len(df_entrenamiento)}.")
+            return
+        data_norm_train = scaler.fit_transform(df_entrenamiento[FEATURES_LSTM].values)
 
-        X     = crear_ventanas(data_norm, WINDOW_SIZE)
+        X     = crear_ventanas(data_norm_train, WINDOW_SIZE)
         model = construir_autoencoder(WINDOW_SIZE, len(FEATURES_LSTM), LATENT_DIM)
         model.summary()
 
@@ -289,9 +437,11 @@ def ejecutar_analisis():
             verbose=1
         )
         os.makedirs(MODELO_DIR, exist_ok=True)
-        model.save(MODELO_DIR)
+        model.save(MODEL_PATH)
         joblib.dump(scaler, SCALER_PATH)
+        modelo_reentrenado = True
         print(f"  Modelo y scaler guardados en '{MODELO_DIR}/'")
+        data_norm = scaler.transform(df[FEATURES_LSTM].values)
 
     # 3. Ventanas
     X = crear_ventanas(data_norm, WINDOW_SIZE)
@@ -313,6 +463,12 @@ def ejecutar_analisis():
     print(f"  Anomalias LSTM:  {n_anom_lstm}")
     print(f"  Anomalias Vrms (fuera de {VRMS_MIN}V-{VRMS_MAX}V): {n_anom_vrms}")
     print(f"  Anomalias totales: {n_anom} / {len(errores)} ({n_anom/len(errores)*100:.1f}%)")
+    with open(UMBRAL_PATH, "w", encoding="utf-8") as f:
+        json.dump({
+            "umbral_mse": float(umbral_lstm),
+            "zscore_umbral": float(ZSCORE_UMBRAL),
+            "actualizado_en": datetime.now().isoformat(timespec="seconds"),
+        }, f, ensure_ascii=False, indent=2)
 
     idx_anomalias = np.where(anomalias)[0] + WINDOW_SIZE
     if n_anom:
@@ -323,12 +479,17 @@ def ejecutar_analisis():
 
     # 5. Reporte + notificacion
     generar_reporte(df, errores, anomalias, umbral_lstm, historia)
+    conclusiones_path = guardar_conclusiones(
+        df, errores, anomalias, umbral_lstm, modelo_reentrenado, dataset_path
+    )
+    print(f"  Conclusiones guardadas en: {conclusiones_path}")
     enviar_resultados_al_servidor(df, errores, anomalias, umbral_lstm)
     print("\nAnalisis finalizado.")
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--daemon', action='store_true', help="Corre continuamente")
+    parser.add_argument('--interval', type=int, default=DAEMON_INTERVAL, help="Segundos entre revisiones en modo daemon")
     args = parser.parse_args()
 
     if args.daemon:
@@ -344,7 +505,7 @@ def main():
                     ultimo_conteo = conteo_actual
             except Exception as e:
                 print(f"  [daemon] Error: {e}")
-            time.sleep(15)
+            time.sleep(max(1, args.interval))
     else:
         ejecutar_analisis()
 

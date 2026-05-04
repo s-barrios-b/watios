@@ -1283,6 +1283,7 @@
     let rows = [];
     let charts = {};
     let chatHistory = [];
+    let pollTimer = null;
     let lastAlertTime = 0;          // cooldown para alertas proactivas
     let prevAnomalyStates = new Set(); // registrar estados específicos de anomalía
 
@@ -1298,6 +1299,30 @@
     function pf(v) { return parseFloat(String(v).replace(',', '.')) || 0; }
     function parseRow(r) {
       return { fecha: r[0] || '', vrms: pf(r[1]), irms: pf(r[2]), power: pf(r[3]), kwh: pf(r[4]), joule: pf(r[5]) };
+    }
+
+    async function pollDataFallback() {
+      const base = httpBaseFromWsInput();
+      if (!base) return;
+      try {
+        const res = await fetch(base + '/data?ts=' + Date.now(), { cache: 'no-store' });
+        if (!res.ok) return;
+        const data = await res.json();
+        const incoming = (data.rows || []).slice(1).map(parseRow);
+        if (incoming.length > rows.length) {
+          rows = incoming;
+          updateUI();
+          document.getElementById('last-update').textContent = 'Sincronizado ' + new Date().toLocaleTimeString('es-CO');
+        }
+      } catch (e) {
+        console.warn('Polling /data falló:', e);
+      }
+    }
+
+    function startPollingFallback() {
+      if (pollTimer) clearInterval(pollTimer);
+      pollDataFallback();
+      pollTimer = setInterval(pollDataFallback, 2000);
     }
 
     // ── Estadísticas ─────────────────────────────────────────
@@ -1470,6 +1495,7 @@
         setStatus('live', 'En vivo');
         document.getElementById('ws-status').innerHTML = 'Conectado <span style="color:var(--ok)">✓</span>';
         document.getElementById('overlay').classList.add('hidden');
+        startPollingFallback();
         let banner = document.getElementById('err-banner');
         if (banner) banner.remove();
       };
@@ -1522,6 +1548,7 @@
       ws.onclose = () => {
         setStatus('error', 'Desconectado');
         document.getElementById('ws-status').innerHTML = 'Desconectado <span style="color:var(--danger)">✕</span>';
+        startPollingFallback();
         showBanner(' <b>Conexión perdida con el servidor local</b> (Servidor.py)<br>Intentando reconectar en 3 segundos...');
         setTimeout(initWebSocket, 3000);
       };
