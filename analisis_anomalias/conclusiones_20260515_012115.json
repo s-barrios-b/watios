@@ -1,0 +1,36 @@
+{
+  "generado_en": "2026-05-15T01:21:15",
+  "servidor_origen": "http://192.168.1.7:5000",
+  "modelo": "Autoencoder LSTM",
+  "tensorflow": "2.21.0",
+  "modelo_reentrenado": true,
+  "total_lecturas": 6,
+  "ventanas_evaluadas": 1,
+  "anomalias_detectadas": 1,
+  "tasa_anomalias_pct": 100.0,
+  "umbral_mse": 0.938491471755907,
+  "zscore_umbral": 2.0,
+  "vrms_min": 99.0,
+  "vrms_max": 121.0,
+  "features_lstm": [
+    "vrms",
+    "irms",
+    "power",
+    "kwh",
+    "joule"
+  ],
+  "dataset_entrenamiento": "C:\\Users\\sebas\\Downloads\\INTENTO2\\analisis_anomalias\\datos_entrenamiento.csv",
+  "reporte_html": "C:\\Users\\sebas\\Downloads\\INTENTO2\\analisis_anomalias\\reporte_anomalias.html",
+  "grafica": "C:\\Users\\sebas\\Downloads\\INTENTO2\\analisis_anomalias\\graficas_anomalias.png",
+  "primeras_anomalias": [
+    {
+      "fecha": "2026-05-15 01:20:50",
+      "vrms": 2.55,
+      "irms": 0.0432,
+      "power": 0.1127,
+      "kwh": 0.029246,
+      "joule": 0.00012317184,
+      "error_mse": 5598.720038180423
+    }
+  ]
+}

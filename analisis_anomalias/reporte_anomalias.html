@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Watios — Reporte de Anomalias</title>
+<style>
+  body { background:#0a0e17; color:#e2e8f0; font-family:'Share Tech Mono',monospace; padding:32px; }
+  h1 { color:#00e5ff; font-size:1.4rem; margin-bottom:4px; }
+  h2 { color:#4a5568; font-size:0.85rem; text-transform:uppercase; letter-spacing:1px; margin:28px 0 12px; }
+  .meta { color:#4a5568; font-size:0.72rem; margin-bottom:28px; }
+  .kpi-row { display:flex; gap:16px; margin-bottom:28px; flex-wrap:wrap; }
+  .kpi { background:#111827; border:1px solid #1e293b; border-radius:10px; padding:16px 20px; flex:1; min-width:140px; }
+  .kpi-val { font-size:2rem; color:#00e5ff; line-height:1; }
+  .kpi-lbl { font-size:0.65rem; color:#4a5568; text-transform:uppercase; letter-spacing:1px; margin-top:6px; }
+  .kpi-anom .kpi-val { color:#ff3b3b; }
+  img { width:100%; border-radius:10px; border:1px solid #1e293b; margin-bottom:20px; }
+  .tabla { width:100%; border-collapse:collapse; font-size:0.72rem; }
+  .tabla th { background:#0d1420; color:#4a5568; padding:9px 12px; text-align:left; border-bottom:1px solid #1e293b; text-transform:uppercase; letter-spacing:1px; font-size:0.62rem; }
+  .tabla td { padding:8px 12px; border-bottom:1px solid #1e293b; color:#e2e8f0; }
+  .tabla tr:hover { background:rgba(255,255,255,.02); }
+  .footer { color:#4a5568; font-size:0.65rem; margin-top:32px; border-top:1px solid #1e293b; padding-top:14px; }
+</style>
+</head>
+<body>
+<h1>Watios — Reporte de Anomalias</h1>
+<p class="meta">Generado: 2026-05-15 01:22:06 · Modelo: TensorFlow 2.21.0 · Ventana: 5 muestras</p>
+
+<div class="kpi-row">
+  <div class="kpi"><div class="kpi-val">13</div><div class="kpi-lbl">Total lecturas</div></div>
+  <div class="kpi kpi-anom"><div class="kpi-val">8</div><div class="kpi-lbl">Anomalias detectadas</div></div>
+  <div class="kpi"><div class="kpi-val">100.0%</div><div class="kpi-lbl">Tasa de anomalias</div></div>
+  <div class="kpi"><div class="kpi-val">0.938491</div><div class="kpi-lbl">Umbral MSE (Z>2.0)</div></div>
+  <div class="kpi"><div class="kpi-val">99.0V-121.0V</div><div class="kpi-lbl">Umbral Voltaje fijo</div></div>
+  <div class="kpi"><div class="kpi-val">50</div><div class="kpi-lbl">Epocas entrenamiento</div></div>
+</div>
+
+<p style="color:#4a5568;font-size:0.8rem">(Curva de entrenamiento no disponible — modelo pre-entrenado cargado)</p>
+
+<h2>Series de tiempo con anomalias marcadas</h2>
+<img src="graficas_anomalias.png" alt="Anomalias">
+
+<h2>Filas anomalas (ordenadas por error descendente)</h2>
+<table class="dataframe tabla">
+  <thead>
+    <tr style="text-align: right;">
+      <th>fecha</th>
+      <th>vrms</th>
+      <th>irms</th>
+      <th>power</th>
+      <th>kwh</th>
+      <th>joule</th>
+      <th>error</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>2026-05-15 01:21:10</td>
+      <td>4.53000</td>
+      <td>0.06500</td>
+      <td>0.32020</td>
+      <td>0.02925</td>
+      <td>0.00028</td>
+      <td>5611.98681</td>
+    </tr>
+    <tr>
+      <td>2026-05-15 01:21:00</td>
+      <td>2.94000</td>
+      <td>0.05100</td>
+      <td>0.15250</td>
+      <td>0.02925</td>
+      <td>0.00017</td>
+      <td>5610.72456</td>
+    </tr>
+    <tr>
+      <td>2026-05-15 01:20:50</td>
+      <td>2.55000</td>
+      <td>0.04320</td>
+      <td>0.11270</td>
+      <td>0.02925</td>
+      <td>0.00012</td>
+      <td>5598.72004</td>
+    </tr>
+    <tr>
+      <td>2026-05-15 01:21:21</td>
+      <td>5.27000</td>
+      <td>0.05440</td>
+      <td>0.28030</td>
+      <td>0.02925</td>
+      <td>0.00020</td>
+      <td>5577.66080</td>
+    </tr>
+    <tr>
+      <td>2026-05-15 01:21:31</td>
+      <td>3.68000</td>
+      <td>0.04860</td>
+      <td>0.17680</td>
+      <td>0.02925</td>
+      <td>0.00016</td>
+      <td>5544.35381</td>
+    </tr>
+    <tr>
+      <td>2026-05-15 01:21:41</td>
+      <td>3.25000</td>
+      <td>0.05410</td>
+      <td>0.18430</td>
+      <td>0.02925</td>
+      <td>0.00019</td>
+      <td>5537.58986</td>
+    </tr>
+    <tr>
+      <td>2026-05-15 01:21:51</td>
+      <td>4.32000</td>
+      <td>0.04430</td>
+      <td>0.19980</td>
+      <td>0.02925</td>
+      <td>0.00013</td>
+      <td>5520.84191</td>
+    </tr>
+    <tr>
+      <td>2026-05-15 01:22:02</td>
+      <td>3.74000</td>
+      <td>0.04250</td>
+      <td>0.16140</td>
+      <td>0.02925</td>
+      <td>0.00012</td>
+      <td>5496.00187</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="footer">
+  Features: vrms, irms, power, kwh, P. Joule (W) ·
+  Encoder: Z-score (LSTM) + Umbral fijo Vrms 99.0V-121.0V · Z-score LSTM: 2.0 ·
+  Arquitectura: LSTM(32) -> LSTM(8) -> RepeatVector -> LSTM(8) -> LSTM(32) -> Dense
+</div>
+</body>
+</html>

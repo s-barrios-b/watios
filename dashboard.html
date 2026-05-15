@@ -897,6 +897,7 @@
     .info-banner {
       display: flex;
       align-items: center;
+      flex-wrap: wrap;
       gap: 10px;
       background: rgba(0, 229, 255, .06);
       border: 1px solid rgba(0, 229, 255, .2);
@@ -912,6 +913,80 @@
       color: var(--accent);
     }
 
+    .info-chip {
+      display: inline-flex;
+      align-items: center;
+      border: 1px solid rgba(255, 176, 32, .24);
+      border-radius: 6px;
+      padding: 2px 8px;
+      color: var(--warn);
+      background: rgba(255, 176, 32, .08);
+    }
+
+    .ml-strip {
+      display: grid;
+      grid-template-columns: minmax(160px, auto) 1fr;
+      gap: 10px 18px;
+      align-items: center;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 11px 14px;
+      margin-bottom: 16px;
+      font-family: var(--mono);
+      font-size: 0.7rem;
+    }
+
+    .ml-state-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .ml-label {
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .ml-state {
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 3px 9px;
+      color: var(--muted);
+      background: var(--bg);
+    }
+
+    .ml-state.ok {
+      color: var(--ok);
+      border-color: rgba(0, 230, 118, .35);
+      background: rgba(0, 230, 118, .07);
+    }
+
+    .ml-state.alert {
+      color: var(--danger);
+      border-color: rgba(255, 59, 59, .38);
+      background: rgba(255, 59, 59, .08);
+    }
+
+    .ml-metrics {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 16px;
+      color: var(--muted);
+    }
+
+    .ml-metrics b {
+      color: var(--text);
+      font-weight: 400;
+    }
+
+    .ml-detail {
+      grid-column: 1 / -1;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
     /* ── Responsive ── */
     @media(max-width:1100px) {
       .kpi-grid {
@@ -925,6 +1000,10 @@
       }
 
       .charts-grid {
+        grid-template-columns: 1fr
+      }
+
+      .ml-strip {
         grid-template-columns: 1fr
       }
 
@@ -1020,6 +1099,22 @@
     <div class="info-banner">
       Arquitectura: <span>ESP32 → Servidor.py (FastAPI) + WebSockets → Dashboard</span>
       &nbsp;|&nbsp; Respaldo simultáneo en Google Sheets &nbsp;|&nbsp; Machine Learning y IA Local
+      <span class="info-chip" id="alert-gate">Alertas desde lectura 6 de la sesion</span>
+      <span class="info-chip">anomaliastf.py dicta OK/alerta usando datos_entrenamiento.csv</span>
+    </div>
+
+    <div class="ml-strip" id="ml-strip">
+      <div class="ml-state-wrap">
+        <span class="ml-label">TensorFlow</span>
+        <span class="ml-state" id="ml-state">Pendiente</span>
+      </div>
+      <div class="ml-metrics">
+        <span>Modelo <b id="ml-model">Autoencoder LSTM</b></span>
+        <span>Lecturas <b id="ml-readings">--</b></span>
+        <span>AnomalÃ­as <b id="ml-anom-count">--</b></span>
+        <span>Umbral MSE <b id="ml-threshold">--</b></span>
+      </div>
+      <div class="ml-detail" id="ml-detail">Esperando resultado de anomaliastf.py.</div>
     </div>
 
     <!-- Tabs -->
@@ -1212,7 +1307,7 @@
     <div class="tab-pane" id="tab-history">
       <div class="table-card">
         <div class="table-head-bar">
-          <span>Historial de lecturas (<span id="row-count">0</span> registros)</span>
+          <span>Historial de sesion (<span id="row-count">0</span> registros)</span>
           <span class="anom-badge" id="anom-count">0 anomalías</span>
         </div>
         <div class="table-scroll">
@@ -1276,6 +1371,7 @@
     const V_MIN = 99.0;
     const V_MAX = 121.0;
     const Z_THRESH = 2.0;
+    const ALERT_START_READING = 6;
     const MAX_PTS = 80;
 
     // ── Estado global ─────────────────────────────────────────
@@ -1284,6 +1380,7 @@
     let charts = {};
     let chatHistory = [];
     let pollTimer = null;
+    let lastMlSignature = '';
     let lastAlertTime = 0;          // cooldown para alertas proactivas
     let prevAnomalyStates = new Set(); // registrar estados específicos de anomalía
 
@@ -1297,8 +1394,93 @@
 
     // ── Parseo ────────────────────────────────────────────────
     function pf(v) { return parseFloat(String(v).replace(',', '.')) || 0; }
-    function parseRow(r) {
-      return { fecha: r[0] || '', vrms: pf(r[1]), irms: pf(r[2]), power: pf(r[3]), kwh: pf(r[4]), joule: pf(r[5]) };
+    function parseRow(r, index = 0) {
+      const lectura = index + 1;
+      return {
+        fecha: r[0] || '', vrms: pf(r[1]), irms: pf(r[2]), power: pf(r[3]), kwh: pf(r[4]), joule: pf(r[5]),
+        lectura_sesion: lectura,
+        calibrando: lectura < ALERT_START_READING
+      };
+    }
+
+    function normalizeServerRow(r, index = 0) {
+      const lectura = Number(r.lectura_sesion || index + 1);
+      const calibrando = r.anomalias && typeof r.anomalias === 'string'
+        ? r.anomalias.includes('sistema_calibrando')
+        : (r.anomalias?.sistema_calibrando ?? lectura < ALERT_START_READING);
+      return {
+        fecha: r.fecha, vrms: parseFloat(r.vrms), irms: parseFloat(r.irms),
+        power: parseFloat(r.power), kwh: parseFloat(r.kwh || r.kWh), joule: parseFloat(r.joule),
+        lectura_sesion: lectura,
+        calibrando
+      };
+    }
+
+    function updateAlertGate() {
+      const el = document.getElementById('alert-gate');
+      if (!el) return;
+      const n = rows.length;
+      if (n < ALERT_START_READING) {
+        el.textContent = `Estabilizando medidas ${n}/${ALERT_START_READING - 1}; alertas desde lectura ${ALERT_START_READING}`;
+      } else {
+        el.textContent = `Alertas activas desde lectura ${ALERT_START_READING} de esta sesion`;
+      }
+    }
+
+    function fmtMlNumber(value, dec = 6) {
+      const n = Number(value);
+      return Number.isFinite(n) ? n.toFixed(dec) : '--';
+    }
+
+    function mlSignature(msg) {
+      return [
+        msg.n_lecturas ?? '',
+        msg.n_anomalias ?? '',
+        msg.umbral_mse ?? '',
+        msg.ultima_lectura?.fecha ?? '',
+        msg.ultima_lectura?.alerta ?? '',
+        msg.ultima_lectura?.error_mse ?? '',
+        Array.isArray(msg.ultima_lectura?.variables) ? msg.ultima_lectura.variables.join(',') : ''
+      ].join('|');
+    }
+
+    function setMlPanel(msg) {
+      const state = document.getElementById('ml-state');
+      if (!state) return;
+      const latest = msg?.ultima_lectura;
+      const isAlert = !!latest?.alerta;
+      state.className = 'ml-state ' + (latest ? (isAlert ? 'alert' : 'ok') : '');
+      state.textContent = latest ? (isAlert ? 'ALERTA' : 'OK') : 'Analizado';
+
+      document.getElementById('ml-model').textContent = msg.modelo || 'Autoencoder LSTM';
+      document.getElementById('ml-readings').textContent = msg.n_lecturas ?? '--';
+      const tasa = Number.isFinite(Number(msg.tasa_pct)) ? ` (${Number(msg.tasa_pct).toFixed(1)}%)` : '';
+      document.getElementById('ml-anom-count').textContent = `${msg.n_anomalias ?? '--'}${tasa}`;
+      document.getElementById('ml-threshold').textContent = fmtMlNumber(msg.umbral_mse);
+
+      const detail = document.getElementById('ml-detail');
+      if (!latest) {
+        detail.textContent = 'Lote analizado por anomaliastf.py.';
+      } else if (isAlert) {
+        const vars = Array.isArray(latest.variables) && latest.variables.length ? latest.variables.join(', ') : 'variables no especificadas';
+        const motives = Array.isArray(latest.motivos) && latest.motivos.length ? latest.motivos.join('; ') : 'sin detalle adicional';
+        detail.textContent = `Ultima lectura con alerta en ${vars}. ${motives}. MSE ${fmtMlNumber(latest.error_mse)} / umbral ${fmtMlNumber(latest.umbral_mse)}.`;
+      } else {
+        detail.textContent = `Ultima lectura OK segun anomaliastf.py. MSE ${fmtMlNumber(latest.error_mse)} / umbral ${fmtMlNumber(latest.umbral_mse)}.`;
+      }
+    }
+
+    async function fetchLatestMlResult() {
+      const base = httpBaseFromWsInput();
+      if (!base) return;
+      try {
+        const res = await fetch(base + '/ml/latest?ts=' + Date.now(), { cache: 'no-store' });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data.result) applyMlResult(data.result, { silent: true });
+      } catch (e) {
+        console.warn('Polling /ml/latest fallo:', e);
+      }
     }
 
     async function pollDataFallback() {
@@ -1314,6 +1496,7 @@
           updateUI();
           document.getElementById('last-update').textContent = 'Sincronizado ' + new Date().toLocaleTimeString('es-CO');
         }
+        fetchLatestMlResult();
       } catch (e) {
         console.warn('Polling /data falló:', e);
       }
@@ -1337,12 +1520,44 @@
     }
     function isAnom(row, key, hist) {
       if (row.calibrando) return false;
-      if (key === 'vrms') return row.vrms < V_MIN || row.vrms > V_MAX;
-      const vals = hist.map(r => r[key]).filter(v => v >= 0);
-      if (vals.length < 5) return false;
-      const { mean, std } = calcStats(vals);
-      if (std === 0) return false;
-      return Math.abs((row[key] - mean) / std) > Z_THRESH;
+      return Array.isArray(row.ml_anomalias) && row.ml_anomalias.includes(key);
+    }
+
+    function applyMlResult(msg, options = {}) {
+      if (!msg) return false;
+      const signature = mlSignature(msg);
+      const isDuplicate = signature === lastMlSignature;
+      lastMlSignature = signature;
+      setMlPanel(msg);
+
+      const resultados = Array.isArray(msg.resultados) ? msg.resultados : [];
+      if (resultados.length && rows.length) {
+        const start = Math.max(0, Number(msg.n_lecturas || rows.length) - resultados.length);
+        resultados.forEach((r, i) => {
+          const row = rows[start + i];
+          if (!row) return;
+          row.ml_alerta = !!r.alerta;
+          row.ml_anomalias = Array.isArray(r.variables) ? r.variables : [];
+          row.ml_motivos = Array.isArray(r.motivos) ? r.motivos : [];
+          row.ml_error_mse = r.error_mse;
+          row.ml_umbral_mse = r.umbral_mse;
+        });
+      }
+
+      const latest = msg.ultima_lectura;
+      const last = rows[rows.length - 1];
+      if (latest && last) {
+        last.ml_alerta = !!latest.alerta;
+        last.ml_anomalias = Array.isArray(latest.variables) ? latest.variables : [];
+        last.ml_motivos = Array.isArray(latest.motivos) ? latest.motivos : [];
+        last.ml_error_mse = latest.error_mse;
+        last.ml_umbral_mse = latest.umbral_mse;
+      }
+
+      updateUI();
+      if (!options.silent && !isDuplicate && last && last.ml_alerta) triggerAlerta(last);
+      else if (last && !last.ml_alerta) prevAnomalyStates = new Set();
+      return !isDuplicate;
     }
 
     // ── Gráficas ─────────────────────────────────────────────
@@ -1412,6 +1627,7 @@
     function updateUI() {
       if (!rows.length) return;
       const last = rows[rows.length - 1];
+      updateAlertGate();
 
       for (const k of KEYS) {
         const s = calcStats(rows.map(r => r[k]));
@@ -1470,9 +1686,14 @@
         const fecha = isNaN(d) ? row.fecha : d.toLocaleString('es-CO');
         const tr = document.createElement('tr');
         if (rowAnom) tr.classList.add('ranom');
+        const estado = row.calibrando
+          ? '<span class="tok">ESTABILIZANDO</span>'
+          : (row.ml_alerta === undefined
+            ? '<span class="tok">ML PENDIENTE</span>'
+            : (rowAnom ? '<span class="tag">ANOMALIA</span>' : '<span class="tok">OK ML</span>'));
         tr.innerHTML = `<td>${fecha}</td>` +
           KEYS.map(k => `<td class="${anoms[k] ? 'canom' : 'cnorm'}">${row[k].toFixed(DECS[k])}${anoms[k] ? '<span class="tag">!</span>' : ''}</td>`).join('') +
-          `<td>${rowAnom ? '<span class="tag">ANOMALÍA</span>' : '<span class="tok">✓ OK</span>'}</td>`;
+          `<td>${estado}</td>`;
         tbody.appendChild(tr);
       });
 
@@ -1505,41 +1726,39 @@
 
         if (msg.type === 'ping') return; // keepalive del servidor, ignorar
         if (msg.type === 'history') {
-          rows = msg.data.map(r => ({
-            fecha: r.fecha, vrms: parseFloat(r.vrms), irms: parseFloat(r.irms),
-            power: parseFloat(r.power), kwh: parseFloat(r.kwh), joule: parseFloat(r.joule),
-            calibrando: r.anomalias && typeof r.anomalias === 'string' ? r.anomalias.includes('sistema_calibrando') : (r.anomalias?.sistema_calibrando || false)
-          }));
+          rows = msg.data.map(normalizeServerRow);
           updateUI();
           document.getElementById('last-update').textContent = 'Sincronizado ' + new Date().toLocaleTimeString('es-CO');
         }
         else if (msg.type === 'new_reading') {
           const r = msg.data;
           const isCalib = r.anomalias?.sistema_calibrando || false;
-          const newRow = {
-            fecha: r.fecha, vrms: parseFloat(r.vrms), irms: parseFloat(r.irms),
-            power: parseFloat(r.power), kwh: parseFloat(r.kwh || r.kWh), joule: parseFloat(r.joule),
-            calibrando: isCalib
-          };
+          const newRow = normalizeServerRow(r, rows.length);
           rows.push(newRow);
           if (rows.length > 5000) rows.shift();
           updateUI();
 
-          if (!isCalib) triggerAlerta(newRow);
-
-          const txtStatus = isCalib ? 'Calibrando Filtros (Ignorando Anomalías)...' : 'Última lectura: ' + new Date().toLocaleTimeString('es-CO');
+          const txtStatus = isCalib
+            ? `Estabilizando medidas (${newRow.lectura_sesion}/${ALERT_START_READING - 1}); alertas desde lectura ${ALERT_START_READING}`
+            : 'Ultima lectura: ' + new Date().toLocaleTimeString('es-CO') + ' · ML pendiente';
           document.getElementById('last-update').textContent = txtStatus;
           if (isCalib) document.getElementById('last-update').style.color = '#ffb020';
           else document.getElementById('last-update').style.color = '';
         }
         else if (msg.type === 'ml_result') {
-          showBanner(` <b>Análisis IA de Python Recibido (${msg.modelo}):</b> ${msg.n_anomalias} anomalías en ${msg.n_lecturas} lecturas (Tasa: ${parseFloat(msg.tasa_pct).toFixed(1)}%)`);
+          const changed = applyMlResult(msg);
+          if (!changed) return;
+          const latest = msg.ultima_lectura;
+          const latestState = latest ? (latest.alerta ? 'ALERTA' : 'OK') : 'lote analizado';
+          showBanner(` <b>Análisis IA de Python (${msg.modelo}):</b> ${latestState}. ${msg.n_anomalias} anomalías en ${msg.n_lecturas} lecturas (Tasa: ${parseFloat(msg.tasa_pct).toFixed(1)}%)`);
+          document.getElementById('last-update').textContent = `ML actualizado: ${latestState}`;
+          document.getElementById('last-update').style.color = latest?.alerta ? '#ff3b3b' : '#00e676';
 
           // Auto informar a DeepSeek si hay algo interesante
-          if (msg.n_anomalias > 0 && Array.isArray(chatHistory)) {
+          if (latest?.alerta && Array.isArray(chatHistory)) {
             setTimeout(() => {
-              appendMessage('user', ` Alerta ML (${msg.modelo}): ${msg.n_anomalias} anomalías`);
-              sendToDeepSeek(`El modelo de inteligencia artificial de TensorFlow acaba de detectar ${msg.n_anomalias} anomalías en el analizador. ¿Qué tipo de fallas en el hogar pueden generar ruidos Z-Score repentinos en el muestreo de corriente/potencia? Dale una recomendación exprés al usuario.`);
+              appendMessage('user', ` Alerta ML (${msg.modelo}): ${latest.variables.join(', ')}`);
+              sendToDeepSeek(`El modelo de TensorFlow detecto una alerta en ${latest.variables.join(', ')}. Motivos: ${latest.motivos.join('; ')}. Dame una recomendacion breve para el usuario.`);
             }, 3000);
           }
         }
@@ -1582,6 +1801,7 @@
     const ALERT_COOLDOWN = 25000; // 25 s de cooldown para el chatbot proactivo (facilita pruebas)
 
     function triggerAlerta(row) {
+      if (row.calibrando || rows.length < ALERT_START_READING) return;
       const hist = rows.slice(0, -1);
       const currentStates = [];
       const anomKeys = [];

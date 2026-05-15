@@ -37,6 +37,7 @@ APPS_SCRIPT_URL  = os.getenv("APPS_SCRIPT_URL", "").strip()
 EXCEL_SYNC       = os.getenv("EXCEL_SYNC", "1").strip().lower() not in {"0", "false", "no", "off"}
 EXCEL_SYNC_INTERVAL = float(os.getenv("EXCEL_SYNC_INTERVAL", "1"))
 AUTO_START_ML    = os.getenv("AUTO_START_ML", "1").strip().lower() not in {"0", "false", "no", "off"}
+ALERT_START_READING = int(os.getenv("ALERT_START_READING", "6"))
 BASE_DIR         = os.path.dirname(os.path.abspath(__file__))
 ML_SCRIPT        = os.path.join(BASE_DIR, "anomaliastf.py")
 ML_ARTIFACTS_DIR = os.path.join(BASE_DIR, "analisis_anomalias")
@@ -120,6 +121,7 @@ class ConnectionManager:
 manager = ConnectionManager()
 ML_PROCESS: Optional[subprocess.Popen] = None
 ML_LOG_HANDLE = None
+LAST_ML_RESULT: Optional[Dict[str, Any]] = None
 EXCEL_QUEUE: deque = deque(maxlen=5000)
 EXCEL_SYNC_TASK: Optional[asyncio.Task] = None
 
@@ -146,33 +148,18 @@ def row_from_csv(record: dict) -> Optional[dict]:
     return normalized
 
 
-def load_rows_from_training_csv():
+def count_training_reference_rows():
+    """Cuenta las filas validas del CSV de referencia sin usarlo como historial."""
     ensure_training_csv()
-    loaded = deque(maxlen=MAX_ROWS)
+    total = 0
     try:
         with open(TRAINING_DATA_FILE, "r", newline="", encoding="utf-8-sig") as f:
             for record in csv.DictReader(f):
-                row = row_from_csv(record)
-                if row:
-                    loaded.append(row)
+                if row_from_csv(record):
+                    total += 1
     except Exception as e:
-        print(f"[Base de Datos] Error leyendo CSV editable: {e}")
-    ROWS.clear()
-    ROWS.extend(loaded)
-    return len(ROWS)
-
-
-def append_row_to_training_csv(row: dict):
-    ensure_training_csv()
-    with open(TRAINING_DATA_FILE, "a", newline="", encoding="utf-8") as f:
-        csv.writer(f).writerow([
-            format_fecha_csv(row.get("fecha", "")),
-            format_decimal_csv(row.get("vrms", "")),
-            format_decimal_csv(row.get("irms", "")),
-            format_decimal_csv(row.get("power", "")),
-            format_decimal_csv(row.get("kwh", "")),
-            format_decimal_csv(row.get("joule", "")),
-        ])
+        print(f"[Referencia ML] Error leyendo CSV editable: {e}")
+    return total
 
 
 def excel_payload(row: dict) -> dict:
@@ -286,8 +273,9 @@ def stop_ml_daemon():
 @app.on_event("startup")
 async def startup_event():
     global EXCEL_SYNC_TASK
-    total = load_rows_from_training_csv()
-    print(f"[Base de Datos] Cargadas {total} filas desde CSV editable: {TRAINING_DATA_FILE}")
+    total = count_training_reference_rows()
+    print(f"[Referencia ML] {total} filas disponibles en CSV editable: {TRAINING_DATA_FILE}")
+    print("[Historial] La sesion inicia vacia; las lecturas nuevas se guardan en Apps Script/Excel.")
     if EXCEL_SYNC and APPS_SCRIPT_URL:
         EXCEL_SYNC_TASK = asyncio.create_task(sync_excel_loop())
     start_ml_daemon()
@@ -325,14 +313,6 @@ def parse_row(payload: dict) -> dict:
     joule = _to_float(payload, "joule") if "joule" in payload else round(irms ** 2 * R_CABLE, 12)
     fecha = payload.get("fecha") or payload.get("timestamp") or datetime.now().isoformat()
 
-    uptime = payload.get("uptime")
-    calibrando = False
-    if uptime is not None:
-        try:
-            calibrando = 0 <= float(uptime) < 480_000   # primeros 8 min
-        except (TypeError, ValueError):
-            pass
-
     return {
         "fecha":  fecha,
         "vrms":   round(vrms,  2),
@@ -340,7 +320,7 @@ def parse_row(payload: dict) -> dict:
         "power":  round(power, 4),
         "kwh":    round(kwh,   6),
         "joule":  joule,
-        "anomalias": {"sistema_calibrando": calibrando},
+        "anomalias": {"sistema_calibrando": False},
     }
 
 # -- Rutas HTTP --------------------------------------------------------
@@ -358,15 +338,14 @@ async def post_data(request: Request):
         payload = payload[0]
 
     row = parse_row(payload)
+    lectura_sesion = len(ROWS) + 1
+    row["lectura_sesion"] = lectura_sesion
+    row["alertas_activas_desde"] = ALERT_START_READING
+    row["anomalias"]["sistema_calibrando"] = lectura_sesion < ALERT_START_READING
     ROWS.append(row)   # deque descarta automaticamente los mas antiguos si llega a maxlen
     client_host = request.client.host if request.client else "desconocido"
     print(f"[DATA] Lectura recibida desde {client_host}: Vrms={row['vrms']} Irms={row['irms']} Power={row['power']}")
 
-    # Guardar la fila persistentemente en el CSV editable.
-    try:
-        append_row_to_training_csv(row)
-    except Exception as e:
-        print(f"[Base de Datos] Error guardando fila en CSV: {e}")
     if EXCEL_SYNC and APPS_SCRIPT_URL:
         EXCEL_QUEUE.append(excel_payload(row))
 
@@ -376,8 +355,7 @@ async def post_data(request: Request):
 
 @app.get("/data")
 async def get_data():
-    """Entrega el historial completo en formato { rows: [[encabezado], ...] }."""
-    load_rows_from_training_csv()
+    """Entrega el historial de la sesion actual en formato { rows: [[encabezado], ...] }."""
     rows_list = [HEADER]
     for r in ROWS:
         rows_list.append([
@@ -397,9 +375,12 @@ async def health():
     return JSONResponse({
         "status": "ok",
         "lecturas_en_memoria": len(ROWS),
-        "csv_datos": TRAINING_DATA_FILE,
+        "csv_referencia_anomalias": TRAINING_DATA_FILE,
+        "filas_referencia_anomalias": count_training_reference_rows(),
+        "alertas_desde_lectura": ALERT_START_READING,
         "ml_autoarranque": AUTO_START_ML,
         "ml_estado": "corriendo" if ML_PROCESS and ML_PROCESS.poll() is None else "detenido",
+        "ml_ultimo_resultado": LAST_ML_RESULT,
         "excel_sync": EXCEL_SYNC and bool(APPS_SCRIPT_URL),
         "excel_pendientes": len(EXCEL_QUEUE),
     })
@@ -408,21 +389,35 @@ async def health():
 @app.post("/ml/result")
 async def ml_result(request: Request):
     """Recibe resultados del modulo anomaliastf.py y los reenvía al dashboard."""
+    global LAST_ML_RESULT
     try:
         payload = await request.json()
     except Exception:
         body = await request.body()
         payload = json.loads(body.decode() or "{}")
 
-    await manager.broadcast({
+    LAST_ML_RESULT = {
         "type":        "ml_result",
         "n_lecturas":  payload.get("n_lecturas"),
         "n_anomalias": payload.get("n_anomalias"),
         "tasa_pct":    payload.get("tasa_pct"),
         "umbral_mse":  payload.get("umbral_mse"),
         "modelo":      payload.get("modelo"),
-    })
+        "ventana":     payload.get("ventana"),
+        "features":    payload.get("features"),
+        "ultima_lectura": payload.get("ultima_lectura"),
+        "resultados":  payload.get("resultados", []),
+    }
+    await manager.broadcast(LAST_ML_RESULT)
     return JSONResponse({"status": "ok"})
+
+
+@app.get("/ml/latest")
+async def ml_latest():
+    """Entrega el ultimo resultado ML recibido para dashboards que se abren tarde."""
+    if LAST_ML_RESULT is None:
+        return JSONResponse({"status": "pending", "result": None})
+    return JSONResponse({"status": "ok", "result": LAST_ML_RESULT})
 
 
 @app.post("/chat")
@@ -478,10 +473,11 @@ async def ws_endpoint(websocket: WebSocket):
     await manager.connect(websocket)
     print("[WS] Conexion abierta")
     try:
-        load_rows_from_training_csv()
         await websocket.send_text(json.dumps(
             {"type": "history", "data": list(ROWS)}, default=str
         ))
+        if LAST_ML_RESULT is not None:
+            await websocket.send_text(json.dumps(LAST_ML_RESULT, default=str))
         while True:
             try:
                 # Espera un mensaje del cliente hasta KEEPALIVE_INTERVAL segundos

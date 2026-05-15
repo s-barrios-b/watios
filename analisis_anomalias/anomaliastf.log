@@ -1,0 +1,348 @@
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1778825992.504013   25584 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1778825995.724767   25584 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+I0000 00:00:1778826056.630056   25584 cpu_feature_guard.cc:227] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: SSE3 SSE4.1 SSE4.2 AVX AVX2 AVX_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+WARNING:tensorflow:TensorFlow GPU support is not available on native Windows for TensorFlow >= 2.11. Even if CUDA/cuDNN are installed, GPU will not be used. Please use WSL2 or the TensorFlow-DirectML plugin.
+Iniciando Modulo ML en modo continuo...
+=======================================================
+  Analisis ML a las 01:20:41
+=======================================================
+Descargando datos desde el servidor (GET /data)...
+  5 filas cargadas (2026-05-15 01:19:59 -> 2026-05-15 01:20:40)
+Necesitas al menos 6 filas. Tienes 5.
+=======================================================
+  Analisis ML a las 01:20:56
+=======================================================
+Descargando datos desde el servidor (GET /data)...
+  6 filas cargadas (2026-05-15 01:19:59 -> 2026-05-15 01:20:50)
+  Datos de entrenamiento editables: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\datos_entrenamiento.csv
+Construyendo y entrenando Autoencoder LSTM...
+Model: "autoencoder_lstm"
++--------------------------------------------------------------------------+
+| Layer (type)                    | Output Shape           |       Param # |
+|---------------------------------+------------------------+---------------|
+| input_layer (InputLayer)        | (None, 5, 5)           |             0 |
+|---------------------------------+------------------------+---------------|
+| lstm (LSTM)                     | (None, 5, 32)          |         4,864 |
+|---------------------------------+------------------------+---------------|
+| lstm_1 (LSTM)                   | (None, 8)              |         1,312 |
+|---------------------------------+------------------------+---------------|
+| repeat_vector (RepeatVector)    | (None, 5, 8)           |             0 |
+|---------------------------------+------------------------+---------------|
+| lstm_2 (LSTM)                   | (None, 5, 8)           |           544 |
+|---------------------------------+------------------------+---------------|
+| lstm_3 (LSTM)                   | (None, 5, 32)          |         5,248 |
+|---------------------------------+------------------------+---------------|
+| time_distributed                | (None, 5, 5)           |           165 |
+| (TimeDistributed)               |                        |               |
++--------------------------------------------------------------------------+
+ Total params: 12,133 (47.39 KB)
+ Trainable params: 12,133 (47.39 KB)
+ Non-trainable params: 0 (0.00 B)
+Epoch 1/50
+E0000 00:00:1778826060.421329   25584 util.cc:131] oneDNN supports DT_INT32 only on platforms with AVX-512. Falling back to the default Eigen-based implementation if present.
+
+[1m1/4[0m [32m=====[0m[37m===============[0m [1m10s[0m 4s/step - loss: 0.9053
+[1m4/4[0m [32m====================[0m[37m[0m [1m4s[0m 239ms/step - loss: 0.9442 - val_loss: 0.9830 - learning_rate: 0.0010
+Epoch 2/50
+
+[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 30ms/step - loss: 0.8955
+[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 31ms/step - loss: 0.9372 - val_loss: 0.9828 - learning_rate: 0.0010
+Epoch 3/50
+
+[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 28ms/step - loss: 0.8910
+[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 29ms/step - loss: 0.9328 - val_loss: 0.9820 - learning_rate: 0.0010
+Epoch 4/50
+
+[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 28ms/step - loss: 0.8871
+[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 26ms/step - loss: 0.9287 - val_loss: 0.9805 - learning_rate: 0.0010
+Epoch 5/50
+
+[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 25ms/step - loss: 0.8830
+[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 23ms/step - loss: 0.9238 - val_loss: 0.9775 - learning_rate: 0.0010
+Epoch 6/50
+
+[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 26ms/step - loss: 0.8780
+[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 24ms/step - loss: 0.9173 - val_loss: 0.9725 - learning_rate: 0.0010
+Epoch 7/50
+
+[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 23ms/step - loss: 0.8715
+[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 26ms/step - loss: 0.9084 - val_loss: 0.9645 - learning_rate: 0.0010
+Epoch 8/50
+
+[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 31ms/step - loss: 0.8630
+[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 23ms/step - loss: 0.8964 - val_loss: 0.9529 - learning_rate: 0.0010
+Epoch 9/50
+
+[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 90ms/step - loss: 0.8517
+[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 32ms/step - loss: 0.8803 - val_loss: 0.9366 - learning_rate: 0.0010
+Epoch 10/50
+
+[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 30ms/step - loss: 0.8369
+[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 62ms/step - loss: 0.8592 - val_loss: 0.9146 - learning_rate: 0.0010
+Epoch 11/50
+
+[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 30ms/step - loss: 0.8180
+[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 25ms/step - loss: 0.8321 - val_loss: 0.8859 - learning_rate: 0.0010
+Epoch 12/50
+
+[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 28ms/step - loss: 0.7949
+[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 23ms/step - loss: 0.7988 - val_loss: 0.8499 - learning_rate: 0.0010
+Epoch 13/50
+
+[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 24ms/step - loss: 0.7689
+[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 22ms/step - loss: 0.7604 - val_loss: 0.8067 - learning_rate: 0.0010
+Epoch 14/50
+
+[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 27ms/step - loss: 0.7435
+[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 22ms/step - loss: 0.7199 - val_loss: 0.7571 - learning_rate: 0.0010
+Epoch 15/50
+
+[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 24ms/step - loss: 0.7245
+[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 27ms/step - loss: 0.6825 - val_loss: 0.7037 - learning_rate: 0.0010
+Epoch 16/50
+
+[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 29ms/step - loss: 0.7172
+[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 23ms/step - loss: 0.6529 - val_loss: 0.6498 - learning_rate: 0.0010
+Epoch 17/50
+
+[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 23ms/step - loss: 0.7194
+[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 21ms/step - loss: 0.6309 - val_loss: 0.5988 - learning_rate: 0.0010
+Epoch 18/50
+
+[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 21ms/step - loss: 0.7215
+[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 21ms/step - loss: 0.6122 - val_loss: 0.5530 - learning_rate: 0.0010
+Epoch 19/50
+
+[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 33ms/step - loss: 0.7177
+[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 27ms/step - loss: 0.5944 - val_loss: 0.5138 - learning_rate: 0.0010
+Epoch 20/50
+
+[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 35ms/step - loss: 0.7095
+[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 48ms/step - loss: 0.5788 - val_loss: 0.4825 - learning_rate: 0.0010
+Epoch 21/50
+
+[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 46ms/step - loss: 0.7004
+[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 32ms/step - loss: 0.5669 - val_loss: 0.4592 - learning_rate: 0.0010
+Epoch 22/50
+
+[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 40ms/step - loss: 0.6925
+[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 30ms/step - loss: 0.5586 - val_loss: 0.4429 - learning_rate: 0.0010
+Epoch 23/50
+
+[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 30ms/step - loss: 0.6860
+[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 29ms/step - loss: 0.5529 - val_loss: 0.4314 - learning_rate: 0.0010
+Epoch 24/50
+
+[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 34ms/step - loss: 0.6805
+[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 32ms/step - loss: 0.5481 - val_loss: 0.4220 - learning_rate: 0.0010
+Epoch 25/50
+
+[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 26ms/step - loss: 0.6755
+[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 28ms/step - loss: 0.5433 - val_loss: 0.4137 - learning_rate: 0.0010
+Epoch 26/50
+
+[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 30ms/step - loss: 0.6710
+[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 24ms/step - loss: 0.5384 - val_loss: 0.4065 - learning_rate: 0.0010
+Epoch 27/50
+
+[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 26ms/step - loss: 0.6666
+[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 20ms/step - loss: 0.5335 - val_loss: 0.4003 - learning_rate: 0.0010
+Epoch 28/50
+
+[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 31ms/step - loss: 0.6626
+[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 29ms/step - loss: 0.5288 - val_loss: 0.3950 - learning_rate: 0.0010
+Epoch 29/50
+
+[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 25ms/step - loss: 0.6587
+[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 24ms/step - loss: 0.5242 - val_loss: 0.3903 - learning_rate: 0.0010
+Epoch 30/50
+
+[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 27ms/step - loss: 0.6549
+[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 24ms/step - loss: 0.5197 - val_loss: 0.3859 - learning_rate: 0.0010
+Epoch 31/50
+
+[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 27ms/step - loss: 0.6511
+[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 25ms/step - loss: 0.5152 - val_loss: 0.3816 - learning_rate: 0.0010
+Epoch 32/50
+
+[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 23ms/step - loss: 0.6474
+[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 25ms/step - loss: 0.5107 - val_loss: 0.3774 - learning_rate: 0.0010
+Epoch 33/50
+
+[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 43ms/step - loss: 0.6436
+[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 29ms/step - loss: 0.5062 - val_loss: 0.3734 - learning_rate: 0.0010
+Epoch 34/50
+
+[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 25ms/step - loss: 0.6399
+[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 22ms/step - loss: 0.5017 - val_loss: 0.3696 - learning_rate: 0.0010
+Epoch 35/50
+
+[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 26ms/step - loss: 0.6363
+[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 27ms/step - loss: 0.4973 - val_loss: 0.3661 - learning_rate: 0.0010
+Epoch 36/50
+
+[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 26ms/step - loss: 0.6327
+[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 21ms/step - loss: 0.4929 - val_loss: 0.3629 - learning_rate: 0.0010
+Epoch 37/50
+
+[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 26ms/step - loss: 0.6293
+[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 20ms/step - loss: 0.4886 - val_loss: 0.3599 - learning_rate: 0.0010
+Epoch 38/50
+
+[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 20ms/step - loss: 0.6258
+[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 24ms/step - loss: 0.4842 - val_loss: 0.3570 - learning_rate: 0.0010
+Epoch 39/50
+
+[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 28ms/step - loss: 0.6225
+[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 27ms/step - loss: 0.4799 - val_loss: 0.3544 - learning_rate: 0.0010
+Epoch 40/50
+
+[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 32ms/step - loss: 0.6191
+[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 27ms/step - loss: 0.4756 - val_loss: 0.3518 - learning_rate: 0.0010
+Epoch 41/50
+
+[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 34ms/step - loss: 0.6157
+[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 21ms/step - loss: 0.4713 - val_loss: 0.3492 - learning_rate: 0.0010
+Epoch 42/50
+
+[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 31ms/step - loss: 0.6122
+[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 30ms/step - loss: 0.4670 - val_loss: 0.3467 - learning_rate: 0.0010
+Epoch 43/50
+
+[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 36ms/step - loss: 0.6086
+[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 27ms/step - loss: 0.4627 - val_loss: 0.3441 - learning_rate: 0.0010
+Epoch 44/50
+
+[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 36ms/step - loss: 0.6048
+[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 31ms/step - loss: 0.4585 - val_loss: 0.3414 - learning_rate: 0.0010
+Epoch 45/50
+
+[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 33ms/step - loss: 0.6009
+[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 30ms/step - loss: 0.4541 - val_loss: 0.3387 - learning_rate: 0.0010
+Epoch 46/50
+
+[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 81ms/step - loss: 0.5968
+[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 24ms/step - loss: 0.4498 - val_loss: 0.3360 - learning_rate: 0.0010
+Epoch 47/50
+
+[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 32ms/step - loss: 0.5925
+[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 27ms/step - loss: 0.4454 - val_loss: 0.3331 - learning_rate: 0.0010
+Epoch 48/50
+
+[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 26ms/step - loss: 0.5880
+[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 28ms/step - loss: 0.4410 - val_loss: 0.3303 - learning_rate: 0.0010
+Epoch 49/50
+
+[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 28ms/step - loss: 0.5832
+[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 26ms/step - loss: 0.4366 - val_loss: 0.3275 - learning_rate: 0.0010
+Epoch 50/50
+
+[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 34ms/step - loss: 0.5782
+[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 28ms/step - loss: 0.4321 - val_loss: 0.3246 - learning_rate: 0.0010
+WARNING:tensorflow:5 out of the last 9 calls to <function TensorFlowTrainer.make_predict_function.<locals>.one_step_on_data_distributed at 0x00000240F3FF3920> triggered tf.function retracing. Tracing is expensive and the excessive number of tracings could be due to (1) creating @tf.function repeatedly in a loop, (2) passing tensors with different shapes, (3) passing Python objects instead of tensors. For (1), please define your @tf.function outside of the loop. For (2), @tf.function has reduce_retracing=True option that can avoid unnecessary retracing. For (3), please refer to https://www.tensorflow.org/guide/function#controlling_retracing and https://www.tensorflow.org/api_docs/python/tf/function for  more details.
+WARNING:tensorflow:6 out of the last 11 calls to <function TensorFlowTrainer.make_predict_function.<locals>.one_step_on_data_distributed at 0x00000240F3FF3920> triggered tf.function retracing. Tracing is expensive and the excessive number of tracings could be due to (1) creating @tf.function repeatedly in a loop, (2) passing tensors with different shapes, (3) passing Python objects instead of tensors. For (1), please define your @tf.function outside of the loop. For (2), @tf.function has reduce_retracing=True option that can avoid unnecessary retracing. For (3), please refer to https://www.tensorflow.org/guide/function#controlling_retracing and https://www.tensorflow.org/api_docs/python/tf/function for  more details.
+  Modelo y scaler guardados en 'C:\Users\sebas\Downloads\INTENTO2\modelo_autoencoder/'
+  Forma de entrada: (1, 5, 5)  (muestras, ventana, features)
+Calculando errores de reconstruccion...
+  Umbral Z-score LSTM : 2.0  (MSE equiv: 0.938491)
+  Anomalias LSTM:  1
+  Anomalias Vrms (fuera de 99.0V-121.0V): 1
+  Anomalias totales: 1 / 1 (100.0%)
+
+  Primeras 5 anomalias:
+    [2026-05-15 01:20:50] Vrms=2.55V Irms=0.0432A Power=0.1127W
+Generando reporte HTML...
+  Reporte HTML actualizado.
+  Conclusiones guardadas en: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\conclusiones_20260515_012115.json
+  Resultados enviados al servidor (WebSocket -> dashboard).
+
+Analisis finalizado.
+=======================================================
+  Analisis ML a las 01:21:30
+=======================================================
+Descargando datos desde el servidor (GET /data)...
+  9 filas cargadas (2026-05-15 01:19:59 -> 2026-05-15 01:21:21)
+  Datos de entrenamiento editables: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\datos_entrenamiento.csv
+Cargando modelo y scaler desde 'C:\Users\sebas\Downloads\INTENTO2\modelo_autoencoder\model.keras'...
+  (Para re-entrenar, elimina modelo_autoencoder/ y conserva analisis_anomalias/datos_entrenamiento.csv)
+  Forma de entrada: (4, 5, 5)  (muestras, ventana, features)
+Calculando errores de reconstruccion...
+  Umbral Z-score LSTM : 2.0  (MSE equiv: 0.938491)
+  Anomalias LSTM:  4
+  Anomalias Vrms (fuera de 99.0V-121.0V): 4
+  Anomalias totales: 4 / 4 (100.0%)
+
+  Primeras 5 anomalias:
+    [2026-05-15 01:20:50] Vrms=2.55V Irms=0.0432A Power=0.1127W
+    [2026-05-15 01:21:00] Vrms=2.94V Irms=0.0510A Power=0.1525W
+    [2026-05-15 01:21:10] Vrms=4.53V Irms=0.0650A Power=0.3202W
+    [2026-05-15 01:21:21] Vrms=5.27V Irms=0.0544A Power=0.2803W
+Generando reporte HTML...
+  Reporte HTML actualizado.
+  Conclusiones guardadas en: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\conclusiones_20260515_012132.json
+  Resultados enviados al servidor (WebSocket -> dashboard).
+
+Analisis finalizado.
+=======================================================
+  Analisis ML a las 01:21:47
+=======================================================
+Descargando datos desde el servidor (GET /data)...
+  11 filas cargadas (2026-05-15 01:19:59 -> 2026-05-15 01:21:41)
+  Datos de entrenamiento editables: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\datos_entrenamiento.csv
+Cargando modelo y scaler desde 'C:\Users\sebas\Downloads\INTENTO2\modelo_autoencoder\model.keras'...
+  (Para re-entrenar, elimina modelo_autoencoder/ y conserva analisis_anomalias/datos_entrenamiento.csv)
+  Forma de entrada: (6, 5, 5)  (muestras, ventana, features)
+Calculando errores de reconstruccion...
+  Umbral Z-score LSTM : 2.0  (MSE equiv: 0.938491)
+  Anomalias LSTM:  6
+  Anomalias Vrms (fuera de 99.0V-121.0V): 6
+  Anomalias totales: 6 / 6 (100.0%)
+
+  Primeras 5 anomalias:
+    [2026-05-15 01:20:50] Vrms=2.55V Irms=0.0432A Power=0.1127W
+    [2026-05-15 01:21:00] Vrms=2.94V Irms=0.0510A Power=0.1525W
+    [2026-05-15 01:21:10] Vrms=4.53V Irms=0.0650A Power=0.3202W
+    [2026-05-15 01:21:21] Vrms=5.27V Irms=0.0544A Power=0.2803W
+    [2026-05-15 01:21:31] Vrms=3.68V Irms=0.0486A Power=0.1768W
+Generando reporte HTML...
+  Reporte HTML actualizado.
+  Conclusiones guardadas en: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\conclusiones_20260515_012149.json
+  Resultados enviados al servidor (WebSocket -> dashboard).
+
+Analisis finalizado.
+=======================================================
+  Analisis ML a las 01:22:04
+=======================================================
+Descargando datos desde el servidor (GET /data)...
+  13 filas cargadas (2026-05-15 01:19:59 -> 2026-05-15 01:22:02)
+  Datos de entrenamiento editables: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\datos_entrenamiento.csv
+Cargando modelo y scaler desde 'C:\Users\sebas\Downloads\INTENTO2\modelo_autoencoder\model.keras'...
+  (Para re-entrenar, elimina modelo_autoencoder/ y conserva analisis_anomalias/datos_entrenamiento.csv)
+  Forma de entrada: (8, 5, 5)  (muestras, ventana, features)
+Calculando errores de reconstruccion...
+  Umbral Z-score LSTM : 2.0  (MSE equiv: 0.938491)
+  Anomalias LSTM:  8
+  Anomalias Vrms (fuera de 99.0V-121.0V): 8
+  Anomalias totales: 8 / 8 (100.0%)
+
+  Primeras 5 anomalias:
+    [2026-05-15 01:20:50] Vrms=2.55V Irms=0.0432A Power=0.1127W
+    [2026-05-15 01:21:00] Vrms=2.94V Irms=0.0510A Power=0.1525W
+    [2026-05-15 01:21:10] Vrms=4.53V Irms=0.0650A Power=0.3202W
+    [2026-05-15 01:21:21] Vrms=5.27V Irms=0.0544A Power=0.2803W
+    [2026-05-15 01:21:31] Vrms=3.68V Irms=0.0486A Power=0.1768W
+Generando reporte HTML...
+  Reporte HTML actualizado.
+  Conclusiones guardadas en: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\conclusiones_20260515_012206.json
+  Resultados enviados al servidor (WebSocket -> dashboard).
+
+Analisis finalizado.
+Traceback (most recent call last):
+  File "C:\Users\sebas\Downloads\INTENTO2\anomaliastf.py", line 585, in <module>
+    main()
+  File "C:\Users\sebas\Downloads\INTENTO2\anomaliastf.py", line 580, in main
+    time.sleep(max(1, args.interval))
+KeyboardInterrupt
