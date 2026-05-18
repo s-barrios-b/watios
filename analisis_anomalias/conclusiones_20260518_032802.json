@@ -1,11 +1,11 @@
 {
-  "generado_en": "2026-05-18T03:29:21",
+  "generado_en": "2026-05-18T03:28:02",
   "servidor_origen": "http://192.168.1.7:5000",
   "modelo": "Rangos V/I",
-  "total_lecturas": 34,
-  "lecturas_evaluadas": 34,
-  "anomalias_detectadas": 19,
-  "tasa_anomalias_pct": 55.88235294117647,
+  "total_lecturas": 26,
+  "lecturas_evaluadas": 26,
+  "anomalias_detectadas": 11,
+  "tasa_anomalias_pct": 42.30769230769231,
   "rangos": {
     "vrms": {
       "min": 99.0,
@@ -120,78 +120,6 @@
       "kwh": 0.052833,
       "joule": 0.00012952434,
       "desviacion_rango": 4.277272727272727
-    },
-    {
-      "fecha": "2026-05-18 03:28:06",
-      "vrms": 7.04,
-      "irms": 0.0374,
-      "power": 0.2679,
-      "kwh": 0.052834,
-      "joule": 9.231816e-05,
-      "desviacion_rango": 4.18
-    },
-    {
-      "fecha": "2026-05-18 03:28:16",
-      "vrms": 7.75,
-      "irms": 0.0344,
-      "power": 0.261,
-      "kwh": 0.052834,
-      "joule": 7.810176e-05,
-      "desviacion_rango": 4.1477272727272725
-    },
-    {
-      "fecha": "2026-05-18 03:28:26",
-      "vrms": 4.81,
-      "irms": 0.0345,
-      "power": 0.1597,
-      "kwh": 0.052835,
-      "joule": 7.85565e-05,
-      "desviacion_rango": 4.281363636363636
-    },
-    {
-      "fecha": "2026-05-18 03:28:37",
-      "vrms": 4.87,
-      "irms": 0.036,
-      "power": 0.1727,
-      "kwh": 0.052835,
-      "joule": 8.5536e-05,
-      "desviacion_rango": 4.278636363636363
-    },
-    {
-      "fecha": "2026-05-18 03:28:47",
-      "vrms": 3.22,
-      "irms": 0.0461,
-      "power": 0.1464,
-      "kwh": 0.052836,
-      "joule": 0.00014026386,
-      "desviacion_rango": 4.3536363636363635
-    },
-    {
-      "fecha": "2026-05-18 03:28:57",
-      "vrms": 2.85,
-      "irms": 0.0449,
-      "power": 0.1215,
-      "kwh": 0.052836,
-      "joule": 0.00013305666,
-      "desviacion_rango": 4.370454545454546
-    },
-    {
-      "fecha": "2026-05-18 03:29:07",
-      "vrms": 2.84,
-      "irms": 0.0275,
-      "power": 0.0785,
-      "kwh": 0.052836,
-      "joule": 4.99125e-05,
-      "desviacion_rango": 4.370909090909091
-    },
-    {
-      "fecha": "2026-05-18 03:29:17",
-      "vrms": 2.69,
-      "irms": 0.0451,
-      "power": 0.1197,
-      "kwh": 0.052837,
-      "joule": 0.00013424466,
-      "desviacion_rango": 4.377727272727273
     }
   ]
 }

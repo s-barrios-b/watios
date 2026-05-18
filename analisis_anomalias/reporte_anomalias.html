@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Watios — Reporte de Anomalias</title>
+<title>Watios - Reporte de Anomalias</title>
 <style>
   body { background:#0a0e17; color:#e2e8f0; font-family:'Share Tech Mono',monospace; padding:32px; }
   h1 { color:#00e5ff; font-size:1.4rem; margin-bottom:4px; }
@@ -22,24 +22,25 @@
 </style>
 </head>
 <body>
-<h1>Watios — Reporte de Anomalias</h1>
-<p class="meta">Generado: 2026-05-15 01:22:06 · Modelo: TensorFlow 2.21.0 · Ventana: 5 muestras</p>
+<h1>Watios - Reporte de Anomalias</h1>
+<p class="meta">Generado: 2026-05-18 03:29:21 - Analisis: variables base V/I; derivadas informativas</p>
 
 <div class="kpi-row">
-  <div class="kpi"><div class="kpi-val">13</div><div class="kpi-lbl">Total lecturas</div></div>
-  <div class="kpi kpi-anom"><div class="kpi-val">8</div><div class="kpi-lbl">Anomalias detectadas</div></div>
-  <div class="kpi"><div class="kpi-val">100.0%</div><div class="kpi-lbl">Tasa de anomalias</div></div>
-  <div class="kpi"><div class="kpi-val">0.938491</div><div class="kpi-lbl">Umbral MSE (Z>2.0)</div></div>
+  <div class="kpi"><div class="kpi-val">34</div><div class="kpi-lbl">Total lecturas</div></div>
+  <div class="kpi kpi-anom"><div class="kpi-val">19</div><div class="kpi-lbl">Anomalias detectadas</div></div>
+  <div class="kpi"><div class="kpi-val">55.9%</div><div class="kpi-lbl">Tasa de anomalias</div></div>
+  <div class="kpi"><div class="kpi-val">0</div><div class="kpi-lbl">Desviacion permitida</div></div>
   <div class="kpi"><div class="kpi-val">99.0V-121.0V</div><div class="kpi-lbl">Umbral Voltaje fijo</div></div>
-  <div class="kpi"><div class="kpi-val">50</div><div class="kpi-lbl">Epocas entrenamiento</div></div>
+  <div class="kpi"><div class="kpi-val">2</div><div class="kpi-lbl">Rangos de alerta</div></div>
 </div>
 
-<p style="color:#4a5568;font-size:0.8rem">(Curva de entrenamiento no disponible — modelo pre-entrenado cargado)</p>
+<h2>Rangos de alerta usados</h2>
+<table class="tabla"><thead><tr><th>Variable</th><th>Min</th><th>Max</th><th>Unidad</th><th>Fuente</th></tr></thead><tbody><tr><td>vrms</td><td>99</td><td>121</td><td>V</td><td>umbral fijo 110V +/-10%</td></tr><tr><td>irms</td><td>0.0562</td><td>0.0833</td><td>A</td><td>datos_entrenamiento.csv</td></tr></tbody></table>
 
 <h2>Series de tiempo con anomalias marcadas</h2>
 <img src="graficas_anomalias.png" alt="Anomalias">
 
-<h2>Filas anomalas (ordenadas por error descendente)</h2>
+<h2>Filas anomalas (ordenadas por desviacion descendente)</h2>
 <table class="dataframe tabla">
   <thead>
     <tr style="text-align: right;">
@@ -49,89 +50,208 @@
       <th>power</th>
       <th>kwh</th>
       <th>joule</th>
-      <th>error</th>
+      <th>desviacion_rango</th>
+      <th>variables</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <td>2026-05-15 01:21:10</td>
-      <td>4.53000</td>
-      <td>0.06500</td>
-      <td>0.32020</td>
-      <td>0.02925</td>
-      <td>0.00028</td>
-      <td>5611.98681</td>
-    </tr>
-    <tr>
-      <td>2026-05-15 01:21:00</td>
-      <td>2.94000</td>
-      <td>0.05100</td>
-      <td>0.15250</td>
-      <td>0.02925</td>
-      <td>0.00017</td>
-      <td>5610.72456</td>
-    </tr>
-    <tr>
-      <td>2026-05-15 01:20:50</td>
-      <td>2.55000</td>
-      <td>0.04320</td>
-      <td>0.11270</td>
-      <td>0.02925</td>
-      <td>0.00012</td>
-      <td>5598.72004</td>
-    </tr>
-    <tr>
-      <td>2026-05-15 01:21:21</td>
-      <td>5.27000</td>
-      <td>0.05440</td>
-      <td>0.28030</td>
-      <td>0.02925</td>
-      <td>0.00020</td>
-      <td>5577.66080</td>
-    </tr>
-    <tr>
-      <td>2026-05-15 01:21:31</td>
-      <td>3.68000</td>
-      <td>0.04860</td>
-      <td>0.17680</td>
-      <td>0.02925</td>
-      <td>0.00016</td>
-      <td>5544.35381</td>
-    </tr>
-    <tr>
-      <td>2026-05-15 01:21:41</td>
-      <td>3.25000</td>
-      <td>0.05410</td>
-      <td>0.18430</td>
-      <td>0.02925</td>
-      <td>0.00019</td>
-      <td>5537.58986</td>
-    </tr>
-    <tr>
-      <td>2026-05-15 01:21:51</td>
-      <td>4.32000</td>
-      <td>0.04430</td>
-      <td>0.19980</td>
-      <td>0.02925</td>
+      <td>2026-05-18 03:29:17</td>
+      <td>2.69000</td>
+      <td>0.04510</td>
+      <td>0.11970</td>
+      <td>0.05284</td>
       <td>0.00013</td>
-      <td>5520.84191</td>
+      <td>4.37773</td>
+      <td>vrms, irms</td>
     </tr>
     <tr>
-      <td>2026-05-15 01:22:02</td>
-      <td>3.74000</td>
-      <td>0.04250</td>
-      <td>0.16140</td>
-      <td>0.02925</td>
-      <td>0.00012</td>
-      <td>5496.00187</td>
+      <td>2026-05-18 03:29:07</td>
+      <td>2.84000</td>
+      <td>0.02750</td>
+      <td>0.07850</td>
+      <td>0.05284</td>
+      <td>0.00005</td>
+      <td>4.37091</td>
+      <td>vrms, irms</td>
+    </tr>
+    <tr>
+      <td>2026-05-18 03:28:57</td>
+      <td>2.85000</td>
+      <td>0.04490</td>
+      <td>0.12150</td>
+      <td>0.05284</td>
+      <td>0.00013</td>
+      <td>4.37045</td>
+      <td>vrms, irms</td>
+    </tr>
+    <tr>
+      <td>2026-05-18 03:26:45</td>
+      <td>3.04000</td>
+      <td>0.05050</td>
+      <td>0.15290</td>
+      <td>0.05279</td>
+      <td>0.00017</td>
+      <td>4.36182</td>
+      <td>vrms, irms</td>
+    </tr>
+    <tr>
+      <td>2026-05-18 03:28:47</td>
+      <td>3.22000</td>
+      <td>0.04610</td>
+      <td>0.14640</td>
+      <td>0.05284</td>
+      <td>0.00014</td>
+      <td>4.35364</td>
+      <td>vrms, irms</td>
+    </tr>
+    <tr>
+      <td>2026-05-18 03:26:35</td>
+      <td>3.53000</td>
+      <td>0.04900</td>
+      <td>0.17880</td>
+      <td>0.05279</td>
+      <td>0.00016</td>
+      <td>4.33955</td>
+      <td>vrms, irms</td>
+    </tr>
+    <tr>
+      <td>2026-05-18 03:27:46</td>
+      <td>3.91000</td>
+      <td>0.03390</td>
+      <td>0.13090</td>
+      <td>0.05283</td>
+      <td>0.00008</td>
+      <td>4.32227</td>
+      <td>vrms, irms</td>
+    </tr>
+    <tr>
+      <td>2026-05-18 03:26:24</td>
+      <td>4.57000</td>
+      <td>0.04850</td>
+      <td>0.21300</td>
+      <td>0.05279</td>
+      <td>0.00016</td>
+      <td>4.29227</td>
+      <td>vrms, irms</td>
+    </tr>
+    <tr>
+      <td>2026-05-18 03:28:26</td>
+      <td>4.81000</td>
+      <td>0.03450</td>
+      <td>0.15970</td>
+      <td>0.05284</td>
+      <td>0.00008</td>
+      <td>4.28136</td>
+      <td>vrms, irms</td>
+    </tr>
+    <tr>
+      <td>2026-05-18 03:28:37</td>
+      <td>4.87000</td>
+      <td>0.03600</td>
+      <td>0.17270</td>
+      <td>0.05284</td>
+      <td>0.00009</td>
+      <td>4.27864</td>
+      <td>vrms, irms</td>
+    </tr>
+    <tr>
+      <td>2026-05-18 03:27:56</td>
+      <td>4.90000</td>
+      <td>0.04430</td>
+      <td>0.22210</td>
+      <td>0.05283</td>
+      <td>0.00013</td>
+      <td>4.27727</td>
+      <td>vrms, irms</td>
+    </tr>
+    <tr>
+      <td>2026-05-18 03:28:06</td>
+      <td>7.04000</td>
+      <td>0.03740</td>
+      <td>0.26790</td>
+      <td>0.05283</td>
+      <td>0.00009</td>
+      <td>4.18000</td>
+      <td>vrms, irms</td>
+    </tr>
+    <tr>
+      <td>2026-05-18 03:28:16</td>
+      <td>7.75000</td>
+      <td>0.03440</td>
+      <td>0.26100</td>
+      <td>0.05283</td>
+      <td>0.00008</td>
+      <td>4.14773</td>
+      <td>vrms, irms</td>
+    </tr>
+    <tr>
+      <td>2026-05-18 03:27:36</td>
+      <td>8.65000</td>
+      <td>0.04010</td>
+      <td>0.36670</td>
+      <td>0.05283</td>
+      <td>0.00011</td>
+      <td>4.10682</td>
+      <td>vrms, irms</td>
+    </tr>
+    <tr>
+      <td>2026-05-18 03:27:25</td>
+      <td>31.32000</td>
+      <td>0.03280</td>
+      <td>1.02180</td>
+      <td>0.05283</td>
+      <td>0.00007</td>
+      <td>3.07636</td>
+      <td>vrms, irms</td>
+    </tr>
+    <tr>
+      <td>2026-05-18 03:27:15</td>
+      <td>58.92000</td>
+      <td>0.05490</td>
+      <td>3.24020</td>
+      <td>0.05283</td>
+      <td>0.00020</td>
+      <td>1.82182</td>
+      <td>vrms, irms</td>
+    </tr>
+    <tr>
+      <td>2026-05-18 03:26:55</td>
+      <td>65.17000</td>
+      <td>0.07010</td>
+      <td>5.28980</td>
+      <td>0.05281</td>
+      <td>0.00032</td>
+      <td>1.53773</td>
+      <td>vrms</td>
+    </tr>
+    <tr>
+      <td>2026-05-18 03:26:14</td>
+      <td>70.09000</td>
+      <td>0.06120</td>
+      <td>4.92060</td>
+      <td>0.05279</td>
+      <td>0.00025</td>
+      <td>1.31409</td>
+      <td>vrms</td>
+    </tr>
+    <tr>
+      <td>2026-05-18 03:27:05</td>
+      <td>82.79000</td>
+      <td>0.05120</td>
+      <td>4.25500</td>
+      <td>0.05282</td>
+      <td>0.00017</td>
+      <td>0.73682</td>
+      <td>vrms, irms</td>
     </tr>
   </tbody>
 </table>
 
 <div class="footer">
-  Features: vrms, irms, power, kwh, P. Joule (W) ·
-  Encoder: Z-score (LSTM) + Umbral fijo Vrms 99.0V-121.0V · Z-score LSTM: 2.0 ·
-  Arquitectura: LSTM(32) -> LSTM(8) -> RepeatVector -> LSTM(8) -> LSTM(32) -> Dense
+  Variables de alerta: Vrms e Irms -
+  Vrms fijo 99.0V-121.0V - Irms desde datos_entrenamiento.csv -
+  Power, kWh y P. Joule quedan como derivadas informativas
 </div>
 </body>
 </html>

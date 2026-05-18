@@ -1,348 +1,1021 @@
 WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
-I0000 00:00:1778825992.504013   25584 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+I0000 00:00:1779092207.720159   29932 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
 WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
-I0000 00:00:1778825995.724767   25584 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
-I0000 00:00:1778826056.630056   25584 cpu_feature_guard.cc:227] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
-To enable the following instructions: SSE3 SSE4.1 SSE4.2 AVX AVX2 AVX_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
-WARNING:tensorflow:TensorFlow GPU support is not available on native Windows for TensorFlow >= 2.11. Even if CUDA/cuDNN are installed, GPU will not be used. Please use WSL2 or the TensorFlow-DirectML plugin.
+I0000 00:00:1779092210.145796   29932 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
 Iniciando Modulo ML en modo continuo...
 =======================================================
-  Analisis ML a las 01:20:41
+  Analisis por rangos a las 03:17:35
 =======================================================
 Descargando datos desde el servidor (GET /data)...
-  5 filas cargadas (2026-05-15 01:19:59 -> 2026-05-15 01:20:40)
-Necesitas al menos 6 filas. Tienes 5.
-=======================================================
-  Analisis ML a las 01:20:56
-=======================================================
-Descargando datos desde el servidor (GET /data)...
-  6 filas cargadas (2026-05-15 01:19:59 -> 2026-05-15 01:20:50)
-  Datos de entrenamiento editables: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\datos_entrenamiento.csv
-Construyendo y entrenando Autoencoder LSTM...
-Model: "autoencoder_lstm"
-+--------------------------------------------------------------------------+
-| Layer (type)                    | Output Shape           |       Param # |
-|---------------------------------+------------------------+---------------|
-| input_layer (InputLayer)        | (None, 5, 5)           |             0 |
-|---------------------------------+------------------------+---------------|
-| lstm (LSTM)                     | (None, 5, 32)          |         4,864 |
-|---------------------------------+------------------------+---------------|
-| lstm_1 (LSTM)                   | (None, 8)              |         1,312 |
-|---------------------------------+------------------------+---------------|
-| repeat_vector (RepeatVector)    | (None, 5, 8)           |             0 |
-|---------------------------------+------------------------+---------------|
-| lstm_2 (LSTM)                   | (None, 5, 8)           |           544 |
-|---------------------------------+------------------------+---------------|
-| lstm_3 (LSTM)                   | (None, 5, 32)          |         5,248 |
-|---------------------------------+------------------------+---------------|
-| time_distributed                | (None, 5, 5)           |           165 |
-| (TimeDistributed)               |                        |               |
-+--------------------------------------------------------------------------+
- Total params: 12,133 (47.39 KB)
- Trainable params: 12,133 (47.39 KB)
- Non-trainable params: 0 (0.00 B)
-Epoch 1/50
-E0000 00:00:1778826060.421329   25584 util.cc:131] oneDNN supports DT_INT32 only on platforms with AVX-512. Falling back to the default Eigen-based implementation if present.
-
-[1m1/4[0m [32m=====[0m[37m===============[0m [1m10s[0m 4s/step - loss: 0.9053
-[1m4/4[0m [32m====================[0m[37m[0m [1m4s[0m 239ms/step - loss: 0.9442 - val_loss: 0.9830 - learning_rate: 0.0010
-Epoch 2/50
-
-[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 30ms/step - loss: 0.8955
-[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 31ms/step - loss: 0.9372 - val_loss: 0.9828 - learning_rate: 0.0010
-Epoch 3/50
-
-[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 28ms/step - loss: 0.8910
-[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 29ms/step - loss: 0.9328 - val_loss: 0.9820 - learning_rate: 0.0010
-Epoch 4/50
-
-[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 28ms/step - loss: 0.8871
-[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 26ms/step - loss: 0.9287 - val_loss: 0.9805 - learning_rate: 0.0010
-Epoch 5/50
-
-[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 25ms/step - loss: 0.8830
-[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 23ms/step - loss: 0.9238 - val_loss: 0.9775 - learning_rate: 0.0010
-Epoch 6/50
-
-[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 26ms/step - loss: 0.8780
-[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 24ms/step - loss: 0.9173 - val_loss: 0.9725 - learning_rate: 0.0010
-Epoch 7/50
-
-[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 23ms/step - loss: 0.8715
-[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 26ms/step - loss: 0.9084 - val_loss: 0.9645 - learning_rate: 0.0010
-Epoch 8/50
-
-[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 31ms/step - loss: 0.8630
-[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 23ms/step - loss: 0.8964 - val_loss: 0.9529 - learning_rate: 0.0010
-Epoch 9/50
-
-[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 90ms/step - loss: 0.8517
-[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 32ms/step - loss: 0.8803 - val_loss: 0.9366 - learning_rate: 0.0010
-Epoch 10/50
-
-[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 30ms/step - loss: 0.8369
-[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 62ms/step - loss: 0.8592 - val_loss: 0.9146 - learning_rate: 0.0010
-Epoch 11/50
-
-[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 30ms/step - loss: 0.8180
-[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 25ms/step - loss: 0.8321 - val_loss: 0.8859 - learning_rate: 0.0010
-Epoch 12/50
-
-[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 28ms/step - loss: 0.7949
-[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 23ms/step - loss: 0.7988 - val_loss: 0.8499 - learning_rate: 0.0010
-Epoch 13/50
-
-[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 24ms/step - loss: 0.7689
-[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 22ms/step - loss: 0.7604 - val_loss: 0.8067 - learning_rate: 0.0010
-Epoch 14/50
-
-[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 27ms/step - loss: 0.7435
-[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 22ms/step - loss: 0.7199 - val_loss: 0.7571 - learning_rate: 0.0010
-Epoch 15/50
-
-[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 24ms/step - loss: 0.7245
-[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 27ms/step - loss: 0.6825 - val_loss: 0.7037 - learning_rate: 0.0010
-Epoch 16/50
-
-[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 29ms/step - loss: 0.7172
-[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 23ms/step - loss: 0.6529 - val_loss: 0.6498 - learning_rate: 0.0010
-Epoch 17/50
-
-[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 23ms/step - loss: 0.7194
-[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 21ms/step - loss: 0.6309 - val_loss: 0.5988 - learning_rate: 0.0010
-Epoch 18/50
-
-[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 21ms/step - loss: 0.7215
-[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 21ms/step - loss: 0.6122 - val_loss: 0.5530 - learning_rate: 0.0010
-Epoch 19/50
-
-[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 33ms/step - loss: 0.7177
-[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 27ms/step - loss: 0.5944 - val_loss: 0.5138 - learning_rate: 0.0010
-Epoch 20/50
-
-[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 35ms/step - loss: 0.7095
-[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 48ms/step - loss: 0.5788 - val_loss: 0.4825 - learning_rate: 0.0010
-Epoch 21/50
-
-[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 46ms/step - loss: 0.7004
-[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 32ms/step - loss: 0.5669 - val_loss: 0.4592 - learning_rate: 0.0010
-Epoch 22/50
-
-[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 40ms/step - loss: 0.6925
-[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 30ms/step - loss: 0.5586 - val_loss: 0.4429 - learning_rate: 0.0010
-Epoch 23/50
-
-[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 30ms/step - loss: 0.6860
-[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 29ms/step - loss: 0.5529 - val_loss: 0.4314 - learning_rate: 0.0010
-Epoch 24/50
-
-[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 34ms/step - loss: 0.6805
-[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 32ms/step - loss: 0.5481 - val_loss: 0.4220 - learning_rate: 0.0010
-Epoch 25/50
-
-[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 26ms/step - loss: 0.6755
-[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 28ms/step - loss: 0.5433 - val_loss: 0.4137 - learning_rate: 0.0010
-Epoch 26/50
-
-[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 30ms/step - loss: 0.6710
-[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 24ms/step - loss: 0.5384 - val_loss: 0.4065 - learning_rate: 0.0010
-Epoch 27/50
-
-[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 26ms/step - loss: 0.6666
-[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 20ms/step - loss: 0.5335 - val_loss: 0.4003 - learning_rate: 0.0010
-Epoch 28/50
-
-[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 31ms/step - loss: 0.6626
-[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 29ms/step - loss: 0.5288 - val_loss: 0.3950 - learning_rate: 0.0010
-Epoch 29/50
-
-[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 25ms/step - loss: 0.6587
-[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 24ms/step - loss: 0.5242 - val_loss: 0.3903 - learning_rate: 0.0010
-Epoch 30/50
-
-[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 27ms/step - loss: 0.6549
-[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 24ms/step - loss: 0.5197 - val_loss: 0.3859 - learning_rate: 0.0010
-Epoch 31/50
-
-[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 27ms/step - loss: 0.6511
-[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 25ms/step - loss: 0.5152 - val_loss: 0.3816 - learning_rate: 0.0010
-Epoch 32/50
-
-[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 23ms/step - loss: 0.6474
-[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 25ms/step - loss: 0.5107 - val_loss: 0.3774 - learning_rate: 0.0010
-Epoch 33/50
-
-[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 43ms/step - loss: 0.6436
-[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 29ms/step - loss: 0.5062 - val_loss: 0.3734 - learning_rate: 0.0010
-Epoch 34/50
-
-[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 25ms/step - loss: 0.6399
-[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 22ms/step - loss: 0.5017 - val_loss: 0.3696 - learning_rate: 0.0010
-Epoch 35/50
-
-[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 26ms/step - loss: 0.6363
-[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 27ms/step - loss: 0.4973 - val_loss: 0.3661 - learning_rate: 0.0010
-Epoch 36/50
-
-[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 26ms/step - loss: 0.6327
-[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 21ms/step - loss: 0.4929 - val_loss: 0.3629 - learning_rate: 0.0010
-Epoch 37/50
-
-[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 26ms/step - loss: 0.6293
-[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 20ms/step - loss: 0.4886 - val_loss: 0.3599 - learning_rate: 0.0010
-Epoch 38/50
-
-[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 20ms/step - loss: 0.6258
-[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 24ms/step - loss: 0.4842 - val_loss: 0.3570 - learning_rate: 0.0010
-Epoch 39/50
-
-[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 28ms/step - loss: 0.6225
-[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 27ms/step - loss: 0.4799 - val_loss: 0.3544 - learning_rate: 0.0010
-Epoch 40/50
-
-[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 32ms/step - loss: 0.6191
-[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 27ms/step - loss: 0.4756 - val_loss: 0.3518 - learning_rate: 0.0010
-Epoch 41/50
-
-[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 34ms/step - loss: 0.6157
-[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 21ms/step - loss: 0.4713 - val_loss: 0.3492 - learning_rate: 0.0010
-Epoch 42/50
-
-[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 31ms/step - loss: 0.6122
-[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 30ms/step - loss: 0.4670 - val_loss: 0.3467 - learning_rate: 0.0010
-Epoch 43/50
-
-[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 36ms/step - loss: 0.6086
-[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 27ms/step - loss: 0.4627 - val_loss: 0.3441 - learning_rate: 0.0010
-Epoch 44/50
-
-[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 36ms/step - loss: 0.6048
-[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 31ms/step - loss: 0.4585 - val_loss: 0.3414 - learning_rate: 0.0010
-Epoch 45/50
-
-[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 33ms/step - loss: 0.6009
-[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 30ms/step - loss: 0.4541 - val_loss: 0.3387 - learning_rate: 0.0010
-Epoch 46/50
-
-[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 81ms/step - loss: 0.5968
-[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 24ms/step - loss: 0.4498 - val_loss: 0.3360 - learning_rate: 0.0010
-Epoch 47/50
-
-[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 32ms/step - loss: 0.5925
-[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 27ms/step - loss: 0.4454 - val_loss: 0.3331 - learning_rate: 0.0010
-Epoch 48/50
-
-[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 26ms/step - loss: 0.5880
-[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 28ms/step - loss: 0.4410 - val_loss: 0.3303 - learning_rate: 0.0010
-Epoch 49/50
-
-[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 28ms/step - loss: 0.5832
-[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 26ms/step - loss: 0.4366 - val_loss: 0.3275 - learning_rate: 0.0010
-Epoch 50/50
-
-[1m1/4[0m [32m=====[0m[37m===============[0m [1m0s[0m 34ms/step - loss: 0.5782
-[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 28ms/step - loss: 0.4321 - val_loss: 0.3246 - learning_rate: 0.0010
-WARNING:tensorflow:5 out of the last 9 calls to <function TensorFlowTrainer.make_predict_function.<locals>.one_step_on_data_distributed at 0x00000240F3FF3920> triggered tf.function retracing. Tracing is expensive and the excessive number of tracings could be due to (1) creating @tf.function repeatedly in a loop, (2) passing tensors with different shapes, (3) passing Python objects instead of tensors. For (1), please define your @tf.function outside of the loop. For (2), @tf.function has reduce_retracing=True option that can avoid unnecessary retracing. For (3), please refer to https://www.tensorflow.org/guide/function#controlling_retracing and https://www.tensorflow.org/api_docs/python/tf/function for  more details.
-WARNING:tensorflow:6 out of the last 11 calls to <function TensorFlowTrainer.make_predict_function.<locals>.one_step_on_data_distributed at 0x00000240F3FF3920> triggered tf.function retracing. Tracing is expensive and the excessive number of tracings could be due to (1) creating @tf.function repeatedly in a loop, (2) passing tensors with different shapes, (3) passing Python objects instead of tensors. For (1), please define your @tf.function outside of the loop. For (2), @tf.function has reduce_retracing=True option that can avoid unnecessary retracing. For (3), please refer to https://www.tensorflow.org/guide/function#controlling_retracing and https://www.tensorflow.org/api_docs/python/tf/function for  more details.
-  Modelo y scaler guardados en 'C:\Users\sebas\Downloads\INTENTO2\modelo_autoencoder/'
-  Forma de entrada: (1, 5, 5)  (muestras, ventana, features)
-Calculando errores de reconstruccion...
-  Umbral Z-score LSTM : 2.0  (MSE equiv: 0.938491)
-  Anomalias LSTM:  1
-  Anomalias Vrms (fuera de 99.0V-121.0V): 1
-  Anomalias totales: 1 / 1 (100.0%)
+  5 filas cargadas (2026-05-18 03:16:50 -> 2026-05-18 03:17:32)
+  Datos de referencia editables: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\datos_entrenamiento.csv
+  Rangos activos:
+    vrms: 99 - 121 V
+    irms: 0.0562 - 0.0833 A
+    power: 5.9722 - 8.0344 W
+    kwh: 0.001357 - 0.003642 kWh
+    joule: 0.208457 - 0.457967 W
+  Anomalias totales: 5 / 5 (100.0%)
 
   Primeras 5 anomalias:
-    [2026-05-15 01:20:50] Vrms=2.55V Irms=0.0432A Power=0.1127W
+    [2026-05-18 03:16:50] vrms, power, kwh, joule
+    [2026-05-18 03:17:01] vrms, power, kwh, joule
+    [2026-05-18 03:17:11] vrms, power, kwh, joule
+    [2026-05-18 03:17:21] vrms, power, kwh, joule
+    [2026-05-18 03:17:32] vrms, power, kwh, joule
 Generando reporte HTML...
   Reporte HTML actualizado.
-  Conclusiones guardadas en: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\conclusiones_20260515_012115.json
+  Conclusiones guardadas en: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\conclusiones_20260518_031737.json
   Resultados enviados al servidor (WebSocket -> dashboard).
 
 Analisis finalizado.
 =======================================================
-  Analisis ML a las 01:21:30
+  Analisis por rangos a las 03:17:52
 =======================================================
 Descargando datos desde el servidor (GET /data)...
-  9 filas cargadas (2026-05-15 01:19:59 -> 2026-05-15 01:21:21)
-  Datos de entrenamiento editables: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\datos_entrenamiento.csv
-Cargando modelo y scaler desde 'C:\Users\sebas\Downloads\INTENTO2\modelo_autoencoder\model.keras'...
-  (Para re-entrenar, elimina modelo_autoencoder/ y conserva analisis_anomalias/datos_entrenamiento.csv)
-  Forma de entrada: (4, 5, 5)  (muestras, ventana, features)
-Calculando errores de reconstruccion...
-  Umbral Z-score LSTM : 2.0  (MSE equiv: 0.938491)
-  Anomalias LSTM:  4
-  Anomalias Vrms (fuera de 99.0V-121.0V): 4
-  Anomalias totales: 4 / 4 (100.0%)
-
-  Primeras 5 anomalias:
-    [2026-05-15 01:20:50] Vrms=2.55V Irms=0.0432A Power=0.1127W
-    [2026-05-15 01:21:00] Vrms=2.94V Irms=0.0510A Power=0.1525W
-    [2026-05-15 01:21:10] Vrms=4.53V Irms=0.0650A Power=0.3202W
-    [2026-05-15 01:21:21] Vrms=5.27V Irms=0.0544A Power=0.2803W
-Generando reporte HTML...
-  Reporte HTML actualizado.
-  Conclusiones guardadas en: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\conclusiones_20260515_012132.json
-  Resultados enviados al servidor (WebSocket -> dashboard).
-
-Analisis finalizado.
-=======================================================
-  Analisis ML a las 01:21:47
-=======================================================
-Descargando datos desde el servidor (GET /data)...
-  11 filas cargadas (2026-05-15 01:19:59 -> 2026-05-15 01:21:41)
-  Datos de entrenamiento editables: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\datos_entrenamiento.csv
-Cargando modelo y scaler desde 'C:\Users\sebas\Downloads\INTENTO2\modelo_autoencoder\model.keras'...
-  (Para re-entrenar, elimina modelo_autoencoder/ y conserva analisis_anomalias/datos_entrenamiento.csv)
-  Forma de entrada: (6, 5, 5)  (muestras, ventana, features)
-Calculando errores de reconstruccion...
-  Umbral Z-score LSTM : 2.0  (MSE equiv: 0.938491)
-  Anomalias LSTM:  6
-  Anomalias Vrms (fuera de 99.0V-121.0V): 6
+  6 filas cargadas (2026-05-18 03:16:50 -> 2026-05-18 03:17:42)
+  Datos de referencia editables: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\datos_entrenamiento.csv
+  Rangos activos:
+    vrms: 99 - 121 V
+    irms: 0.0562 - 0.0833 A
+    power: 5.9722 - 8.0344 W
+    kwh: 0.001357 - 0.003642 kWh
+    joule: 0.208457 - 0.457967 W
   Anomalias totales: 6 / 6 (100.0%)
 
   Primeras 5 anomalias:
-    [2026-05-15 01:20:50] Vrms=2.55V Irms=0.0432A Power=0.1127W
-    [2026-05-15 01:21:00] Vrms=2.94V Irms=0.0510A Power=0.1525W
-    [2026-05-15 01:21:10] Vrms=4.53V Irms=0.0650A Power=0.3202W
-    [2026-05-15 01:21:21] Vrms=5.27V Irms=0.0544A Power=0.2803W
-    [2026-05-15 01:21:31] Vrms=3.68V Irms=0.0486A Power=0.1768W
+    [2026-05-18 03:16:50] vrms, power, kwh, joule
+    [2026-05-18 03:17:01] vrms, power, kwh, joule
+    [2026-05-18 03:17:11] vrms, power, kwh, joule
+    [2026-05-18 03:17:21] vrms, power, kwh, joule
+    [2026-05-18 03:17:32] vrms, power, kwh, joule
 Generando reporte HTML...
   Reporte HTML actualizado.
-  Conclusiones guardadas en: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\conclusiones_20260515_012149.json
+  Conclusiones guardadas en: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\conclusiones_20260518_031753.json
   Resultados enviados al servidor (WebSocket -> dashboard).
 
 Analisis finalizado.
 =======================================================
-  Analisis ML a las 01:22:04
+  Analisis por rangos a las 03:18:08
 =======================================================
 Descargando datos desde el servidor (GET /data)...
-  13 filas cargadas (2026-05-15 01:19:59 -> 2026-05-15 01:22:02)
-  Datos de entrenamiento editables: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\datos_entrenamiento.csv
-Cargando modelo y scaler desde 'C:\Users\sebas\Downloads\INTENTO2\modelo_autoencoder\model.keras'...
-  (Para re-entrenar, elimina modelo_autoencoder/ y conserva analisis_anomalias/datos_entrenamiento.csv)
-  Forma de entrada: (8, 5, 5)  (muestras, ventana, features)
-Calculando errores de reconstruccion...
-  Umbral Z-score LSTM : 2.0  (MSE equiv: 0.938491)
-  Anomalias LSTM:  8
-  Anomalias Vrms (fuera de 99.0V-121.0V): 8
+  8 filas cargadas (2026-05-18 03:16:50 -> 2026-05-18 03:18:03)
+  Datos de referencia editables: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\datos_entrenamiento.csv
+  Rangos activos:
+    vrms: 99 - 121 V
+    irms: 0.0562 - 0.0833 A
+    power: 5.9722 - 8.0344 W
+    kwh: 0.001357 - 0.003642 kWh
+    joule: 0.208457 - 0.457967 W
   Anomalias totales: 8 / 8 (100.0%)
 
   Primeras 5 anomalias:
-    [2026-05-15 01:20:50] Vrms=2.55V Irms=0.0432A Power=0.1127W
-    [2026-05-15 01:21:00] Vrms=2.94V Irms=0.0510A Power=0.1525W
-    [2026-05-15 01:21:10] Vrms=4.53V Irms=0.0650A Power=0.3202W
-    [2026-05-15 01:21:21] Vrms=5.27V Irms=0.0544A Power=0.2803W
-    [2026-05-15 01:21:31] Vrms=3.68V Irms=0.0486A Power=0.1768W
+    [2026-05-18 03:16:50] vrms, power, kwh, joule
+    [2026-05-18 03:17:01] vrms, power, kwh, joule
+    [2026-05-18 03:17:11] vrms, power, kwh, joule
+    [2026-05-18 03:17:21] vrms, power, kwh, joule
+    [2026-05-18 03:17:32] vrms, power, kwh, joule
 Generando reporte HTML...
   Reporte HTML actualizado.
-  Conclusiones guardadas en: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\conclusiones_20260515_012206.json
+  Conclusiones guardadas en: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\conclusiones_20260518_031809.json
+  Resultados enviados al servidor (WebSocket -> dashboard).
+
+Analisis finalizado.
+=======================================================
+  Analisis por rangos a las 03:18:24
+=======================================================
+Descargando datos desde el servidor (GET /data)...
+  10 filas cargadas (2026-05-18 03:16:50 -> 2026-05-18 03:18:23)
+  Datos de referencia editables: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\datos_entrenamiento.csv
+  Rangos activos:
+    vrms: 99 - 121 V
+    irms: 0.0562 - 0.0833 A
+    power: 5.9722 - 8.0344 W
+    kwh: 0.001357 - 0.003642 kWh
+    joule: 0.208457 - 0.457967 W
+  Anomalias totales: 10 / 10 (100.0%)
+
+  Primeras 5 anomalias:
+    [2026-05-18 03:16:50] vrms, power, kwh, joule
+    [2026-05-18 03:17:01] vrms, power, kwh, joule
+    [2026-05-18 03:17:11] vrms, power, kwh, joule
+    [2026-05-18 03:17:21] vrms, power, kwh, joule
+    [2026-05-18 03:17:32] vrms, power, kwh, joule
+Generando reporte HTML...
+  Reporte HTML actualizado.
+  Conclusiones guardadas en: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\conclusiones_20260518_031825.json
+  Resultados enviados al servidor (WebSocket -> dashboard).
+
+Analisis finalizado.
+=======================================================
+  Analisis por rangos a las 03:18:40
+=======================================================
+Descargando datos desde el servidor (GET /data)...
+  11 filas cargadas (2026-05-18 03:16:50 -> 2026-05-18 03:18:33)
+  Datos de referencia editables: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\datos_entrenamiento.csv
+  Rangos activos:
+    vrms: 99 - 121 V
+    irms: 0.0562 - 0.0833 A
+    power: 5.9722 - 8.0344 W
+    kwh: 0.001357 - 0.003642 kWh
+    joule: 0.208457 - 0.457967 W
+  Anomalias totales: 11 / 11 (100.0%)
+
+  Primeras 5 anomalias:
+    [2026-05-18 03:16:50] vrms, power, kwh, joule
+    [2026-05-18 03:17:01] vrms, power, kwh, joule
+    [2026-05-18 03:17:11] vrms, power, kwh, joule
+    [2026-05-18 03:17:21] vrms, power, kwh, joule
+    [2026-05-18 03:17:32] vrms, power, kwh, joule
+Generando reporte HTML...
+  Reporte HTML actualizado.
+  Conclusiones guardadas en: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\conclusiones_20260518_031841.json
+  Resultados enviados al servidor (WebSocket -> dashboard).
+
+Analisis finalizado.
+=======================================================
+  Analisis por rangos a las 03:18:56
+=======================================================
+Descargando datos desde el servidor (GET /data)...
+  13 filas cargadas (2026-05-18 03:16:50 -> 2026-05-18 03:18:54)
+  Datos de referencia editables: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\datos_entrenamiento.csv
+  Rangos activos:
+    vrms: 99 - 121 V
+    irms: 0.0562 - 0.0833 A
+    power: 5.9722 - 8.0344 W
+    kwh: 0.001357 - 0.003642 kWh
+    joule: 0.208457 - 0.457967 W
+  Anomalias totales: 13 / 13 (100.0%)
+
+  Primeras 5 anomalias:
+    [2026-05-18 03:16:50] vrms, power, kwh, joule
+    [2026-05-18 03:17:01] vrms, power, kwh, joule
+    [2026-05-18 03:17:11] vrms, power, kwh, joule
+    [2026-05-18 03:17:21] vrms, power, kwh, joule
+    [2026-05-18 03:17:32] vrms, power, kwh, joule
+Generando reporte HTML...
+  Reporte HTML actualizado.
+  Conclusiones guardadas en: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\conclusiones_20260518_031857.json
+  Resultados enviados al servidor (WebSocket -> dashboard).
+
+Analisis finalizado.
+=======================================================
+  Analisis por rangos a las 03:19:12
+=======================================================
+Descargando datos desde el servidor (GET /data)...
+  14 filas cargadas (2026-05-18 03:16:50 -> 2026-05-18 03:19:04)
+  Datos de referencia editables: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\datos_entrenamiento.csv
+  Rangos activos:
+    vrms: 99 - 121 V
+    irms: 0.0562 - 0.0833 A
+    power: 5.9722 - 8.0344 W
+    kwh: 0.001357 - 0.003642 kWh
+    joule: 0.208457 - 0.457967 W
+  Anomalias totales: 14 / 14 (100.0%)
+
+  Primeras 5 anomalias:
+    [2026-05-18 03:16:50] vrms, power, kwh, joule
+    [2026-05-18 03:17:01] vrms, power, kwh, joule
+    [2026-05-18 03:17:11] vrms, power, kwh, joule
+    [2026-05-18 03:17:21] vrms, power, kwh, joule
+    [2026-05-18 03:17:32] vrms, power, kwh, joule
+Generando reporte HTML...
+  Reporte HTML actualizado.
+  Conclusiones guardadas en: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\conclusiones_20260518_031913.json
+  Resultados enviados al servidor (WebSocket -> dashboard).
+
+Analisis finalizado.
+=======================================================
+  Analisis por rangos a las 03:19:28
+=======================================================
+Descargando datos desde el servidor (GET /data)...
+  16 filas cargadas (2026-05-18 03:16:50 -> 2026-05-18 03:19:26)
+  Datos de referencia editables: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\datos_entrenamiento.csv
+  Rangos activos:
+    vrms: 99 - 121 V
+    irms: 0.0562 - 0.0833 A
+    power: 5.9722 - 8.0344 W
+    kwh: 0.001357 - 0.003642 kWh
+    joule: 0.208457 - 0.457967 W
+  Anomalias totales: 16 / 16 (100.0%)
+
+  Primeras 5 anomalias:
+    [2026-05-18 03:16:50] vrms, power, kwh, joule
+    [2026-05-18 03:17:01] vrms, power, kwh, joule
+    [2026-05-18 03:17:11] vrms, power, kwh, joule
+    [2026-05-18 03:17:21] vrms, power, kwh, joule
+    [2026-05-18 03:17:32] vrms, power, kwh, joule
+Generando reporte HTML...
+  Reporte HTML actualizado.
+  Conclusiones guardadas en: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\conclusiones_20260518_031929.json
+  Resultados enviados al servidor (WebSocket -> dashboard).
+
+Analisis finalizado.
+=======================================================
+  Analisis por rangos a las 03:19:44
+=======================================================
+Descargando datos desde el servidor (GET /data)...
+  17 filas cargadas (2026-05-18 03:16:50 -> 2026-05-18 03:19:36)
+  Datos de referencia editables: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\datos_entrenamiento.csv
+  Rangos activos:
+    vrms: 99 - 121 V
+    irms: 0.0562 - 0.0833 A
+    power: 5.9722 - 8.0344 W
+    kwh: 0.001357 - 0.003642 kWh
+    joule: 0.208457 - 0.457967 W
+  Anomalias totales: 17 / 17 (100.0%)
+
+  Primeras 5 anomalias:
+    [2026-05-18 03:16:50] vrms, power, kwh, joule
+    [2026-05-18 03:17:01] vrms, power, kwh, joule
+    [2026-05-18 03:17:11] vrms, power, kwh, joule
+    [2026-05-18 03:17:21] vrms, power, kwh, joule
+    [2026-05-18 03:17:32] vrms, power, kwh, joule
+Generando reporte HTML...
+  Reporte HTML actualizado.
+  Conclusiones guardadas en: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\conclusiones_20260518_031944.json
+  Resultados enviados al servidor (WebSocket -> dashboard).
+
+Analisis finalizado.
+=======================================================
+  Analisis por rangos a las 03:19:59
+=======================================================
+Descargando datos desde el servidor (GET /data)...
+  19 filas cargadas (2026-05-18 03:16:50 -> 2026-05-18 03:19:57)
+  Datos de referencia editables: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\datos_entrenamiento.csv
+  Rangos activos:
+    vrms: 99 - 121 V
+    irms: 0.0562 - 0.0833 A
+    power: 5.9722 - 8.0344 W
+    kwh: 0.001357 - 0.003642 kWh
+    joule: 0.208457 - 0.457967 W
+  Anomalias totales: 19 / 19 (100.0%)
+
+  Primeras 5 anomalias:
+    [2026-05-18 03:16:50] vrms, power, kwh, joule
+    [2026-05-18 03:17:01] vrms, power, kwh, joule
+    [2026-05-18 03:17:11] vrms, power, kwh, joule
+    [2026-05-18 03:17:21] vrms, power, kwh, joule
+    [2026-05-18 03:17:32] vrms, power, kwh, joule
+Generando reporte HTML...
+  Reporte HTML actualizado.
+  Conclusiones guardadas en: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\conclusiones_20260518_032000.json
+  Resultados enviados al servidor (WebSocket -> dashboard).
+
+Analisis finalizado.
+=======================================================
+  Analisis por rangos a las 03:20:15
+=======================================================
+Descargando datos desde el servidor (GET /data)...
+  20 filas cargadas (2026-05-18 03:16:50 -> 2026-05-18 03:20:08)
+  Datos de referencia editables: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\datos_entrenamiento.csv
+  Rangos activos:
+    vrms: 99 - 121 V
+    irms: 0.0562 - 0.0833 A
+    power: 5.9722 - 8.0344 W
+    kwh: 0.001357 - 0.003642 kWh
+    joule: 0.208457 - 0.457967 W
+  Anomalias totales: 20 / 20 (100.0%)
+
+  Primeras 5 anomalias:
+    [2026-05-18 03:16:50] vrms, power, kwh, joule
+    [2026-05-18 03:17:01] vrms, power, kwh, joule
+    [2026-05-18 03:17:11] vrms, power, kwh, joule
+    [2026-05-18 03:17:21] vrms, power, kwh, joule
+    [2026-05-18 03:17:32] vrms, power, kwh, joule
+Generando reporte HTML...
+  Reporte HTML actualizado.
+  Conclusiones guardadas en: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\conclusiones_20260518_032016.json
+  Resultados enviados al servidor (WebSocket -> dashboard).
+
+Analisis finalizado.
+=======================================================
+  Analisis por rangos a las 03:20:31
+=======================================================
+Descargando datos desde el servidor (GET /data)...
+  22 filas cargadas (2026-05-18 03:16:50 -> 2026-05-18 03:20:29)
+  Datos de referencia editables: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\datos_entrenamiento.csv
+  Rangos activos:
+    vrms: 99 - 121 V
+    irms: 0.0562 - 0.0833 A
+    power: 5.9722 - 8.0344 W
+    kwh: 0.001357 - 0.003642 kWh
+    joule: 0.208457 - 0.457967 W
+  Anomalias totales: 22 / 22 (100.0%)
+
+  Primeras 5 anomalias:
+    [2026-05-18 03:16:50] vrms, power, kwh, joule
+    [2026-05-18 03:17:01] vrms, power, kwh, joule
+    [2026-05-18 03:17:11] vrms, power, kwh, joule
+    [2026-05-18 03:17:21] vrms, power, kwh, joule
+    [2026-05-18 03:17:32] vrms, power, kwh, joule
+Generando reporte HTML...
+  Reporte HTML actualizado.
+  Conclusiones guardadas en: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\conclusiones_20260518_032032.json
+  Resultados enviados al servidor (WebSocket -> dashboard).
+
+Analisis finalizado.
+=======================================================
+  Analisis por rangos a las 03:20:47
+=======================================================
+Descargando datos desde el servidor (GET /data)...
+  23 filas cargadas (2026-05-18 03:16:50 -> 2026-05-18 03:20:40)
+  Datos de referencia editables: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\datos_entrenamiento.csv
+  Rangos activos:
+    vrms: 99 - 121 V
+    irms: 0.0562 - 0.0833 A
+    power: 5.9722 - 8.0344 W
+    kwh: 0.001357 - 0.003642 kWh
+    joule: 0.208457 - 0.457967 W
+  Anomalias totales: 23 / 23 (100.0%)
+
+  Primeras 5 anomalias:
+    [2026-05-18 03:16:50] vrms, power, kwh, joule
+    [2026-05-18 03:17:01] vrms, power, kwh, joule
+    [2026-05-18 03:17:11] vrms, power, kwh, joule
+    [2026-05-18 03:17:21] vrms, power, kwh, joule
+    [2026-05-18 03:17:32] vrms, power, kwh, joule
+Generando reporte HTML...
+  Reporte HTML actualizado.
+  Conclusiones guardadas en: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\conclusiones_20260518_032048.json
+  Resultados enviados al servidor (WebSocket -> dashboard).
+
+Analisis finalizado.
+=======================================================
+  Analisis por rangos a las 03:21:03
+=======================================================
+Descargando datos desde el servidor (GET /data)...
+  25 filas cargadas (2026-05-18 03:16:50 -> 2026-05-18 03:21:01)
+  Datos de referencia editables: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\datos_entrenamiento.csv
+  Rangos activos:
+    vrms: 99 - 121 V
+    irms: 0.0562 - 0.0833 A
+    power: 5.9722 - 8.0344 W
+    kwh: 0.001357 - 0.003642 kWh
+    joule: 0.208457 - 0.457967 W
+  Anomalias totales: 25 / 25 (100.0%)
+
+  Primeras 5 anomalias:
+    [2026-05-18 03:16:50] vrms, power, kwh, joule
+    [2026-05-18 03:17:01] vrms, power, kwh, joule
+    [2026-05-18 03:17:11] vrms, power, kwh, joule
+    [2026-05-18 03:17:21] vrms, power, kwh, joule
+    [2026-05-18 03:17:32] vrms, power, kwh, joule
+Generando reporte HTML...
+  Reporte HTML actualizado.
+  Conclusiones guardadas en: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\conclusiones_20260518_032103.json
+  Resultados enviados al servidor (WebSocket -> dashboard).
+
+Analisis finalizado.
+=======================================================
+  Analisis por rangos a las 03:21:18
+=======================================================
+Descargando datos desde el servidor (GET /data)...
+  26 filas cargadas (2026-05-18 03:16:50 -> 2026-05-18 03:21:12)
+  Datos de referencia editables: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\datos_entrenamiento.csv
+  Rangos activos:
+    vrms: 99 - 121 V
+    irms: 0.0562 - 0.0833 A
+    power: 5.9722 - 8.0344 W
+    kwh: 0.001357 - 0.003642 kWh
+    joule: 0.208457 - 0.457967 W
+  Anomalias totales: 26 / 26 (100.0%)
+
+  Primeras 5 anomalias:
+    [2026-05-18 03:16:50] vrms, power, kwh, joule
+    [2026-05-18 03:17:01] vrms, power, kwh, joule
+    [2026-05-18 03:17:11] vrms, power, kwh, joule
+    [2026-05-18 03:17:21] vrms, power, kwh, joule
+    [2026-05-18 03:17:32] vrms, power, kwh, joule
+Generando reporte HTML...
+  Reporte HTML actualizado.
+  Conclusiones guardadas en: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\conclusiones_20260518_032119.json
+  Resultados enviados al servidor (WebSocket -> dashboard).
+
+Analisis finalizado.
+=======================================================
+  Analisis por rangos a las 03:21:34
+=======================================================
+Descargando datos desde el servidor (GET /data)...
+  28 filas cargadas (2026-05-18 03:16:50 -> 2026-05-18 03:21:33)
+  Datos de referencia editables: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\datos_entrenamiento.csv
+  Rangos activos:
+    vrms: 99 - 121 V
+    irms: 0.0562 - 0.0833 A
+    power: 5.9722 - 8.0344 W
+    kwh: 0.001357 - 0.003642 kWh
+    joule: 0.208457 - 0.457967 W
+  Anomalias totales: 28 / 28 (100.0%)
+
+  Primeras 5 anomalias:
+    [2026-05-18 03:16:50] vrms, power, kwh, joule
+    [2026-05-18 03:17:01] vrms, power, kwh, joule
+    [2026-05-18 03:17:11] vrms, power, kwh, joule
+    [2026-05-18 03:17:21] vrms, power, kwh, joule
+    [2026-05-18 03:17:32] vrms, power, kwh, joule
+Generando reporte HTML...
+  Reporte HTML actualizado.
+  Conclusiones guardadas en: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\conclusiones_20260518_032135.json
+  Resultados enviados al servidor (WebSocket -> dashboard).
+
+Analisis finalizado.
+=======================================================
+  Analisis por rangos a las 03:21:50
+=======================================================
+Descargando datos desde el servidor (GET /data)...
+  29 filas cargadas (2026-05-18 03:16:50 -> 2026-05-18 03:21:43)
+  Datos de referencia editables: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\datos_entrenamiento.csv
+  Rangos activos:
+    vrms: 99 - 121 V
+    irms: 0.0562 - 0.0833 A
+    power: 5.9722 - 8.0344 W
+    kwh: 0.001357 - 0.003642 kWh
+    joule: 0.208457 - 0.457967 W
+  Anomalias totales: 29 / 29 (100.0%)
+
+  Primeras 5 anomalias:
+    [2026-05-18 03:16:50] vrms, power, kwh, joule
+    [2026-05-18 03:17:01] vrms, power, kwh, joule
+    [2026-05-18 03:17:11] vrms, power, kwh, joule
+    [2026-05-18 03:17:21] vrms, power, kwh, joule
+    [2026-05-18 03:17:32] vrms, power, kwh, joule
+Generando reporte HTML...
+  Reporte HTML actualizado.
+  Conclusiones guardadas en: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\conclusiones_20260518_032151.json
+  Resultados enviados al servidor (WebSocket -> dashboard).
+
+Analisis finalizado.
+=======================================================
+  Analisis por rangos a las 03:22:06
+=======================================================
+Descargando datos desde el servidor (GET /data)...
+  31 filas cargadas (2026-05-18 03:16:50 -> 2026-05-18 03:22:05)
+  Datos de referencia editables: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\datos_entrenamiento.csv
+  Rangos activos:
+    vrms: 99 - 121 V
+    irms: 0.0562 - 0.0833 A
+    power: 5.9722 - 8.0344 W
+    kwh: 0.001357 - 0.003642 kWh
+    joule: 0.208457 - 0.457967 W
+  Anomalias totales: 31 / 31 (100.0%)
+
+  Primeras 5 anomalias:
+    [2026-05-18 03:16:50] vrms, power, kwh, joule
+    [2026-05-18 03:17:01] vrms, power, kwh, joule
+    [2026-05-18 03:17:11] vrms, power, kwh, joule
+    [2026-05-18 03:17:21] vrms, power, kwh, joule
+    [2026-05-18 03:17:32] vrms, power, kwh, joule
+Generando reporte HTML...
+  Reporte HTML actualizado.
+  Conclusiones guardadas en: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\conclusiones_20260518_032207.json
+  Resultados enviados al servidor (WebSocket -> dashboard).
+
+Analisis finalizado.
+=======================================================
+  Analisis por rangos a las 03:22:22
+=======================================================
+Descargando datos desde el servidor (GET /data)...
+  32 filas cargadas (2026-05-18 03:16:50 -> 2026-05-18 03:22:15)
+  Datos de referencia editables: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\datos_entrenamiento.csv
+  Rangos activos:
+    vrms: 99 - 121 V
+    irms: 0.0562 - 0.0833 A
+    power: 5.9722 - 8.0344 W
+    kwh: 0.001357 - 0.003642 kWh
+    joule: 0.208457 - 0.457967 W
+  Anomalias totales: 32 / 32 (100.0%)
+
+  Primeras 5 anomalias:
+    [2026-05-18 03:16:50] vrms, power, kwh, joule
+    [2026-05-18 03:17:01] vrms, power, kwh, joule
+    [2026-05-18 03:17:11] vrms, power, kwh, joule
+    [2026-05-18 03:17:21] vrms, power, kwh, joule
+    [2026-05-18 03:17:32] vrms, power, kwh, joule
+Generando reporte HTML...
+  Reporte HTML actualizado.
+  Conclusiones guardadas en: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\conclusiones_20260518_032222.json
+  Resultados enviados al servidor (WebSocket -> dashboard).
+
+Analisis finalizado.
+=======================================================
+  Analisis por rangos a las 03:22:37
+=======================================================
+Descargando datos desde el servidor (GET /data)...
+  34 filas cargadas (2026-05-18 03:16:50 -> 2026-05-18 03:22:37)
+  Datos de referencia editables: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\datos_entrenamiento.csv
+  Rangos activos:
+    vrms: 99 - 121 V
+    irms: 0.0562 - 0.0833 A
+    power: 5.9722 - 8.0344 W
+    kwh: 0.001357 - 0.003642 kWh
+    joule: 0.208457 - 0.457967 W
+  Anomalias totales: 34 / 34 (100.0%)
+
+  Primeras 5 anomalias:
+    [2026-05-18 03:16:50] vrms, power, kwh, joule
+    [2026-05-18 03:17:01] vrms, power, kwh, joule
+    [2026-05-18 03:17:11] vrms, power, kwh, joule
+    [2026-05-18 03:17:21] vrms, power, kwh, joule
+    [2026-05-18 03:17:32] vrms, power, kwh, joule
+Generando reporte HTML...
+  Reporte HTML actualizado.
+  Conclusiones guardadas en: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\conclusiones_20260518_032240.json
+  Resultados enviados al servidor (WebSocket -> dashboard).
+
+Analisis finalizado.
+=======================================================
+  Analisis por rangos a las 03:22:55
+=======================================================
+Descargando datos desde el servidor (GET /data)...
+  35 filas cargadas (2026-05-18 03:16:50 -> 2026-05-18 03:22:48)
+  Datos de referencia editables: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\datos_entrenamiento.csv
+  Rangos activos:
+    vrms: 99 - 121 V
+    irms: 0.0562 - 0.0833 A
+    power: 5.9722 - 8.0344 W
+    kwh: 0.001357 - 0.003642 kWh
+    joule: 0.208457 - 0.457967 W
+  Anomalias totales: 35 / 35 (100.0%)
+
+  Primeras 5 anomalias:
+    [2026-05-18 03:16:50] vrms, power, kwh, joule
+    [2026-05-18 03:17:01] vrms, power, kwh, joule
+    [2026-05-18 03:17:11] vrms, power, kwh, joule
+    [2026-05-18 03:17:21] vrms, power, kwh, joule
+    [2026-05-18 03:17:32] vrms, power, kwh, joule
+Generando reporte HTML...
+  Reporte HTML actualizado.
+  Conclusiones guardadas en: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\conclusiones_20260518_032256.json
+  Resultados enviados al servidor (WebSocket -> dashboard).
+
+Analisis finalizado.
+=======================================================
+  Analisis por rangos a las 03:23:11
+=======================================================
+Descargando datos desde el servidor (GET /data)...
+  37 filas cargadas (2026-05-18 03:16:50 -> 2026-05-18 03:23:09)
+  Datos de referencia editables: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\datos_entrenamiento.csv
+  Rangos activos:
+    vrms: 99 - 121 V
+    irms: 0.0562 - 0.0833 A
+    power: 5.9722 - 8.0344 W
+    kwh: 0.001357 - 0.003642 kWh
+    joule: 0.208457 - 0.457967 W
+  Anomalias totales: 37 / 37 (100.0%)
+
+  Primeras 5 anomalias:
+    [2026-05-18 03:16:50] vrms, power, kwh, joule
+    [2026-05-18 03:17:01] vrms, power, kwh, joule
+    [2026-05-18 03:17:11] vrms, power, kwh, joule
+    [2026-05-18 03:17:21] vrms, power, kwh, joule
+    [2026-05-18 03:17:32] vrms, power, kwh, joule
+Generando reporte HTML...
+Traceback (most recent call last):
+  File "C:\Users\sebas\Downloads\INTENTO2\anomaliastf.py", line 876, in <module>
+    else:
+    ^^^^^^
+  File "C:\Users\sebas\Downloads\INTENTO2\anomaliastf.py", line 867, in main
+    res           = requests.get(SCRIPT_URL, timeout=10)
+        ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\sebas\Downloads\INTENTO2\anomaliastf.py", line 845, in ejecutar_analisis
+    row = df.iloc[idx]
+^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\sebas\Downloads\INTENTO2\anomaliastf.py", line 677, in generar_reporte
+    ax.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\sebas\AppData\Local\Programs\Python\Python312\Lib\site-packages\matplotlib\pyplot.py", line 1250, in savefig
+    res = fig.savefig(*args, **kwargs)  # type: ignore[func-returns-value]
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\sebas\AppData\Local\Programs\Python\Python312\Lib\site-packages\matplotlib\figure.py", line 3490, in savefig
+    self.canvas.print_figure(fname, **kwargs)
+  File "C:\Users\sebas\AppData\Local\Programs\Python\Python312\Lib\site-packages\matplotlib\backend_bases.py", line 2186, in print_figure
+    result = print_method(
+             ^^^^^^^^^^^^^
+  File "C:\Users\sebas\AppData\Local\Programs\Python\Python312\Lib\site-packages\matplotlib\backend_bases.py", line 2042, in <lambda>
+    print_method = functools.wraps(meth)(lambda *args, **kwargs: meth(
+                                                                 ^^^^^
+  File "C:\Users\sebas\AppData\Local\Programs\Python\Python312\Lib\site-packages\matplotlib\backends\backend_agg.py", line 481, in print_png
+    self._print_pil(filename_or_obj, "png", pil_kwargs, metadata)
+  File "C:\Users\sebas\AppData\Local\Programs\Python\Python312\Lib\site-packages\matplotlib\backends\backend_agg.py", line 429, in _print_pil
+    FigureCanvasAgg.draw(self)
+  File "C:\Users\sebas\AppData\Local\Programs\Python\Python312\Lib\site-packages\matplotlib\backends\backend_agg.py", line 382, in draw
+    self.figure.draw(self.renderer)
+  File "C:\Users\sebas\AppData\Local\Programs\Python\Python312\Lib\site-packages\matplotlib\artist.py", line 94, in draw_wrapper
+    result = draw(artist, renderer, *args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\sebas\AppData\Local\Programs\Python\Python312\Lib\site-packages\matplotlib\artist.py", line 71, in draw_wrapper
+    return draw(artist, renderer)
+           ^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\sebas\AppData\Local\Programs\Python\Python312\Lib\site-packages\matplotlib\figure.py", line 3257, in draw
+    mimage._draw_list_compositing_images(
+  File "C:\Users\sebas\AppData\Local\Programs\Python\Python312\Lib\site-packages\matplotlib\image.py", line 134, in _draw_list_compositing_images
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1779092612.558458   19900 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1779092614.768644   19900 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+Iniciando Modulo ML en modo continuo...
+=======================================================
+  Analisis por rangos V/I a las 03:24:20
+=======================================================
+Descargando datos desde el servidor (GET /data)...
+  5 filas cargadas (2026-05-18 03:23:35 -> 2026-05-18 03:24:18)
+  Datos de referencia editables: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\datos_entrenamiento.csv
+  Rangos activos:
+    vrms: 99 - 121 V
+    irms: 0.0562 - 0.0833 A
+  Anomalias totales: 0 / 5 (0.0%)
+Generando reporte HTML...
+  Reporte HTML actualizado.
+  Conclusiones guardadas en: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\conclusiones_20260518_032421.json
+  Resultados enviados al servidor (WebSocket -> dashboard).
+
+Analisis finalizado.
+=======================================================
+  Analisis por rangos V/I a las 03:24:36
+=======================================================
+Descargando datos desde el servidor (GET /data)...
+  6 filas cargadas (2026-05-18 03:23:35 -> 2026-05-18 03:24:29)
+  Datos de referencia editables: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\datos_entrenamiento.csv
+  Rangos activos:
+    vrms: 99 - 121 V
+    irms: 0.0562 - 0.0833 A
+  Anomalias totales: 0 / 6 (0.0%)
+Generando reporte HTML...
+  Reporte HTML actualizado.
+  Conclusiones guardadas en: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\conclusiones_20260518_032437.json
+  Resultados enviados al servidor (WebSocket -> dashboard).
+
+Analisis finalizado.
+=======================================================
+  Analisis por rangos V/I a las 03:24:52
+=======================================================
+Descargando datos desde el servidor (GET /data)...
+  8 filas cargadas (2026-05-18 03:23:35 -> 2026-05-18 03:24:50)
+  Datos de referencia editables: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\datos_entrenamiento.csv
+  Rangos activos:
+    vrms: 99 - 121 V
+    irms: 0.0562 - 0.0833 A
+  Anomalias totales: 0 / 8 (0.0%)
+Generando reporte HTML...
+  Reporte HTML actualizado.
+  Conclusiones guardadas en: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\conclusiones_20260518_032453.json
+  Resultados enviados al servidor (WebSocket -> dashboard).
+
+Analisis finalizado.
+=======================================================
+  Analisis por rangos V/I a las 03:25:08
+=======================================================
+Descargando datos desde el servidor (GET /data)...
+  9 filas cargadas (2026-05-18 03:23:35 -> 2026-05-18 03:25:00)
+  Datos de referencia editables: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\datos_entrenamiento.csv
+  Rangos activos:
+    vrms: 99 - 121 V
+    irms: 0.0562 - 0.0833 A
+  Anomalias totales: 0 / 9 (0.0%)
+Generando reporte HTML...
+  Reporte HTML actualizado.
+  Conclusiones guardadas en: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\conclusiones_20260518_032508.json
+  Resultados enviados al servidor (WebSocket -> dashboard).
+
+Analisis finalizado.
+=======================================================
+  Analisis por rangos V/I a las 03:25:23
+=======================================================
+Descargando datos desde el servidor (GET /data)...
+  11 filas cargadas (2026-05-18 03:23:35 -> 2026-05-18 03:25:21)
+  Datos de referencia editables: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\datos_entrenamiento.csv
+  Rangos activos:
+    vrms: 99 - 121 V
+    irms: 0.0562 - 0.0833 A
+  Anomalias totales: 0 / 11 (0.0%)
+Generando reporte HTML...
+  Reporte HTML actualizado.
+  Conclusiones guardadas en: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\conclusiones_20260518_032524.json
+  Resultados enviados al servidor (WebSocket -> dashboard).
+
+Analisis finalizado.
+=======================================================
+  Analisis por rangos V/I a las 03:25:39
+=======================================================
+Descargando datos desde el servidor (GET /data)...
+  12 filas cargadas (2026-05-18 03:23:35 -> 2026-05-18 03:25:32)
+  Datos de referencia editables: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\datos_entrenamiento.csv
+  Rangos activos:
+    vrms: 99 - 121 V
+    irms: 0.0562 - 0.0833 A
+  Anomalias totales: 0 / 12 (0.0%)
+Generando reporte HTML...
+  Reporte HTML actualizado.
+  Conclusiones guardadas en: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\conclusiones_20260518_032540.json
+  Resultados enviados al servidor (WebSocket -> dashboard).
+
+Analisis finalizado.
+=======================================================
+  Analisis por rangos V/I a las 03:25:55
+=======================================================
+Descargando datos desde el servidor (GET /data)...
+  14 filas cargadas (2026-05-18 03:23:35 -> 2026-05-18 03:25:53)
+  Datos de referencia editables: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\datos_entrenamiento.csv
+  Rangos activos:
+    vrms: 99 - 121 V
+    irms: 0.0562 - 0.0833 A
+  Anomalias totales: 0 / 14 (0.0%)
+Generando reporte HTML...
+  Reporte HTML actualizado.
+  Conclusiones guardadas en: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\conclusiones_20260518_032556.json
+  Resultados enviados al servidor (WebSocket -> dashboard).
+
+Analisis finalizado.
+=======================================================
+  Analisis por rangos V/I a las 03:26:11
+=======================================================
+Descargando datos desde el servidor (GET /data)...
+  15 filas cargadas (2026-05-18 03:23:35 -> 2026-05-18 03:26:04)
+  Datos de referencia editables: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\datos_entrenamiento.csv
+  Rangos activos:
+    vrms: 99 - 121 V
+    irms: 0.0562 - 0.0833 A
+  Anomalias totales: 0 / 15 (0.0%)
+Generando reporte HTML...
+  Reporte HTML actualizado.
+  Conclusiones guardadas en: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\conclusiones_20260518_032611.json
+  Resultados enviados al servidor (WebSocket -> dashboard).
+
+Analisis finalizado.
+=======================================================
+  Analisis por rangos V/I a las 03:26:26
+=======================================================
+Descargando datos desde el servidor (GET /data)...
+  17 filas cargadas (2026-05-18 03:23:35 -> 2026-05-18 03:26:24)
+  Datos de referencia editables: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\datos_entrenamiento.csv
+  Rangos activos:
+    vrms: 99 - 121 V
+    irms: 0.0562 - 0.0833 A
+  Anomalias totales: 2 / 17 (11.8%)
+
+  Primeras 5 anomalias:
+    [2026-05-18 03:26:14] vrms
+    [2026-05-18 03:26:24] vrms, irms
+Generando reporte HTML...
+  Reporte HTML actualizado.
+  Conclusiones guardadas en: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\conclusiones_20260518_032627.json
+  Resultados enviados al servidor (WebSocket -> dashboard).
+
+Analisis finalizado.
+=======================================================
+  Analisis por rangos V/I a las 03:26:42
+=======================================================
+Descargando datos desde el servidor (GET /data)...
+  18 filas cargadas (2026-05-18 03:23:35 -> 2026-05-18 03:26:35)
+  Datos de referencia editables: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\datos_entrenamiento.csv
+  Rangos activos:
+    vrms: 99 - 121 V
+    irms: 0.0562 - 0.0833 A
+  Anomalias totales: 3 / 18 (16.7%)
+
+  Primeras 5 anomalias:
+    [2026-05-18 03:26:14] vrms
+    [2026-05-18 03:26:24] vrms, irms
+    [2026-05-18 03:26:35] vrms, irms
+Generando reporte HTML...
+  Reporte HTML actualizado.
+  Conclusiones guardadas en: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\conclusiones_20260518_032643.json
+  Resultados enviados al servidor (WebSocket -> dashboard).
+
+Analisis finalizado.
+=======================================================
+  Analisis por rangos V/I a las 03:26:58
+=======================================================
+Descargando datos desde el servidor (GET /data)...
+  20 filas cargadas (2026-05-18 03:23:35 -> 2026-05-18 03:26:55)
+  Datos de referencia editables: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\datos_entrenamiento.csv
+  Rangos activos:
+    vrms: 99 - 121 V
+    irms: 0.0562 - 0.0833 A
+  Anomalias totales: 5 / 20 (25.0%)
+
+  Primeras 5 anomalias:
+    [2026-05-18 03:26:14] vrms
+    [2026-05-18 03:26:24] vrms, irms
+    [2026-05-18 03:26:35] vrms, irms
+    [2026-05-18 03:26:45] vrms, irms
+    [2026-05-18 03:26:55] vrms
+Generando reporte HTML...
+  Reporte HTML actualizado.
+  Conclusiones guardadas en: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\conclusiones_20260518_032659.json
+  Resultados enviados al servidor (WebSocket -> dashboard).
+
+Analisis finalizado.
+=======================================================
+  Analisis por rangos V/I a las 03:27:14
+=======================================================
+Descargando datos desde el servidor (GET /data)...
+  21 filas cargadas (2026-05-18 03:23:35 -> 2026-05-18 03:27:05)
+  Datos de referencia editables: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\datos_entrenamiento.csv
+  Rangos activos:
+    vrms: 99 - 121 V
+    irms: 0.0562 - 0.0833 A
+  Anomalias totales: 6 / 21 (28.6%)
+
+  Primeras 5 anomalias:
+    [2026-05-18 03:26:14] vrms
+    [2026-05-18 03:26:24] vrms, irms
+    [2026-05-18 03:26:35] vrms, irms
+    [2026-05-18 03:26:45] vrms, irms
+    [2026-05-18 03:26:55] vrms
+Generando reporte HTML...
+  Reporte HTML actualizado.
+  Conclusiones guardadas en: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\conclusiones_20260518_032715.json
+  Resultados enviados al servidor (WebSocket -> dashboard).
+
+Analisis finalizado.
+=======================================================
+  Analisis por rangos V/I a las 03:27:30
+=======================================================
+Descargando datos desde el servidor (GET /data)...
+  23 filas cargadas (2026-05-18 03:23:35 -> 2026-05-18 03:27:25)
+  Datos de referencia editables: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\datos_entrenamiento.csv
+  Rangos activos:
+    vrms: 99 - 121 V
+    irms: 0.0562 - 0.0833 A
+  Anomalias totales: 8 / 23 (34.8%)
+
+  Primeras 5 anomalias:
+    [2026-05-18 03:26:14] vrms
+    [2026-05-18 03:26:24] vrms, irms
+    [2026-05-18 03:26:35] vrms, irms
+    [2026-05-18 03:26:45] vrms, irms
+    [2026-05-18 03:26:55] vrms
+Generando reporte HTML...
+  Reporte HTML actualizado.
+  Conclusiones guardadas en: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\conclusiones_20260518_032730.json
+  Resultados enviados al servidor (WebSocket -> dashboard).
+
+Analisis finalizado.
+=======================================================
+  Analisis por rangos V/I a las 03:27:45
+=======================================================
+Descargando datos desde el servidor (GET /data)...
+  24 filas cargadas (2026-05-18 03:23:35 -> 2026-05-18 03:27:36)
+  Datos de referencia editables: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\datos_entrenamiento.csv
+  Rangos activos:
+    vrms: 99 - 121 V
+    irms: 0.0562 - 0.0833 A
+  Anomalias totales: 9 / 24 (37.5%)
+
+  Primeras 5 anomalias:
+    [2026-05-18 03:26:14] vrms
+    [2026-05-18 03:26:24] vrms, irms
+    [2026-05-18 03:26:35] vrms, irms
+    [2026-05-18 03:26:45] vrms, irms
+    [2026-05-18 03:26:55] vrms
+Generando reporte HTML...
+  Reporte HTML actualizado.
+  Conclusiones guardadas en: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\conclusiones_20260518_032746.json
+  Resultados enviados al servidor (WebSocket -> dashboard).
+
+Analisis finalizado.
+=======================================================
+  Analisis por rangos V/I a las 03:28:01
+=======================================================
+Descargando datos desde el servidor (GET /data)...
+  26 filas cargadas (2026-05-18 03:23:35 -> 2026-05-18 03:27:56)
+  Datos de referencia editables: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\datos_entrenamiento.csv
+  Rangos activos:
+    vrms: 99 - 121 V
+    irms: 0.0562 - 0.0833 A
+  Anomalias totales: 11 / 26 (42.3%)
+
+  Primeras 5 anomalias:
+    [2026-05-18 03:26:14] vrms
+    [2026-05-18 03:26:24] vrms, irms
+    [2026-05-18 03:26:35] vrms, irms
+    [2026-05-18 03:26:45] vrms, irms
+    [2026-05-18 03:26:55] vrms
+Generando reporte HTML...
+  Reporte HTML actualizado.
+  Conclusiones guardadas en: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\conclusiones_20260518_032802.json
+  Resultados enviados al servidor (WebSocket -> dashboard).
+
+Analisis finalizado.
+=======================================================
+  Analisis por rangos V/I a las 03:28:17
+=======================================================
+Descargando datos desde el servidor (GET /data)...
+  28 filas cargadas (2026-05-18 03:23:35 -> 2026-05-18 03:28:16)
+  Datos de referencia editables: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\datos_entrenamiento.csv
+  Rangos activos:
+    vrms: 99 - 121 V
+    irms: 0.0562 - 0.0833 A
+  Anomalias totales: 13 / 28 (46.4%)
+
+  Primeras 5 anomalias:
+    [2026-05-18 03:26:14] vrms
+    [2026-05-18 03:26:24] vrms, irms
+    [2026-05-18 03:26:35] vrms, irms
+    [2026-05-18 03:26:45] vrms, irms
+    [2026-05-18 03:26:55] vrms
+Generando reporte HTML...
+  Reporte HTML actualizado.
+  Conclusiones guardadas en: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\conclusiones_20260518_032818.json
+  Resultados enviados al servidor (WebSocket -> dashboard).
+
+Analisis finalizado.
+=======================================================
+  Analisis por rangos V/I a las 03:28:33
+=======================================================
+Descargando datos desde el servidor (GET /data)...
+  29 filas cargadas (2026-05-18 03:23:35 -> 2026-05-18 03:28:26)
+  Datos de referencia editables: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\datos_entrenamiento.csv
+  Rangos activos:
+    vrms: 99 - 121 V
+    irms: 0.0562 - 0.0833 A
+  Anomalias totales: 14 / 29 (48.3%)
+
+  Primeras 5 anomalias:
+    [2026-05-18 03:26:14] vrms
+    [2026-05-18 03:26:24] vrms, irms
+    [2026-05-18 03:26:35] vrms, irms
+    [2026-05-18 03:26:45] vrms, irms
+    [2026-05-18 03:26:55] vrms
+Generando reporte HTML...
+  Reporte HTML actualizado.
+  Conclusiones guardadas en: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\conclusiones_20260518_032834.json
+  Resultados enviados al servidor (WebSocket -> dashboard).
+
+Analisis finalizado.
+=======================================================
+  Analisis por rangos V/I a las 03:28:49
+=======================================================
+Descargando datos desde el servidor (GET /data)...
+  31 filas cargadas (2026-05-18 03:23:35 -> 2026-05-18 03:28:47)
+  Datos de referencia editables: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\datos_entrenamiento.csv
+  Rangos activos:
+    vrms: 99 - 121 V
+    irms: 0.0562 - 0.0833 A
+  Anomalias totales: 16 / 31 (51.6%)
+
+  Primeras 5 anomalias:
+    [2026-05-18 03:26:14] vrms
+    [2026-05-18 03:26:24] vrms, irms
+    [2026-05-18 03:26:35] vrms, irms
+    [2026-05-18 03:26:45] vrms, irms
+    [2026-05-18 03:26:55] vrms
+Generando reporte HTML...
+  Reporte HTML actualizado.
+  Conclusiones guardadas en: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\conclusiones_20260518_032849.json
+  Resultados enviados al servidor (WebSocket -> dashboard).
+
+Analisis finalizado.
+=======================================================
+  Analisis por rangos V/I a las 03:29:04
+=======================================================
+Descargando datos desde el servidor (GET /data)...
+  32 filas cargadas (2026-05-18 03:23:35 -> 2026-05-18 03:28:57)
+  Datos de referencia editables: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\datos_entrenamiento.csv
+  Rangos activos:
+    vrms: 99 - 121 V
+    irms: 0.0562 - 0.0833 A
+  Anomalias totales: 17 / 32 (53.1%)
+
+  Primeras 5 anomalias:
+    [2026-05-18 03:26:14] vrms
+    [2026-05-18 03:26:24] vrms, irms
+    [2026-05-18 03:26:35] vrms, irms
+    [2026-05-18 03:26:45] vrms, irms
+    [2026-05-18 03:26:55] vrms
+Generando reporte HTML...
+  Reporte HTML actualizado.
+  Conclusiones guardadas en: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\conclusiones_20260518_032905.json
+  Resultados enviados al servidor (WebSocket -> dashboard).
+
+Analisis finalizado.
+=======================================================
+  Analisis por rangos V/I a las 03:29:20
+=======================================================
+Descargando datos desde el servidor (GET /data)...
+  34 filas cargadas (2026-05-18 03:23:35 -> 2026-05-18 03:29:17)
+  Datos de referencia editables: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\datos_entrenamiento.csv
+  Rangos activos:
+    vrms: 99 - 121 V
+    irms: 0.0562 - 0.0833 A
+  Anomalias totales: 19 / 34 (55.9%)
+
+  Primeras 5 anomalias:
+    [2026-05-18 03:26:14] vrms
+    [2026-05-18 03:26:24] vrms, irms
+    [2026-05-18 03:26:35] vrms, irms
+    [2026-05-18 03:26:45] vrms, irms
+    [2026-05-18 03:26:55] vrms
+Generando reporte HTML...
+  Reporte HTML actualizado.
+  Conclusiones guardadas en: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\conclusiones_20260518_032921.json
   Resultados enviados al servidor (WebSocket -> dashboard).
 
 Analisis finalizado.
 Traceback (most recent call last):
-  File "C:\Users\sebas\Downloads\INTENTO2\anomaliastf.py", line 585, in <module>
+  File "C:\Users\sebas\Downloads\INTENTO2\anomaliastf.py", line 880, in <module>
     main()
-  File "C:\Users\sebas\Downloads\INTENTO2\anomaliastf.py", line 580, in main
+  File "C:\Users\sebas\Downloads\INTENTO2\anomaliastf.py", line 875, in main
     time.sleep(max(1, args.interval))
 KeyboardInterrupt

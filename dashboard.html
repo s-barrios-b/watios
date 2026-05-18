@@ -893,36 +893,6 @@
       color: var(--muted);
     }
 
-    /* ── Info banner ── */
-    .info-banner {
-      display: flex;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 10px;
-      background: rgba(0, 229, 255, .06);
-      border: 1px solid rgba(0, 229, 255, .2);
-      border-radius: 10px;
-      padding: 10px 16px;
-      margin-bottom: 16px;
-      font-family: var(--mono);
-      font-size: 0.7rem;
-      color: var(--muted);
-    }
-
-    .info-banner span {
-      color: var(--accent);
-    }
-
-    .info-chip {
-      display: inline-flex;
-      align-items: center;
-      border: 1px solid rgba(255, 176, 32, .24);
-      border-radius: 6px;
-      padding: 2px 8px;
-      color: var(--warn);
-      background: rgba(255, 176, 32, .08);
-    }
-
     .ml-strip {
       display: grid;
       grid-template-columns: minmax(160px, auto) 1fr;
@@ -1095,24 +1065,16 @@
       <div class="countdown-wrap"><span id="ws-status">Desconectado</span></div>
     </div>
 
-    <!-- Info -->
-    <div class="info-banner">
-      Arquitectura: <span>ESP32 → Servidor.py (FastAPI) + WebSockets → Dashboard</span>
-      &nbsp;|&nbsp; Respaldo simultáneo en Google Sheets &nbsp;|&nbsp; Machine Learning y IA Local
-      <span class="info-chip" id="alert-gate">Alertas desde lectura 6 de la sesion</span>
-      <span class="info-chip">anomaliastf.py dicta OK/alerta usando datos_entrenamiento.csv</span>
-    </div>
-
     <div class="ml-strip" id="ml-strip">
       <div class="ml-state-wrap">
-        <span class="ml-label">TensorFlow</span>
+        <span class="ml-label">Rangos</span>
         <span class="ml-state" id="ml-state">Pendiente</span>
       </div>
       <div class="ml-metrics">
-        <span>Modelo <b id="ml-model">Autoencoder LSTM</b></span>
+        <span>Modelo <b id="ml-model">Rangos V/I</b></span>
         <span>Lecturas <b id="ml-readings">--</b></span>
         <span>AnomalÃ­as <b id="ml-anom-count">--</b></span>
-        <span>Umbral MSE <b id="ml-threshold">--</b></span>
+        <span>Criterio <b id="ml-threshold">--</b></span>
       </div>
       <div class="ml-detail" id="ml-detail">Esperando resultado de anomaliastf.py.</div>
     </div>
@@ -1381,7 +1343,6 @@
     let chatHistory = [];
     let pollTimer = null;
     let lastMlSignature = '';
-    let lastAlertTime = 0;          // cooldown para alertas proactivas
     let prevAnomalyStates = new Set(); // registrar estados específicos de anomalía
 
     // ── Tabs ─────────────────────────────────────────────────
@@ -1452,11 +1413,11 @@
       state.className = 'ml-state ' + (latest ? (isAlert ? 'alert' : 'ok') : '');
       state.textContent = latest ? (isAlert ? 'ALERTA' : 'OK') : 'Analizado';
 
-      document.getElementById('ml-model').textContent = msg.modelo || 'Autoencoder LSTM';
+      document.getElementById('ml-model').textContent = msg.modelo || 'Rangos V/I';
       document.getElementById('ml-readings').textContent = msg.n_lecturas ?? '--';
       const tasa = Number.isFinite(Number(msg.tasa_pct)) ? ` (${Number(msg.tasa_pct).toFixed(1)}%)` : '';
       document.getElementById('ml-anom-count').textContent = `${msg.n_anomalias ?? '--'}${tasa}`;
-      document.getElementById('ml-threshold').textContent = fmtMlNumber(msg.umbral_mse);
+      document.getElementById('ml-threshold').textContent = 'V/I en rango';
 
       const detail = document.getElementById('ml-detail');
       if (!latest) {
@@ -1464,9 +1425,9 @@
       } else if (isAlert) {
         const vars = Array.isArray(latest.variables) && latest.variables.length ? latest.variables.join(', ') : 'variables no especificadas';
         const motives = Array.isArray(latest.motivos) && latest.motivos.length ? latest.motivos.join('; ') : 'sin detalle adicional';
-        detail.textContent = `Ultima lectura con alerta en ${vars}. ${motives}. MSE ${fmtMlNumber(latest.error_mse)} / umbral ${fmtMlNumber(latest.umbral_mse)}.`;
+        detail.textContent = `Ultima lectura con alerta en ${vars}. ${motives}. Desviacion ${fmtMlNumber(latest.error_mse)}.`;
       } else {
-        detail.textContent = `Ultima lectura OK segun anomaliastf.py. MSE ${fmtMlNumber(latest.error_mse)} / umbral ${fmtMlNumber(latest.umbral_mse)}.`;
+        detail.textContent = `Ultima lectura OK segun rangos de voltaje y corriente. Derivadas informativas.`;
       }
     }
 
@@ -1754,13 +1715,6 @@
           document.getElementById('last-update').textContent = `ML actualizado: ${latestState}`;
           document.getElementById('last-update').style.color = latest?.alerta ? '#ff3b3b' : '#00e676';
 
-          // Auto informar a DeepSeek si hay algo interesante
-          if (latest?.alerta && Array.isArray(chatHistory)) {
-            setTimeout(() => {
-              appendMessage('user', ` Alerta ML (${msg.modelo}): ${latest.variables.join(', ')}`);
-              sendToDeepSeek(`El modelo de TensorFlow detecto una alerta en ${latest.variables.join(', ')}. Motivos: ${latest.motivos.join('; ')}. Dame una recomendacion breve para el usuario.`);
-            }, 3000);
-          }
         }
       };
 
@@ -1798,8 +1752,6 @@
     // ── Alertas proactivas ────────────────────────────────────
     const LABELS = { vrms: 'Voltaje', irms: 'Corriente', power: 'Potencia', kwh: 'Energía', joule: 'P. Joule' };
     const UNITS = { vrms: 'V', irms: 'A', power: 'W', kwh: 'kWh', joule: 'W' };
-    const ALERT_COOLDOWN = 25000; // 25 s de cooldown para el chatbot proactivo (facilita pruebas)
-
     function triggerAlerta(row) {
       if (row.calibrando || rows.length < ALERT_START_READING) return;
       const hist = rows.slice(0, -1);
@@ -1830,17 +1782,6 @@
       ).join(' | ');
       showToast(detalles);
 
-      // Chatbot proactivo (con cooldown)
-      const now = Date.now();
-      if (now - lastAlertTime < ALERT_COOLDOWN) return;
-      lastAlertTime = now;
-
-      const pregunta = `Acabo de detectar una anomalía en: ${detalles}. ¿Está todo bien? Dame un diagnóstico breve.`;
-      // Esperar 2 s para que el usuario vea primero el toast
-      setTimeout(() => {
-        appendMessage('ai', `Anomalía detectada — ${detalles}\n¿Está todo bien?`);
-        sendToDeepSeek(pregunta);
-      }, 2000);
     }
 
     function showToast(detalle) {

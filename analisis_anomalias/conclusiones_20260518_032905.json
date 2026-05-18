@@ -1,11 +1,11 @@
 {
-  "generado_en": "2026-05-18T03:29:21",
+  "generado_en": "2026-05-18T03:29:05",
   "servidor_origen": "http://192.168.1.7:5000",
   "modelo": "Rangos V/I",
-  "total_lecturas": 34,
-  "lecturas_evaluadas": 34,
-  "anomalias_detectadas": 19,
-  "tasa_anomalias_pct": 55.88235294117647,
+  "total_lecturas": 32,
+  "lecturas_evaluadas": 32,
+  "anomalias_detectadas": 17,
+  "tasa_anomalias_pct": 53.125,
   "rangos": {
     "vrms": {
       "min": 99.0,
@@ -174,24 +174,6 @@
       "kwh": 0.052836,
       "joule": 0.00013305666,
       "desviacion_rango": 4.370454545454546
-    },
-    {
-      "fecha": "2026-05-18 03:29:07",
-      "vrms": 2.84,
-      "irms": 0.0275,
-      "power": 0.0785,
-      "kwh": 0.052836,
-      "joule": 4.99125e-05,
-      "desviacion_rango": 4.370909090909091
-    },
-    {
-      "fecha": "2026-05-18 03:29:17",
-      "vrms": 2.69,
-      "irms": 0.0451,
-      "power": 0.1197,
-      "kwh": 0.052837,
-      "joule": 0.00013424466,
-      "desviacion_rango": 4.377727272727273
     }
   ]
 }

@@ -1,0 +1,320 @@
+{
+  "generado_en": "2026-05-18T03:22:07",
+  "servidor_origen": "http://192.168.1.7:5000",
+  "modelo": "Rangos independientes",
+  "total_lecturas": 31,
+  "lecturas_evaluadas": 31,
+  "anomalias_detectadas": 31,
+  "tasa_anomalias_pct": 100.0,
+  "rangos": {
+    "vrms": {
+      "min": 99.0,
+      "max": 121.0,
+      "fuente": "umbral fijo 110V +/-10%"
+    },
+    "irms": {
+      "min": 0.0562,
+      "max": 0.0833,
+      "fuente": "datos_entrenamiento.csv"
+    },
+    "power": {
+      "min": 5.9722,
+      "max": 8.0344,
+      "fuente": "datos_entrenamiento.csv"
+    },
+    "kwh": {
+      "min": 0.001357,
+      "max": 0.003642,
+      "fuente": "datos_entrenamiento.csv"
+    },
+    "joule": {
+      "min": 0.208457,
+      "max": 0.457967,
+      "fuente": "datos_entrenamiento.csv"
+    }
+  },
+  "dataset_entrenamiento": "C:\\Users\\sebas\\Downloads\\INTENTO2\\analisis_anomalias\\datos_entrenamiento.csv",
+  "reporte_html": "C:\\Users\\sebas\\Downloads\\INTENTO2\\analisis_anomalias\\reporte_anomalias.html",
+  "grafica": "C:\\Users\\sebas\\Downloads\\INTENTO2\\analisis_anomalias\\graficas_anomalias.png",
+  "primeras_anomalias": [
+    {
+      "fecha": "2026-05-18 03:16:50",
+      "vrms": 56.87,
+      "irms": 0.0765,
+      "power": 4.3495,
+      "kwh": 0.051682,
+      "joule": 0.0003862485,
+      "desviacion_rango": 21.02407002188184
+    },
+    {
+      "fecha": "2026-05-18 03:17:01",
+      "vrms": 56.34,
+      "irms": 0.0766,
+      "power": 4.3141,
+      "kwh": 0.051695,
+      "joule": 0.00038725896,
+      "desviacion_rango": 21.029759299781183
+    },
+    {
+      "fecha": "2026-05-18 03:17:11",
+      "vrms": 55.97,
+      "irms": 0.0759,
+      "power": 4.2493,
+      "kwh": 0.051707,
+      "joule": 0.00038021346,
+      "desviacion_rango": 21.03501094091904
+    },
+    {
+      "fecha": "2026-05-18 03:17:21",
+      "vrms": 56.1,
+      "irms": 0.0784,
+      "power": 4.3966,
+      "kwh": 0.05172,
+      "joule": 0.00040567296,
+      "desviacion_rango": 21.040700218818383
+    },
+    {
+      "fecha": "2026-05-18 03:17:32",
+      "vrms": 56.74,
+      "irms": 0.0735,
+      "power": 4.1596,
+      "kwh": 0.051732,
+      "joule": 0.0003565485,
+      "desviacion_rango": 21.04595185995624
+    },
+    {
+      "fecha": "2026-05-18 03:17:42",
+      "vrms": 56.79,
+      "irms": 0.0797,
+      "power": 4.5412,
+      "kwh": 0.051745,
+      "joule": 0.00041923794,
+      "desviacion_rango": 21.051641137855583
+    },
+    {
+      "fecha": "2026-05-18 03:17:52",
+      "vrms": 56.1,
+      "irms": 0.0791,
+      "power": 4.4375,
+      "kwh": 0.051757,
+      "joule": 0.00041294946,
+      "desviacion_rango": 21.056892778993436
+    },
+    {
+      "fecha": "2026-05-18 03:18:03",
+      "vrms": 56.23,
+      "irms": 0.0773,
+      "power": 4.3458,
+      "kwh": 0.05177,
+      "joule": 0.00039436914,
+      "desviacion_rango": 21.06258205689278
+    },
+    {
+      "fecha": "2026-05-18 03:18:13",
+      "vrms": 58.05,
+      "irms": 0.081,
+      "power": 4.7165,
+      "kwh": 0.051784,
+      "joule": 0.000433026,
+      "desviacion_rango": 21.06870897155361
+    },
+    {
+      "fecha": "2026-05-18 03:18:23",
+      "vrms": 55.9,
+      "irms": 0.0781,
+      "power": 4.3671,
+      "kwh": 0.051796,
+      "joule": 0.00040257426,
+      "desviacion_rango": 21.07396061269147
+    },
+    {
+      "fecha": "2026-05-18 03:18:33",
+      "vrms": 5.09,
+      "irms": 0.0567,
+      "power": 0.2877,
+      "kwh": 0.051797,
+      "joule": 0.00021218274,
+      "desviacion_rango": 21.07439824945296
+    },
+    {
+      "fecha": "2026-05-18 03:18:43",
+      "vrms": 4.56,
+      "irms": 0.0531,
+      "power": 0.2446,
+      "kwh": 0.051798,
+      "joule": 0.00018609426,
+      "desviacion_rango": 21.074835886214444
+    },
+    {
+      "fecha": "2026-05-18 03:18:54",
+      "vrms": 3.44,
+      "irms": 0.059,
+      "power": 0.2034,
+      "kwh": 0.051798,
+      "joule": 0.000229746,
+      "desviacion_rango": 21.074835886214444
+    },
+    {
+      "fecha": "2026-05-18 03:19:04",
+      "vrms": 117.88,
+      "irms": 0.0804,
+      "power": 9.5354,
+      "kwh": 0.051827,
+      "joule": 0.00042663456,
+      "desviacion_rango": 21.087527352297595
+    },
+    {
+      "fecha": "2026-05-18 03:19:15",
+      "vrms": 115.41,
+      "irms": 0.0719,
+      "power": 8.3029,
+      "kwh": 0.051851,
+      "joule": 0.00034119426,
+      "desviacion_rango": 21.09803063457331
+    },
+    {
+      "fecha": "2026-05-18 03:19:26",
+      "vrms": 114.98,
+      "irms": 0.0691,
+      "power": 7.9473,
+      "kwh": 0.051875,
+      "joule": 0.00031513746,
+      "desviacion_rango": 21.108533916849016
+    },
+    {
+      "fecha": "2026-05-18 03:19:36",
+      "vrms": 114.81,
+      "irms": 0.0707,
+      "power": 8.1171,
+      "kwh": 0.051898,
+      "joule": 0.00032990034,
+      "desviacion_rango": 21.11859956236324
+    },
+    {
+      "fecha": "2026-05-18 03:19:47",
+      "vrms": 114.2,
+      "irms": 0.0699,
+      "power": 7.9794,
+      "kwh": 0.051922,
+      "joule": 0.00032247666,
+      "desviacion_rango": 21.129102844638954
+    },
+    {
+      "fecha": "2026-05-18 03:19:57",
+      "vrms": 114.56,
+      "irms": 0.0713,
+      "power": 8.1738,
+      "kwh": 0.051946,
+      "joule": 0.00033552354,
+      "desviacion_rango": 21.139606126914664
+    },
+    {
+      "fecha": "2026-05-18 03:20:08",
+      "vrms": 114.63,
+      "irms": 0.0716,
+      "power": 8.204,
+      "kwh": 0.05197,
+      "joule": 0.00033835296,
+      "desviacion_rango": 21.150109409190375
+    },
+    {
+      "fecha": "2026-05-18 03:20:18",
+      "vrms": 114.95,
+      "irms": 0.0692,
+      "power": 7.962,
+      "kwh": 0.051993,
+      "joule": 0.00031605024,
+      "desviacion_rango": 21.1601750547046
+    },
+    {
+      "fecha": "2026-05-18 03:20:29",
+      "vrms": 114.68,
+      "irms": 0.071,
+      "power": 8.146,
+      "kwh": 0.052017,
+      "joule": 0.000332706,
+      "desviacion_rango": 21.17067833698031
+    },
+    {
+      "fecha": "2026-05-18 03:20:40",
+      "vrms": 114.76,
+      "irms": 0.0725,
+      "power": 8.3208,
+      "kwh": 0.052041,
+      "joule": 0.0003469125,
+      "desviacion_rango": 21.18118161925602
+    },
+    {
+      "fecha": "2026-05-18 03:20:50",
+      "vrms": 114.26,
+      "irms": 0.069,
+      "power": 7.8852,
+      "kwh": 0.052065,
+      "joule": 0.000314226,
+      "desviacion_rango": 21.191684901531733
+    },
+    {
+      "fecha": "2026-05-18 03:21:01",
+      "vrms": 113.98,
+      "irms": 0.0706,
+      "power": 8.0527,
+      "kwh": 0.052089,
+      "joule": 0.00032896776,
+      "desviacion_rango": 21.202188183807444
+    },
+    {
+      "fecha": "2026-05-18 03:21:12",
+      "vrms": 114.59,
+      "irms": 0.0724,
+      "power": 8.2988,
+      "kwh": 0.052113,
+      "joule": 0.00034595616,
+      "desviacion_rango": 21.212691466083154
+    },
+    {
+      "fecha": "2026-05-18 03:21:22",
+      "vrms": 114.71,
+      "irms": 0.0713,
+      "power": 8.1806,
+      "kwh": 0.052138,
+      "joule": 0.00033552354,
+      "desviacion_rango": 21.22363238512035
+    },
+    {
+      "fecha": "2026-05-18 03:21:33",
+      "vrms": 114.39,
+      "irms": 0.0734,
+      "power": 8.3997,
+      "kwh": 0.052162,
+      "joule": 0.00035557896,
+      "desviacion_rango": 21.234135667396064
+    },
+    {
+      "fecha": "2026-05-18 03:21:43",
+      "vrms": 114.37,
+      "irms": 0.0713,
+      "power": 8.155,
+      "kwh": 0.052186,
+      "joule": 0.00033552354,
+      "desviacion_rango": 21.244638949671778
+    },
+    {
+      "fecha": "2026-05-18 03:21:54",
+      "vrms": 114.26,
+      "irms": 0.0703,
+      "power": 8.0363,
+      "kwh": 0.05221,
+      "joule": 0.00032617794,
+      "desviacion_rango": 21.255142231947488
+    },
+    {
+      "fecha": "2026-05-18 03:22:05",
+      "vrms": 114.46,
+      "irms": 0.0723,
+      "power": 8.2754,
+      "kwh": 0.052235,
+      "joule": 0.00034500114,
+      "desviacion_rango": 21.266083150984684
+    }
+  ]
+}

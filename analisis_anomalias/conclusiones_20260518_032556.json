@@ -1,0 +1,25 @@
+{
+  "generado_en": "2026-05-18T03:25:56",
+  "servidor_origen": "http://192.168.1.7:5000",
+  "modelo": "Rangos V/I",
+  "total_lecturas": 14,
+  "lecturas_evaluadas": 14,
+  "anomalias_detectadas": 0,
+  "tasa_anomalias_pct": 0.0,
+  "rangos": {
+    "vrms": {
+      "min": 99.0,
+      "max": 121.0,
+      "fuente": "umbral fijo 110V +/-10%"
+    },
+    "irms": {
+      "min": 0.0562,
+      "max": 0.0833,
+      "fuente": "datos_entrenamiento.csv"
+    }
+  },
+  "dataset_entrenamiento": "C:\\Users\\sebas\\Downloads\\INTENTO2\\analisis_anomalias\\datos_entrenamiento.csv",
+  "reporte_html": "C:\\Users\\sebas\\Downloads\\INTENTO2\\analisis_anomalias\\reporte_anomalias.html",
+  "grafica": "C:\\Users\\sebas\\Downloads\\INTENTO2\\analisis_anomalias\\graficas_anomalias.png",
+  "primeras_anomalias": []
+}

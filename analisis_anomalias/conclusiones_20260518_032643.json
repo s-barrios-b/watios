@@ -1,0 +1,53 @@
+{
+  "generado_en": "2026-05-18T03:26:43",
+  "servidor_origen": "http://192.168.1.7:5000",
+  "modelo": "Rangos V/I",
+  "total_lecturas": 18,
+  "lecturas_evaluadas": 18,
+  "anomalias_detectadas": 3,
+  "tasa_anomalias_pct": 16.666666666666664,
+  "rangos": {
+    "vrms": {
+      "min": 99.0,
+      "max": 121.0,
+      "fuente": "umbral fijo 110V +/-10%"
+    },
+    "irms": {
+      "min": 0.0562,
+      "max": 0.0833,
+      "fuente": "datos_entrenamiento.csv"
+    }
+  },
+  "dataset_entrenamiento": "C:\\Users\\sebas\\Downloads\\INTENTO2\\analisis_anomalias\\datos_entrenamiento.csv",
+  "reporte_html": "C:\\Users\\sebas\\Downloads\\INTENTO2\\analisis_anomalias\\reporte_anomalias.html",
+  "grafica": "C:\\Users\\sebas\\Downloads\\INTENTO2\\analisis_anomalias\\graficas_anomalias.png",
+  "primeras_anomalias": [
+    {
+      "fecha": "2026-05-18 03:26:14",
+      "vrms": 70.09,
+      "irms": 0.0612,
+      "power": 4.9206,
+      "kwh": 0.05279,
+      "joule": 0.00024719904,
+      "desviacion_rango": 1.314090909090909
+    },
+    {
+      "fecha": "2026-05-18 03:26:24",
+      "vrms": 4.57,
+      "irms": 0.0485,
+      "power": 0.213,
+      "kwh": 0.052791,
+      "joule": 0.0001552485,
+      "desviacion_rango": 4.292272727272728
+    },
+    {
+      "fecha": "2026-05-18 03:26:35",
+      "vrms": 3.53,
+      "irms": 0.049,
+      "power": 0.1788,
+      "kwh": 0.052792,
+      "joule": 0.000158466,
+      "desviacion_rango": 4.339545454545455
+    }
+  ]
+}

@@ -43,7 +43,10 @@ VRMS_MIN       = 99.0
 VRMS_MAX       = 121.0
 DAEMON_INTERVAL = int(os.environ.get("ML_DAEMON_INTERVAL", "15"))
 FEATURES       = ['vrms', 'irms', 'power', 'kwh', 'joule']
-FEATURES_LSTM  = FEATURES
+ALERT_FEATURES = ['vrms', 'irms']
+FEATURES_REFERENCIA = ['irms']
+FEATURES_DERIVADAS = ['power', 'kwh', 'joule']
+UNIDADES       = {'vrms': 'V', 'irms': 'A', 'power': 'W', 'kwh': 'kWh', 'joule': 'W'}
 _r_cable = os.environ.get("R_CABLE")
 if _r_cable is None:
     raise RuntimeError("R_CABLE no definido en .env — agrega R_CABLE=0.066 y reinicia el script.")
@@ -308,7 +311,7 @@ def generar_reporte(df, errores, anomalias, umbral, historia):
 
 <div class="footer">
   Features: {', '.join('P. Joule (W)' if f == 'joule' else f for f in FEATURES)} ·
-  Encoder: Z-score (LSTM) + Umbral fijo Vrms {VRMS_MIN}V-{VRMS_MAX}V · Z-score LSTM: {ZSCORE_UMBRAL} ·
+  Encoder: Z-score (LSTM sin Vrms) + Umbral fijo Vrms {VRMS_MIN}V-{VRMS_MAX}V · Z-score LSTM: {ZSCORE_UMBRAL} ·
   Arquitectura: LSTM(32) -> LSTM({LATENT_DIM}) -> RepeatVector -> LSTM({LATENT_DIM}) -> LSTM(32) -> Dense
 </div>
 </body>
@@ -557,6 +560,298 @@ def ejecutar_analisis():
     print(f"  Conclusiones guardadas en: {conclusiones_path}")
     enviar_resultados_al_servidor(df, errores, anomalias, umbral_lstm, detalles)
     print("\nAnalisis finalizado.")
+
+# Implementacion activa: alertas independientes por variable.
+# Las funciones siguientes reemplazan el flujo historico de Autoencoder.
+def calcular_rangos_independientes(df_entrenamiento):
+    """Construye rangos de alerta solo para variables base: Vrms e Irms."""
+    if df_entrenamiento.empty:
+        raise ValueError("datos_entrenamiento.csv no tiene filas de referencia.")
+
+    rangos = {
+        "vrms": {
+            "min": float(VRMS_MIN),
+            "max": float(VRMS_MAX),
+            "fuente": "umbral fijo 110V +/-10%",
+        }
+    }
+    for feat in FEATURES_REFERENCIA:
+        valores = pd.to_numeric(df_entrenamiento[feat], errors="coerce").dropna()
+        if valores.empty:
+            raise ValueError(f"datos_entrenamiento.csv no tiene valores validos para {feat}.")
+        rangos[feat] = {
+            "min": float(valores.min()),
+            "max": float(valores.max()),
+            "fuente": "datos_entrenamiento.csv",
+        }
+    return rangos
+
+
+def desviacion_rango(valor, minimo, maximo):
+    """Devuelve 0 si esta dentro; si no, cuanto se salio normalizado al rango."""
+    ancho = max(maximo - minimo, 1e-12)
+    if valor < minimo:
+        return float((minimo - valor) / ancho)
+    if valor > maximo:
+        return float((valor - maximo) / ancho)
+    return 0.0
+
+
+def detalle_anomalia_independiente(row, rangos):
+    variables = []
+    motivos = []
+    desviaciones = {}
+
+    for feat in ALERT_FEATURES:
+        rango = rangos[feat]
+        valor = float(row[feat])
+        minimo = float(rango["min"])
+        maximo = float(rango["max"])
+        desviacion = desviacion_rango(valor, minimo, maximo)
+        desviaciones[feat] = desviacion
+        if desviacion <= 0:
+            continue
+        variables.append(feat)
+        unidad = UNIDADES.get(feat, "")
+        motivos.append(f"{feat} fuera de rango ({minimo:.6g}-{maximo:.6g} {unidad})")
+
+    score = max(desviaciones.values()) if desviaciones else 0.0
+    return {
+        "fecha": str(row["fecha"]),
+        "valores": {feat: float(row[feat]) for feat in FEATURES},
+        "alerta": bool(variables),
+        "variables": variables,
+        "motivos": motivos,
+        "desviaciones": desviaciones,
+        "rangos": rangos,
+        "error_mse": float(score),
+        "umbral_mse": 0.0,
+    }
+
+
+def evaluar_anomalias_independientes(df, rangos):
+    detalles = [detalle_anomalia_independiente(row, rangos) for _, row in df.iterrows()]
+    puntuaciones = np.array([d["error_mse"] for d in detalles], dtype=float)
+    anomalias = np.array([d["alerta"] for d in detalles], dtype=bool)
+    return puntuaciones, anomalias, detalles
+
+
+def generar_reporte(df, puntuaciones, anomalias, rangos, detalles):
+    print("Generando reporte HTML...")
+
+    idx_anomalias = np.where(anomalias)[0]
+    fechas_slice = df["fecha"].reset_index(drop=True)
+    colores = {"vrms": "#00e5ff", "irms": "#ff4081", "power": "#69ff47", "kwh": "#ffb020", "joule": "#b388ff"}
+
+    fig, axes = plt.subplots(len(FEATURES) + 1, 1, figsize=(14, 4 * (len(FEATURES) + 1)))
+    fig.patch.set_facecolor("#0a0e17")
+
+    ax = axes[0]
+    ax.set_facecolor("#111827")
+    ax.plot(fechas_slice, puntuaciones, color="#ffffff", linewidth=0.8, alpha=0.7, label="Desviacion de rango")
+    ax.axhline(0, color="#00e676", linestyle="--", linewidth=1, label="Dentro de rango")
+    anom_fechas = fechas_slice[anomalias]
+    ax.scatter(anom_fechas, puntuaciones[anomalias], color="#ff3b3b", s=20, zorder=5, label="Anomalias")
+    ax.set_title("Desviacion maxima fuera de rango", color="#e2e8f0", fontsize=10)
+    ax.tick_params(colors="#4a5568", labelsize=7)
+    ax.spines[:].set_color("#1e293b")
+    ax.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
+    ax.legend(fontsize=7, facecolor="#111827", labelcolor="#e2e8f0")
+
+    for i, feat in enumerate(FEATURES):
+        ax = axes[i + 1]
+        ax.set_facecolor("#111827")
+        color = colores.get(feat, "#ffffff")
+        vals = df[feat].reset_index(drop=True)
+        ax.plot(fechas_slice, vals, color=color, linewidth=0.9, alpha=0.8)
+        rango = rangos.get(feat)
+        if rango:
+            ax.axhline(rango["min"], color="#4a5568", linestyle="--", linewidth=0.7, alpha=0.7)
+            ax.axhline(rango["max"], color="#4a5568", linestyle="--", linewidth=0.7, alpha=0.7)
+        if rango and len(anom_fechas) > 0:
+            ax.scatter(anom_fechas, vals[anomalias], color="#ff3b3b", s=18, zorder=5)
+        label = "P. Joule (W)" if feat == "joule" else feat.upper()
+        ax.set_title(label, color="#e2e8f0", fontsize=9)
+        ax.tick_params(colors="#4a5568", labelsize=7)
+        ax.spines[:].set_color("#1e293b")
+        ax.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
+
+    plt.tight_layout(pad=2.0)
+    plt.savefig(GRAPH_PATH, dpi=120, bbox_inches="tight", facecolor="#0a0e17")
+    plt.close()
+
+    filas_anomalas = df.iloc[idx_anomalias].copy()
+    if len(filas_anomalas):
+        filas_anomalas["desviacion_rango"] = puntuaciones[anomalias]
+        filas_anomalas["variables"] = [", ".join(detalles[idx]["variables"]) for idx in idx_anomalias]
+        filas_anomalas = filas_anomalas.sort_values("desviacion_rango", ascending=False)
+    tabla_html = filas_anomalas.to_html(index=False, float_format="%.5f", classes="tabla", border=0)
+
+    n_total = len(df)
+    n_anom = int(np.sum(anomalias))
+    pct = n_anom / len(anomalias) * 100 if len(anomalias) else 0
+    rangos_html = "".join(
+        f'<tr><td>{feat}</td><td>{rango["min"]:.6g}</td><td>{rango["max"]:.6g}</td><td>{UNIDADES.get(feat, "")}</td><td>{rango["fuente"]}</td></tr>'
+        for feat, rango in rangos.items()
+    )
+
+    html = f"""<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Watios - Reporte de Anomalias</title>
+<style>
+  body {{ background:#0a0e17; color:#e2e8f0; font-family:'Share Tech Mono',monospace; padding:32px; }}
+  h1 {{ color:#00e5ff; font-size:1.4rem; margin-bottom:4px; }}
+  h2 {{ color:#4a5568; font-size:0.85rem; text-transform:uppercase; letter-spacing:1px; margin:28px 0 12px; }}
+  .meta {{ color:#4a5568; font-size:0.72rem; margin-bottom:28px; }}
+  .kpi-row {{ display:flex; gap:16px; margin-bottom:28px; flex-wrap:wrap; }}
+  .kpi {{ background:#111827; border:1px solid #1e293b; border-radius:10px; padding:16px 20px; flex:1; min-width:140px; }}
+  .kpi-val {{ font-size:2rem; color:#00e5ff; line-height:1; }}
+  .kpi-lbl {{ font-size:0.65rem; color:#4a5568; text-transform:uppercase; letter-spacing:1px; margin-top:6px; }}
+  .kpi-anom .kpi-val {{ color:#ff3b3b; }}
+  img {{ width:100%; border-radius:10px; border:1px solid #1e293b; margin-bottom:20px; }}
+  .tabla {{ width:100%; border-collapse:collapse; font-size:0.72rem; }}
+  .tabla th {{ background:#0d1420; color:#4a5568; padding:9px 12px; text-align:left; border-bottom:1px solid #1e293b; text-transform:uppercase; letter-spacing:1px; font-size:0.62rem; }}
+  .tabla td {{ padding:8px 12px; border-bottom:1px solid #1e293b; color:#e2e8f0; }}
+  .tabla tr:hover {{ background:rgba(255,255,255,.02); }}
+  .footer {{ color:#4a5568; font-size:0.65rem; margin-top:32px; border-top:1px solid #1e293b; padding-top:14px; }}
+</style>
+</head>
+<body>
+<h1>Watios - Reporte de Anomalias</h1>
+<p class="meta">Generado: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} - Analisis: variables base V/I; derivadas informativas</p>
+
+<div class="kpi-row">
+  <div class="kpi"><div class="kpi-val">{n_total}</div><div class="kpi-lbl">Total lecturas</div></div>
+  <div class="kpi kpi-anom"><div class="kpi-val">{n_anom}</div><div class="kpi-lbl">Anomalias detectadas</div></div>
+  <div class="kpi"><div class="kpi-val">{pct:.1f}%</div><div class="kpi-lbl">Tasa de anomalias</div></div>
+  <div class="kpi"><div class="kpi-val">0</div><div class="kpi-lbl">Desviacion permitida</div></div>
+  <div class="kpi"><div class="kpi-val">{VRMS_MIN}V-{VRMS_MAX}V</div><div class="kpi-lbl">Umbral Voltaje fijo</div></div>
+  <div class="kpi"><div class="kpi-val">{len(rangos)}</div><div class="kpi-lbl">Rangos de alerta</div></div>
+</div>
+
+<h2>Rangos de alerta usados</h2>
+<table class="tabla"><thead><tr><th>Variable</th><th>Min</th><th>Max</th><th>Unidad</th><th>Fuente</th></tr></thead><tbody>{rangos_html}</tbody></table>
+
+<h2>Series de tiempo con anomalias marcadas</h2>
+<img src="graficas_anomalias.png" alt="Anomalias">
+
+<h2>Filas anomalas (ordenadas por desviacion descendente)</h2>
+{tabla_html}
+
+<div class="footer">
+  Variables de alerta: Vrms e Irms -
+  Vrms fijo {VRMS_MIN}V-{VRMS_MAX}V - Irms desde datos_entrenamiento.csv -
+  Power, kWh y P. Joule quedan como derivadas informativas
+</div>
+</body>
+</html>"""
+
+    with open(REPORT_PATH, "w", encoding="utf-8") as f:
+        f.write(html)
+    print("  Reporte HTML actualizado.")
+
+
+def guardar_conclusiones(df, puntuaciones, anomalias, rangos, dataset_path):
+    stamp = timestamp_archivo()
+    idx_anomalias = np.where(anomalias)[0]
+    filas_anomalas = []
+    for idx in idx_anomalias[:50]:
+        row = df.iloc[idx]
+        filas_anomalas.append({
+            "fecha": str(row["fecha"]),
+            "vrms": float(row["vrms"]),
+            "irms": float(row["irms"]),
+            "power": float(row["power"]),
+            "kwh": float(row["kwh"]),
+            "joule": float(row["joule"]),
+            "desviacion_rango": float(puntuaciones[idx]),
+        })
+
+    n_anom = int(np.sum(anomalias))
+    conclusiones = {
+        "generado_en": datetime.now().isoformat(timespec="seconds"),
+        "servidor_origen": LOCAL_SERVER,
+        "modelo": "Rangos V/I",
+        "total_lecturas": int(len(df)),
+        "lecturas_evaluadas": int(len(puntuaciones)),
+        "anomalias_detectadas": n_anom,
+        "tasa_anomalias_pct": float((n_anom / len(puntuaciones) * 100) if len(puntuaciones) else 0),
+        "rangos": rangos,
+        "dataset_entrenamiento": dataset_path,
+        "reporte_html": REPORT_PATH,
+        "grafica": GRAPH_PATH,
+        "primeras_anomalias": filas_anomalas,
+    }
+
+    historico_path = os.path.join(ARTIFACTS_DIR, f"conclusiones_{stamp}.json")
+    with open(LATEST_CONCLUSIONS_PATH, "w", encoding="utf-8") as f:
+        json.dump(conclusiones, f, ensure_ascii=False, indent=2)
+    with open(historico_path, "w", encoding="utf-8") as f:
+        json.dump(conclusiones, f, ensure_ascii=False, indent=2)
+    return historico_path
+
+
+def enviar_resultados_al_servidor(df, puntuaciones, anomalias, rangos, detalles=None):
+    try:
+        n_anom = int(np.sum(anomalias))
+        ultima_lectura = detalles[-1] if detalles else None
+        payload = {
+            "n_lecturas": len(df),
+            "n_anomalias": n_anom,
+            "tasa_pct": (n_anom / len(df) * 100) if len(df) else 0,
+            "umbral_mse": 0.0,
+            "modelo": "Rangos V/I",
+            "ventana": 1,
+            "features": ALERT_FEATURES,
+            "rangos": rangos,
+            "ultima_lectura": ultima_lectura,
+            "resultados": detalles[-20:] if detalles else [],
+        }
+        res = requests.post(f"{LOCAL_SERVER}/ml/result", json=payload, timeout=5)
+        if res.status_code == 200:
+            print("  Resultados enviados al servidor (WebSocket -> dashboard).")
+    except Exception as e:
+        print(f"  Error al notificar al servidor: {e}")
+
+
+def ejecutar_analisis():
+    print("=" * 55)
+    print(f"  Analisis por rangos V/I a las {datetime.now().strftime('%H:%M:%S')}")
+    print("=" * 55)
+
+    df = cargar_datos(SCRIPT_URL)
+    if len(df) < 1:
+        print("No hay lecturas para analizar.")
+        return
+
+    dataset_path = guardar_datos_entrenamiento(df)
+    df_entrenamiento = cargar_datos_entrenamiento_editables()
+    print(f"  Datos de referencia editables: {dataset_path}")
+
+    rangos = calcular_rangos_independientes(df_entrenamiento)
+    puntuaciones, anomalias, detalles = evaluar_anomalias_independientes(df, rangos)
+
+    n_anom = int(np.sum(anomalias))
+    print("  Rangos activos:")
+    for feat, rango in rangos.items():
+        print(f"    {feat}: {rango['min']:.6g} - {rango['max']:.6g} {UNIDADES.get(feat, '')}")
+    print(f"  Anomalias totales: {n_anom} / {len(puntuaciones)} ({n_anom/len(puntuaciones)*100:.1f}%)")
+
+    if n_anom:
+        print("\n  Primeras 5 anomalias:")
+        for idx in np.where(anomalias)[0][:5]:
+            row = df.iloc[idx]
+            variables = ", ".join(detalles[idx]["variables"])
+            print(f"    [{row['fecha']}] {variables}")
+
+    generar_reporte(df, puntuaciones, anomalias, rangos, detalles)
+    conclusiones_path = guardar_conclusiones(df, puntuaciones, anomalias, rangos, dataset_path)
+    print(f"  Conclusiones guardadas en: {conclusiones_path}")
+    enviar_resultados_al_servidor(df, puntuaciones, anomalias, rangos, detalles)
+    print("\nAnalisis finalizado.")
+
 
 def main():
     parser = argparse.ArgumentParser()
