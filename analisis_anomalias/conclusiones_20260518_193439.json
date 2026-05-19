@@ -1,0 +1,214 @@
+{
+  "generado_en": "2026-05-18T19:34:39",
+  "servidor_origen": "http://192.168.1.7:5000",
+  "modelo": "Autoencoder LSTM",
+  "tensorflow": "2.21.0",
+  "modelo_reentrenado": false,
+  "dataset_entrenamiento": "C:\\Users\\sebas\\Downloads\\INTENTO2\\analisis_anomalias\\datos_entrenamiento.csv",
+  "modelo_path": "C:\\Users\\sebas\\Downloads\\INTENTO2\\modelo_autoencoder\\model.keras",
+  "scaler_path": "C:\\Users\\sebas\\Downloads\\INTENTO2\\modelo_autoencoder\\scaler.pkl",
+  "umbral_path": "C:\\Users\\sebas\\Downloads\\INTENTO2\\modelo_autoencoder\\umbral.json",
+  "total_lecturas": 10,
+  "lecturas_evaluadas": 6,
+  "anomalias_detectadas": 1,
+  "tasa_anomalias_pct": 16.666666666666664,
+  "window_size": 5,
+  "features": [
+    "vrms",
+    "irms",
+    "power",
+    "kwh",
+    "joule"
+  ],
+  "variables_alerta": [
+    "vrms",
+    "irms"
+  ],
+  "variables_informativas": [
+    "power",
+    "kwh",
+    "joule"
+  ],
+  "umbral_por_variable": {
+    "vrms": 1.9634756560847229,
+    "irms": 1.7237091492721113,
+    "power": 1.752733402028525,
+    "kwh": 0.85581273256812,
+    "joule": 1.7231136916201466
+  },
+  "vrms_rango_fijo": {
+    "min": 99.0,
+    "max": 121.0,
+    "unidad": "V"
+  },
+  "alert_start_reading": 6,
+  "consistencia_joule": {
+    "r_cable": 0.066,
+    "factor_inferido": 1.0,
+    "formula": "irms^2 * R_CABLE",
+    "tolerancia_relativa": 0.2,
+    "porcentaje_consistente": 100.0,
+    "error_relativo_mediano": 0.0,
+    "error_relativo_maximo": 1.851773580305504e-16
+  },
+  "primeras_anomalias": [
+    {
+      "fecha": "2026-05-18 19:34:37",
+      "lectura_sesion": 10,
+      "sistema_calibrando": false,
+      "valores": {
+        "vrms": 91.82,
+        "irms": 0.0666,
+        "power": 6.6264,
+        "kwh": 0.026141,
+        "joule": 0.00029274696
+      },
+      "alerta": true,
+      "variables": [
+        "vrms"
+      ],
+      "variables_alerta": [
+        "vrms",
+        "irms"
+      ],
+      "variables_informativas": [
+        "power",
+        "kwh",
+        "joule"
+      ],
+      "variables_informativas_mse_alto": [
+        "power",
+        "kwh",
+        "joule"
+      ],
+      "motivos": [
+        "vrms=91.82 V fuera de [99, 121] V RETIE 2024 (+/-10% sobre 110 V)",
+        "MSE de vrms 2.12136 supera umbral 1.96348"
+      ],
+      "motivos_informativos": [
+        "MSE de power 4.30606 supera umbral informativo 1.75273",
+        "MSE de kwh 1226.48 supera umbral informativo 0.855813",
+        "MSE de joule 19.638 supera umbral informativo 1.72311"
+      ],
+      "mse_por_variable": {
+        "vrms": 2.121357503388923,
+        "irms": 0.3410189882663234,
+        "power": 4.3060643552120785,
+        "kwh": 1226.4842539727238,
+        "joule": 19.637955002430356
+      },
+      "umbral_por_variable": {
+        "vrms": 1.9634756560847229,
+        "irms": 1.7237091492721113,
+        "power": 1.752733402028525,
+        "kwh": 0.85581273256812,
+        "joule": 1.7231136916201466
+      },
+      "mse_supera_umbral": {
+        "vrms": true,
+        "irms": false,
+        "power": true,
+        "kwh": true,
+        "joule": true
+      },
+      "activa_alerta_por_variable": {
+        "vrms": true,
+        "irms": false,
+        "power": false,
+        "kwh": false,
+        "joule": false
+      },
+      "vrms_fuera_rango": true,
+      "vrms_rango_fijo": {
+        "min": 99.0,
+        "max": 121.0,
+        "unidad": "V"
+      },
+      "error_mse": 2.121357503388923,
+      "umbral_mse": 1.9634756560847229,
+      "joule_esperado": 0.00029274696000000005,
+      "joule_error_relativo": 1.851773580305504e-16,
+      "joule_consistente": true
+    }
+  ],
+  "ultima_lectura": {
+    "fecha": "2026-05-18 19:34:37",
+    "lectura_sesion": 10,
+    "sistema_calibrando": false,
+    "valores": {
+      "vrms": 91.82,
+      "irms": 0.0666,
+      "power": 6.6264,
+      "kwh": 0.026141,
+      "joule": 0.00029274696
+    },
+    "alerta": true,
+    "variables": [
+      "vrms"
+    ],
+    "variables_alerta": [
+      "vrms",
+      "irms"
+    ],
+    "variables_informativas": [
+      "power",
+      "kwh",
+      "joule"
+    ],
+    "variables_informativas_mse_alto": [
+      "power",
+      "kwh",
+      "joule"
+    ],
+    "motivos": [
+      "vrms=91.82 V fuera de [99, 121] V RETIE 2024 (+/-10% sobre 110 V)",
+      "MSE de vrms 2.12136 supera umbral 1.96348"
+    ],
+    "motivos_informativos": [
+      "MSE de power 4.30606 supera umbral informativo 1.75273",
+      "MSE de kwh 1226.48 supera umbral informativo 0.855813",
+      "MSE de joule 19.638 supera umbral informativo 1.72311"
+    ],
+    "mse_por_variable": {
+      "vrms": 2.121357503388923,
+      "irms": 0.3410189882663234,
+      "power": 4.3060643552120785,
+      "kwh": 1226.4842539727238,
+      "joule": 19.637955002430356
+    },
+    "umbral_por_variable": {
+      "vrms": 1.9634756560847229,
+      "irms": 1.7237091492721113,
+      "power": 1.752733402028525,
+      "kwh": 0.85581273256812,
+      "joule": 1.7231136916201466
+    },
+    "mse_supera_umbral": {
+      "vrms": true,
+      "irms": false,
+      "power": true,
+      "kwh": true,
+      "joule": true
+    },
+    "activa_alerta_por_variable": {
+      "vrms": true,
+      "irms": false,
+      "power": false,
+      "kwh": false,
+      "joule": false
+    },
+    "vrms_fuera_rango": true,
+    "vrms_rango_fijo": {
+      "min": 99.0,
+      "max": 121.0,
+      "unidad": "V"
+    },
+    "error_mse": 2.121357503388923,
+    "umbral_mse": 1.9634756560847229,
+    "joule_esperado": 0.00029274696000000005,
+    "joule_error_relativo": 1.851773580305504e-16,
+    "joule_consistente": true
+  },
+  "reporte_html": "C:\\Users\\sebas\\Downloads\\INTENTO2\\analisis_anomalias\\reporte_anomalias.html",
+  "grafica": "C:\\Users\\sebas\\Downloads\\INTENTO2\\analisis_anomalias\\graficas_anomalias.png"
+}

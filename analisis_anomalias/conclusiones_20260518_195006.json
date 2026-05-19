@@ -1,5 +1,5 @@
 {
-  "generado_en": "2026-05-18T19:50:23",
+  "generado_en": "2026-05-18T19:50:06",
   "servidor_origen": "http://192.168.1.7:5000",
   "modelo": "Autoencoder LSTM",
   "tensorflow": "2.21.0",
@@ -8,10 +8,10 @@
   "modelo_path": "C:\\Users\\sebas\\Downloads\\INTENTO2\\modelo_autoencoder\\model.keras",
   "scaler_path": "C:\\Users\\sebas\\Downloads\\INTENTO2\\modelo_autoencoder\\scaler.pkl",
   "umbral_path": "C:\\Users\\sebas\\Downloads\\INTENTO2\\modelo_autoencoder\\umbral.json",
-  "total_lecturas": 14,
-  "lecturas_evaluadas": 10,
-  "anomalias_detectadas": 5,
-  "tasa_anomalias_pct": 50.0,
+  "total_lecturas": 12,
+  "lecturas_evaluadas": 8,
+  "anomalias_detectadas": 3,
+  "tasa_anomalias_pct": 37.5,
   "window_size": 5,
   "features": [
     "vrms",
@@ -173,11 +173,11 @@
         "MSE de joule 18.1155 supera umbral informativo 1.72311"
       ],
       "mse_por_variable": {
-        "vrms": 108.82366638748469,
-        "irms": 3.9524687987084803,
-        "power": 37.45702625199958,
-        "kwh": 6.283359451354276,
-        "joule": 18.11548608933566
+        "vrms": 108.82366692525738,
+        "irms": 3.9524687975219024,
+        "power": 37.4570261259059,
+        "kwh": 6.283359252665405,
+        "joule": 18.115486038926427
       },
       "umbral_por_variable": {
         "vrms": 1.9634756560847229,
@@ -206,7 +206,7 @@
         "max": 121.0,
         "unidad": "V"
       },
-      "error_mse": 108.82366638748469,
+      "error_mse": 108.82366692525738,
       "umbral_mse": 1.9634756560847229,
       "joule_esperado": 0.00012260226,
       "joule_error_relativo": 0.0,
@@ -253,11 +253,11 @@
         "MSE de joule 18.6537 supera umbral informativo 1.72311"
       ],
       "mse_por_variable": {
-        "vrms": 174.09077256619753,
-        "irms": 6.083061713439303,
-        "power": 60.30744947460751,
-        "kwh": 7.273501682716417,
-        "joule": 18.653672587013013
+        "vrms": 174.0907727024861,
+        "irms": 6.083061694192323,
+        "power": 60.307449221915306,
+        "kwh": 7.2735012256077285,
+        "joule": 18.653672493042205
       },
       "umbral_por_variable": {
         "vrms": 1.9634756560847229,
@@ -286,183 +286,23 @@
         "max": 121.0,
         "unidad": "V"
       },
-      "error_mse": 174.09077256619753,
+      "error_mse": 174.0907727024861,
       "umbral_mse": 1.9634756560847229,
       "joule_esperado": 0.00012661704000000001,
       "joule_error_relativo": 2.1407114170523658e-16,
       "joule_consistente": true
-    },
-    {
-      "fecha": "2026-05-18 19:50:09",
-      "lectura_sesion": 13,
-      "sistema_calibrando": false,
-      "valores": {
-        "vrms": 3.12,
-        "irms": 0.0455,
-        "power": 0.141,
-        "kwh": 0.000468,
-        "joule": 0.0001366365
-      },
-      "alerta": true,
-      "variables": [
-        "vrms",
-        "irms"
-      ],
-      "variables_alerta": [
-        "vrms",
-        "irms"
-      ],
-      "variables_informativas": [
-        "power",
-        "kwh",
-        "joule"
-      ],
-      "variables_informativas_mse_alto": [
-        "power",
-        "kwh",
-        "joule"
-      ],
-      "motivos": [
-        "vrms=3.12 V fuera de [99, 121] V RETIE 2024 (+/-10% sobre 110 V)",
-        "MSE de vrms 238.676 supera umbral 1.96348",
-        "MSE de irms 8.14746 supera umbral 1.72371"
-      ],
-      "motivos_informativos": [
-        "MSE de power 84.2246 supera umbral informativo 1.75273",
-        "MSE de kwh 8.34082 supera umbral informativo 0.855813",
-        "MSE de joule 19.237 supera umbral informativo 1.72311"
-      ],
-      "mse_por_variable": {
-        "vrms": 238.6764344557855,
-        "irms": 8.147463444989151,
-        "power": 84.22458395260227,
-        "kwh": 8.340815148270796,
-        "joule": 19.236966296972483
-      },
-      "umbral_por_variable": {
-        "vrms": 1.9634756560847229,
-        "irms": 1.7237091492721113,
-        "power": 1.752733402028525,
-        "kwh": 0.85581273256812,
-        "joule": 1.7231136916201466
-      },
-      "mse_supera_umbral": {
-        "vrms": true,
-        "irms": true,
-        "power": true,
-        "kwh": true,
-        "joule": true
-      },
-      "activa_alerta_por_variable": {
-        "vrms": true,
-        "irms": true,
-        "power": false,
-        "kwh": false,
-        "joule": false
-      },
-      "vrms_fuera_rango": true,
-      "vrms_rango_fijo": {
-        "min": 99.0,
-        "max": 121.0,
-        "unidad": "V"
-      },
-      "error_mse": 238.6764344557855,
-      "umbral_mse": 1.9634756560847229,
-      "joule_esperado": 0.00013663650000000002,
-      "joule_error_relativo": 1.9837345300953704e-16,
-      "joule_consistente": true
-    },
-    {
-      "fecha": "2026-05-18 19:50:20",
-      "lectura_sesion": 14,
-      "sistema_calibrando": false,
-      "valores": {
-        "vrms": 3.2,
-        "irms": 0.045,
-        "power": 0.1428,
-        "kwh": 0.000468,
-        "joule": 0.00013365
-      },
-      "alerta": true,
-      "variables": [
-        "vrms",
-        "irms"
-      ],
-      "variables_alerta": [
-        "vrms",
-        "irms"
-      ],
-      "variables_informativas": [
-        "power",
-        "kwh",
-        "joule"
-      ],
-      "variables_informativas_mse_alto": [
-        "power",
-        "kwh",
-        "joule"
-      ],
-      "motivos": [
-        "vrms=3.20 V fuera de [99, 121] V RETIE 2024 (+/-10% sobre 110 V)",
-        "MSE de vrms 303.892 supera umbral 1.96348",
-        "MSE de irms 10.2202 supera umbral 1.72371"
-      ],
-      "motivos_informativos": [
-        "MSE de power 108.222 supera umbral informativo 1.75273",
-        "MSE de kwh 9.03861 supera umbral informativo 0.855813",
-        "MSE de joule 19.5629 supera umbral informativo 1.72311"
-      ],
-      "mse_por_variable": {
-        "vrms": 303.89166823277856,
-        "irms": 10.220219794287868,
-        "power": 108.2222823887374,
-        "kwh": 9.03860771406433,
-        "joule": 19.56291478331452
-      },
-      "umbral_por_variable": {
-        "vrms": 1.9634756560847229,
-        "irms": 1.7237091492721113,
-        "power": 1.752733402028525,
-        "kwh": 0.85581273256812,
-        "joule": 1.7231136916201466
-      },
-      "mse_supera_umbral": {
-        "vrms": true,
-        "irms": true,
-        "power": true,
-        "kwh": true,
-        "joule": true
-      },
-      "activa_alerta_por_variable": {
-        "vrms": true,
-        "irms": true,
-        "power": false,
-        "kwh": false,
-        "joule": false
-      },
-      "vrms_fuera_rango": true,
-      "vrms_rango_fijo": {
-        "min": 99.0,
-        "max": 121.0,
-        "unidad": "V"
-      },
-      "error_mse": 303.89166823277856,
-      "umbral_mse": 1.9634756560847229,
-      "joule_esperado": 0.00013365,
-      "joule_error_relativo": 0.0,
-      "joule_consistente": true
     }
   ],
   "ultima_lectura": {
-    "fecha": "2026-05-18 19:50:20",
-    "lectura_sesion": 14,
+    "fecha": "2026-05-18 19:49:59",
+    "lectura_sesion": 12,
     "sistema_calibrando": false,
     "valores": {
-      "vrms": 3.2,
-      "irms": 0.045,
-      "power": 0.1428,
+      "vrms": 3.21,
+      "irms": 0.0438,
+      "power": 0.1395,
       "kwh": 0.000468,
-      "joule": 0.00013365
+      "joule": 0.00012661704
     },
     "alerta": true,
     "variables": [
@@ -484,21 +324,21 @@
       "joule"
     ],
     "motivos": [
-      "vrms=3.20 V fuera de [99, 121] V RETIE 2024 (+/-10% sobre 110 V)",
-      "MSE de vrms 303.892 supera umbral 1.96348",
-      "MSE de irms 10.2202 supera umbral 1.72371"
+      "vrms=3.21 V fuera de [99, 121] V RETIE 2024 (+/-10% sobre 110 V)",
+      "MSE de vrms 174.091 supera umbral 1.96348",
+      "MSE de irms 6.08306 supera umbral 1.72371"
     ],
     "motivos_informativos": [
-      "MSE de power 108.222 supera umbral informativo 1.75273",
-      "MSE de kwh 9.03861 supera umbral informativo 0.855813",
-      "MSE de joule 19.5629 supera umbral informativo 1.72311"
+      "MSE de power 60.3074 supera umbral informativo 1.75273",
+      "MSE de kwh 7.2735 supera umbral informativo 0.855813",
+      "MSE de joule 18.6537 supera umbral informativo 1.72311"
     ],
     "mse_por_variable": {
-      "vrms": 303.89166823277856,
-      "irms": 10.220219794287868,
-      "power": 108.2222823887374,
-      "kwh": 9.03860771406433,
-      "joule": 19.56291478331452
+      "vrms": 174.0907727024861,
+      "irms": 6.083061694192323,
+      "power": 60.307449221915306,
+      "kwh": 7.2735012256077285,
+      "joule": 18.653672493042205
     },
     "umbral_por_variable": {
       "vrms": 1.9634756560847229,
@@ -527,10 +367,10 @@
       "max": 121.0,
       "unidad": "V"
     },
-    "error_mse": 303.89166823277856,
+    "error_mse": 174.0907727024861,
     "umbral_mse": 1.9634756560847229,
-    "joule_esperado": 0.00013365,
-    "joule_error_relativo": 0.0,
+    "joule_esperado": 0.00012661704000000001,
+    "joule_error_relativo": 2.1407114170523658e-16,
     "joule_consistente": true
   },
   "reporte_html": "C:\\Users\\sebas\\Downloads\\INTENTO2\\analisis_anomalias\\reporte_anomalias.html",

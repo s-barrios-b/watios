@@ -4,254 +4,151 @@
 <meta charset="UTF-8">
 <title>Watios - Reporte de Anomalias</title>
 <style>
-  body { background:#0a0e17; color:#e2e8f0; font-family:'Share Tech Mono',monospace; padding:32px; }
-  h1 { color:#00e5ff; font-size:1.4rem; margin-bottom:4px; }
-  h2 { color:#4a5568; font-size:0.85rem; text-transform:uppercase; letter-spacing:1px; margin:28px 0 12px; }
-  .meta { color:#4a5568; font-size:0.72rem; margin-bottom:28px; }
-  .kpi-row { display:flex; gap:16px; margin-bottom:28px; flex-wrap:wrap; }
-  .kpi { background:#111827; border:1px solid #1e293b; border-radius:10px; padding:16px 20px; flex:1; min-width:140px; }
-  .kpi-val { font-size:2rem; color:#00e5ff; line-height:1; }
-  .kpi-lbl { font-size:0.65rem; color:#4a5568; text-transform:uppercase; letter-spacing:1px; margin-top:6px; }
-  .kpi-anom .kpi-val { color:#ff3b3b; }
-  img { width:100%; border-radius:10px; border:1px solid #1e293b; margin-bottom:20px; }
-  .tabla { width:100%; border-collapse:collapse; font-size:0.72rem; }
-  .tabla th { background:#0d1420; color:#4a5568; padding:9px 12px; text-align:left; border-bottom:1px solid #1e293b; text-transform:uppercase; letter-spacing:1px; font-size:0.62rem; }
-  .tabla td { padding:8px 12px; border-bottom:1px solid #1e293b; color:#e2e8f0; }
-  .tabla tr:hover { background:rgba(255,255,255,.02); }
-  .footer { color:#4a5568; font-size:0.65rem; margin-top:32px; border-top:1px solid #1e293b; padding-top:14px; }
+  body { background:#0a0e17; color:#e2e8f0; font-family:Arial, sans-serif; padding:32px; }
+  h1 { color:#00e5ff; font-size:1.45rem; margin:0 0 6px; }
+  h2 { color:#94a3b8; font-size:.86rem; text-transform:uppercase; letter-spacing:1px; margin:28px 0 12px; }
+  .meta,.muted { color:#94a3b8; font-size:.82rem; line-height:1.55; }
+  .kpi-row { display:flex; gap:14px; flex-wrap:wrap; margin:24px 0; }
+  .kpi { background:#111827; border:1px solid #1e293b; border-radius:8px; padding:14px 18px; min-width:150px; flex:1; }
+  .kpi-val { color:#00e5ff; font-size:1.7rem; font-weight:700; line-height:1; }
+  .kpi-alert .kpi-val { color:#ff3b3b; }
+  .kpi-lbl { color:#94a3b8; font-size:.68rem; text-transform:uppercase; letter-spacing:.7px; margin-top:7px; }
+  img { width:100%; border:1px solid #1e293b; border-radius:8px; margin:8px 0 20px; }
+  .tabla { width:100%; border-collapse:collapse; font-size:.78rem; }
+  .tabla th { background:#0d1420; color:#94a3b8; padding:9px 10px; text-align:left; border-bottom:1px solid #1e293b; }
+  .tabla td { padding:8px 10px; border-bottom:1px solid #1e293b; color:#e2e8f0; vertical-align:top; }
+  .note { background:#111827; border:1px solid #1e293b; border-radius:8px; padding:14px 16px; color:#cbd5e1; line-height:1.55; }
+  .footer { color:#94a3b8; font-size:.72rem; margin-top:32px; border-top:1px solid #1e293b; padding-top:14px; }
 </style>
 </head>
 <body>
 <h1>Watios - Reporte de Anomalias</h1>
-<p class="meta">Generado: 2026-05-18 03:29:21 - Analisis: variables base V/I; derivadas informativas</p>
+<p class="meta">
+Generado: 2026-05-18 19:50:23 |
+Modelo: Autoencoder LSTM TensorFlow 2.21.0 |
+Ventana: 5 lecturas |
+Reentrenado en este arranque: no
+</p>
 
-<div class="kpi-row">
-  <div class="kpi"><div class="kpi-val">34</div><div class="kpi-lbl">Total lecturas</div></div>
-  <div class="kpi kpi-anom"><div class="kpi-val">19</div><div class="kpi-lbl">Anomalias detectadas</div></div>
-  <div class="kpi"><div class="kpi-val">55.9%</div><div class="kpi-lbl">Tasa de anomalias</div></div>
-  <div class="kpi"><div class="kpi-val">0</div><div class="kpi-lbl">Desviacion permitida</div></div>
-  <div class="kpi"><div class="kpi-val">99.0V-121.0V</div><div class="kpi-lbl">Umbral Voltaje fijo</div></div>
-  <div class="kpi"><div class="kpi-val">2</div><div class="kpi-lbl">Rangos de alerta</div></div>
+<div class="note">
+  Variables de alerta: <b>vrms</b> e <b>irms</b>. Variables informativas usadas por el autoencoder:
+  <b>power</b>, <b>kwh</b> y <b>joule</b>. Las derivadas tienen MSE y umbral propio,
+  pero no activan alertas porque no son causalmente independientes.
 </div>
 
-<h2>Rangos de alerta usados</h2>
-<table class="tabla"><thead><tr><th>Variable</th><th>Min</th><th>Max</th><th>Unidad</th><th>Fuente</th></tr></thead><tbody><tr><td>vrms</td><td>99</td><td>121</td><td>V</td><td>umbral fijo 110V +/-10%</td></tr><tr><td>irms</td><td>0.0562</td><td>0.0833</td><td>A</td><td>datos_entrenamiento.csv</td></tr></tbody></table>
+<div class="kpi-row">
+  <div class="kpi"><div class="kpi-val">14</div><div class="kpi-lbl">Lecturas recibidas</div></div>
+  <div class="kpi"><div class="kpi-val">10</div><div class="kpi-lbl">Lecturas evaluadas</div></div>
+  <div class="kpi kpi-alert"><div class="kpi-val">5</div><div class="kpi-lbl">Alertas</div></div>
+  <div class="kpi"><div class="kpi-val">50.0%</div><div class="kpi-lbl">Tasa evaluada</div></div>
+  <div class="kpi"><div class="kpi-val">99-121 V</div><div class="kpi-lbl">Rango fijo vrms</div></div>
+  <div class="kpi"><div class="kpi-val">6</div><div class="kpi-lbl">Lecturas calibrando</div></div>
+</div>
 
-<h2>Series de tiempo con anomalias marcadas</h2>
-<img src="graficas_anomalias.png" alt="Anomalias">
+<h2>Umbrales MSE por variable</h2>
+<table class="tabla">
+  <thead><tr><th>Variable</th><th>Rol</th><th>Unidad</th><th>Umbral MSE</th></tr></thead>
+  <tbody><tr><td>vrms</td><td>alerta</td><td>V</td><td>1.9634757</td></tr><tr><td>irms</td><td>alerta</td><td>A</td><td>1.7237091</td></tr><tr><td>power</td><td>informativa</td><td>W</td><td>1.7527334</td></tr><tr><td>kwh</td><td>informativa</td><td>kWh</td><td>0.85581273</td></tr><tr><td>joule</td><td>informativa</td><td>W</td><td>1.7231137</td></tr></tbody>
+</table>
 
-<h2>Filas anomalas (ordenadas por desviacion descendente)</h2>
+<h2>Consistencia de joule</h2>
+<p class="meta">
+R_CABLE=0.066. Formula verificada: irms^2 * R_CABLE.
+Consistencia: 100.0% de lecturas dentro de
+tolerancia relativa 20%.
+</p>
+
+<h2>MSE y series de tiempo</h2>
+<img src="graficas_anomalias.png" alt="Graficas de anomalias">
+
+<h2>Entrenamiento</h2>
+<p class='muted'>Modelo cargado desde disco; no hubo reentrenamiento en este arranque.</p>
+
+<h2>Lecturas con alerta</h2>
 <table class="dataframe tabla">
   <thead>
     <tr style="text-align: right;">
       <th>fecha</th>
+      <th>lectura</th>
+      <th>variables</th>
+      <th>motivos</th>
       <th>vrms</th>
       <th>irms</th>
       <th>power</th>
       <th>kwh</th>
       <th>joule</th>
-      <th>desviacion_rango</th>
-      <th>variables</th>
+      <th>error_mse</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <td>2026-05-18 03:29:17</td>
-      <td>2.69000</td>
-      <td>0.04510</td>
-      <td>0.11970</td>
-      <td>0.05284</td>
-      <td>0.00013</td>
-      <td>4.37773</td>
+      <td>2026-05-18 19:50:20</td>
+      <td>14</td>
       <td>vrms, irms</td>
+      <td>vrms=3.20 V fuera de [99, 121] V RETIE 2024 (+/-10% sobre 110 V); MSE de vrms 303.892 supera umbral 1.96348; MSE de irms 10.2202 supera umbral 1.72371</td>
+      <td>3.200000</td>
+      <td>0.045000</td>
+      <td>0.142800</td>
+      <td>0.000468</td>
+      <td>0.000134</td>
+      <td>303.891668</td>
     </tr>
     <tr>
-      <td>2026-05-18 03:29:07</td>
-      <td>2.84000</td>
-      <td>0.02750</td>
-      <td>0.07850</td>
-      <td>0.05284</td>
-      <td>0.00005</td>
-      <td>4.37091</td>
+      <td>2026-05-18 19:50:09</td>
+      <td>13</td>
       <td>vrms, irms</td>
+      <td>vrms=3.12 V fuera de [99, 121] V RETIE 2024 (+/-10% sobre 110 V); MSE de vrms 238.676 supera umbral 1.96348; MSE de irms 8.14746 supera umbral 1.72371</td>
+      <td>3.120000</td>
+      <td>0.045500</td>
+      <td>0.141000</td>
+      <td>0.000468</td>
+      <td>0.000137</td>
+      <td>238.676434</td>
     </tr>
     <tr>
-      <td>2026-05-18 03:28:57</td>
-      <td>2.85000</td>
-      <td>0.04490</td>
-      <td>0.12150</td>
-      <td>0.05284</td>
-      <td>0.00013</td>
-      <td>4.37045</td>
+      <td>2026-05-18 19:49:59</td>
+      <td>12</td>
       <td>vrms, irms</td>
+      <td>vrms=3.21 V fuera de [99, 121] V RETIE 2024 (+/-10% sobre 110 V); MSE de vrms 174.091 supera umbral 1.96348; MSE de irms 6.08306 supera umbral 1.72371</td>
+      <td>3.210000</td>
+      <td>0.043800</td>
+      <td>0.139500</td>
+      <td>0.000468</td>
+      <td>0.000127</td>
+      <td>174.090773</td>
     </tr>
     <tr>
-      <td>2026-05-18 03:26:45</td>
-      <td>3.04000</td>
-      <td>0.05050</td>
-      <td>0.15290</td>
-      <td>0.05279</td>
-      <td>0.00017</td>
-      <td>4.36182</td>
+      <td>2026-05-18 19:49:49</td>
+      <td>11</td>
       <td>vrms, irms</td>
+      <td>vrms=3.54 V fuera de [99, 121] V RETIE 2024 (+/-10% sobre 110 V); MSE de vrms 108.824 supera umbral 1.96348; MSE de irms 3.95247 supera umbral 1.72371</td>
+      <td>3.540000</td>
+      <td>0.043100</td>
+      <td>0.153900</td>
+      <td>0.000467</td>
+      <td>0.000123</td>
+      <td>108.823666</td>
     </tr>
     <tr>
-      <td>2026-05-18 03:28:47</td>
-      <td>3.22000</td>
-      <td>0.04610</td>
-      <td>0.14640</td>
-      <td>0.05284</td>
-      <td>0.00014</td>
-      <td>4.35364</td>
+      <td>2026-05-18 19:49:39</td>
+      <td>10</td>
       <td>vrms, irms</td>
-    </tr>
-    <tr>
-      <td>2026-05-18 03:26:35</td>
-      <td>3.53000</td>
-      <td>0.04900</td>
-      <td>0.17880</td>
-      <td>0.05279</td>
-      <td>0.00016</td>
-      <td>4.33955</td>
-      <td>vrms, irms</td>
-    </tr>
-    <tr>
-      <td>2026-05-18 03:27:46</td>
-      <td>3.91000</td>
-      <td>0.03390</td>
-      <td>0.13090</td>
-      <td>0.05283</td>
-      <td>0.00008</td>
-      <td>4.32227</td>
-      <td>vrms, irms</td>
-    </tr>
-    <tr>
-      <td>2026-05-18 03:26:24</td>
-      <td>4.57000</td>
-      <td>0.04850</td>
-      <td>0.21300</td>
-      <td>0.05279</td>
-      <td>0.00016</td>
-      <td>4.29227</td>
-      <td>vrms, irms</td>
-    </tr>
-    <tr>
-      <td>2026-05-18 03:28:26</td>
-      <td>4.81000</td>
-      <td>0.03450</td>
-      <td>0.15970</td>
-      <td>0.05284</td>
-      <td>0.00008</td>
-      <td>4.28136</td>
-      <td>vrms, irms</td>
-    </tr>
-    <tr>
-      <td>2026-05-18 03:28:37</td>
-      <td>4.87000</td>
-      <td>0.03600</td>
-      <td>0.17270</td>
-      <td>0.05284</td>
-      <td>0.00009</td>
-      <td>4.27864</td>
-      <td>vrms, irms</td>
-    </tr>
-    <tr>
-      <td>2026-05-18 03:27:56</td>
-      <td>4.90000</td>
-      <td>0.04430</td>
-      <td>0.22210</td>
-      <td>0.05283</td>
-      <td>0.00013</td>
-      <td>4.27727</td>
-      <td>vrms, irms</td>
-    </tr>
-    <tr>
-      <td>2026-05-18 03:28:06</td>
-      <td>7.04000</td>
-      <td>0.03740</td>
-      <td>0.26790</td>
-      <td>0.05283</td>
-      <td>0.00009</td>
-      <td>4.18000</td>
-      <td>vrms, irms</td>
-    </tr>
-    <tr>
-      <td>2026-05-18 03:28:16</td>
-      <td>7.75000</td>
-      <td>0.03440</td>
-      <td>0.26100</td>
-      <td>0.05283</td>
-      <td>0.00008</td>
-      <td>4.14773</td>
-      <td>vrms, irms</td>
-    </tr>
-    <tr>
-      <td>2026-05-18 03:27:36</td>
-      <td>8.65000</td>
-      <td>0.04010</td>
-      <td>0.36670</td>
-      <td>0.05283</td>
-      <td>0.00011</td>
-      <td>4.10682</td>
-      <td>vrms, irms</td>
-    </tr>
-    <tr>
-      <td>2026-05-18 03:27:25</td>
-      <td>31.32000</td>
-      <td>0.03280</td>
-      <td>1.02180</td>
-      <td>0.05283</td>
-      <td>0.00007</td>
-      <td>3.07636</td>
-      <td>vrms, irms</td>
-    </tr>
-    <tr>
-      <td>2026-05-18 03:27:15</td>
-      <td>58.92000</td>
-      <td>0.05490</td>
-      <td>3.24020</td>
-      <td>0.05283</td>
-      <td>0.00020</td>
-      <td>1.82182</td>
-      <td>vrms, irms</td>
-    </tr>
-    <tr>
-      <td>2026-05-18 03:26:55</td>
-      <td>65.17000</td>
-      <td>0.07010</td>
-      <td>5.28980</td>
-      <td>0.05281</td>
-      <td>0.00032</td>
-      <td>1.53773</td>
-      <td>vrms</td>
-    </tr>
-    <tr>
-      <td>2026-05-18 03:26:14</td>
-      <td>70.09000</td>
-      <td>0.06120</td>
-      <td>4.92060</td>
-      <td>0.05279</td>
-      <td>0.00025</td>
-      <td>1.31409</td>
-      <td>vrms</td>
-    </tr>
-    <tr>
-      <td>2026-05-18 03:27:05</td>
-      <td>82.79000</td>
-      <td>0.05120</td>
-      <td>4.25500</td>
-      <td>0.05282</td>
-      <td>0.00017</td>
-      <td>0.73682</td>
-      <td>vrms, irms</td>
+      <td>vrms=25.50 V fuera de [99, 121] V RETIE 2024 (+/-10% sobre 110 V); MSE de vrms 42.4426 supera umbral 1.96348; MSE de irms 1.93546 supera umbral 1.72371</td>
+      <td>25.500000</td>
+      <td>0.043800</td>
+      <td>1.747000</td>
+      <td>0.000467</td>
+      <td>0.000127</td>
+      <td>42.442616</td>
     </tr>
   </tbody>
 </table>
 
 <div class="footer">
-  Variables de alerta: Vrms e Irms -
-  Vrms fijo 99.0V-121.0V - Irms desde datos_entrenamiento.csv -
-  Power, kWh y P. Joule quedan como derivadas informativas
+  Fuente normal: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\datos_entrenamiento.csv |
+  Modelo persistido: C:\Users\sebas\Downloads\INTENTO2\modelo_autoencoder\model.keras |
+  Scaler: C:\Users\sebas\Downloads\INTENTO2\modelo_autoencoder\scaler.pkl |
+  Umbrales: C:\Users\sebas\Downloads\INTENTO2\modelo_autoencoder\umbral.json
 </div>
 </body>
 </html>

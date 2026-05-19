@@ -1019,3 +1019,296 @@ Traceback (most recent call last):
   File "C:\Users\sebas\Downloads\INTENTO2\anomaliastf.py", line 875, in main
     time.sleep(max(1, args.interval))
 KeyboardInterrupt
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1779150786.413975   12856 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1779150793.835362   12856 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+I0000 00:00:1779150832.262242   12856 cpu_feature_guard.cc:227] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: SSE3 SSE4.1 SSE4.2 AVX AVX2 AVX_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+E0000 00:00:1779150836.818350   12856 util.cc:131] oneDNN supports DT_INT32 only on platforms with AVX-512. Falling back to the default Eigen-based implementation if present.
+Iniciando anomaliastf.py en modo demonio...
+  GET http://192.168.1.7:5000/data
+  POST http://192.168.1.7:5000/ml/result
+  [daemon] 2/5 lecturas; esperando ventana completa.
+  [daemon] 4/5 lecturas; esperando ventana completa.
+====================================================================
+  Analisis Watios LSTM - 2026-05-18 19:33:52
+====================================================================
+  Servidor local: http://192.168.1.7:5000
+  Features: vrms, irms, power, kwh, joule
+  Alertas: vrms, irms | Informativas: power, kwh, joule
+  Entrenando Autoencoder LSTM desde datos_entrenamiento.csv...
+  Artefactos guardados en C:\Users\sebas\Downloads\INTENTO2\modelo_autoencoder
+  Lecturas recibidas: 5
+  Ventanas evaluadas: 1 con W=5
+  Primeras 6 lecturas: sistema_calibrando, sin alertas
+  Umbrales MSE por variable:
+    vrms  (alerta): 1.9634757
+    irms  (alerta): 1.7237091
+    power (info): 1.7527334
+    kwh   (info): 0.85581273
+    joule (info): 1.7231137
+  Alertas totales: 0 / 1
+    vrms: 0 | irms: 0
+  Consistencia joule: 100.0% (irms^2 * R_CABLE)
+  Reporte HTML actualizado: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\reporte_anomalias.html
+  Conclusiones guardadas: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\conclusiones_20260518_193406.json
+  Resultados enviados a POST /ml/result.
+  Analisis finalizado.
+====================================================================
+  Analisis Watios LSTM - 2026-05-18 19:34:21
+====================================================================
+  Servidor local: http://192.168.1.7:5000
+  Features: vrms, irms, power, kwh, joule
+  Alertas: vrms, irms | Informativas: power, kwh, joule
+  Modelo cargado desde C:\Users\sebas\Downloads\INTENTO2\modelo_autoencoder\model.keras
+  Reentrenamiento no requerido.
+  Lecturas recibidas: 8
+  Ventanas evaluadas: 4 con W=5
+  Primeras 6 lecturas: sistema_calibrando, sin alertas
+  Umbrales MSE por variable:
+    vrms  (alerta): 1.9634757
+    irms  (alerta): 1.7237091
+    power (info): 1.7527334
+    kwh   (info): 0.85581273
+    joule (info): 1.7231137
+  Alertas totales: 0 / 4
+    vrms: 0 | irms: 0
+  Consistencia joule: 100.0% (irms^2 * R_CABLE)
+  Reporte HTML actualizado: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\reporte_anomalias.html
+  Conclusiones guardadas: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\conclusiones_20260518_193423.json
+  Resultados enviados a POST /ml/result.
+  Analisis finalizado.
+====================================================================
+  Analisis Watios LSTM - 2026-05-18 19:34:38
+====================================================================
+  Servidor local: http://192.168.1.7:5000
+  Features: vrms, irms, power, kwh, joule
+  Alertas: vrms, irms | Informativas: power, kwh, joule
+  Modelo cargado desde C:\Users\sebas\Downloads\INTENTO2\modelo_autoencoder\model.keras
+  Reentrenamiento no requerido.
+  Lecturas recibidas: 10
+  Ventanas evaluadas: 6 con W=5
+  Primeras 6 lecturas: sistema_calibrando, sin alertas
+  Umbrales MSE por variable:
+    vrms  (alerta): 1.9634757
+    irms  (alerta): 1.7237091
+    power (info): 1.7527334
+    kwh   (info): 0.85581273
+    joule (info): 1.7231137
+  Alertas totales: 1 / 6
+    vrms: 1 | irms: 0
+  Consistencia joule: 100.0% (irms^2 * R_CABLE)
+  Primeras alertas:
+    [2026-05-18 19:34:37] vrms: vrms=91.82 V fuera de [99, 121] V RETIE 2024 (+/-10% sobre 110 V); MSE de vrms 2.12136 supera umbral 1.96348
+  Reporte HTML actualizado: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\reporte_anomalias.html
+  Conclusiones guardadas: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\conclusiones_20260518_193439.json
+  Resultados enviados a POST /ml/result.
+  Analisis finalizado.
+====================================================================
+  Analisis Watios LSTM - 2026-05-18 19:34:54
+====================================================================
+  Servidor local: http://192.168.1.7:5000
+  Features: vrms, irms, power, kwh, joule
+  Alertas: vrms, irms | Informativas: power, kwh, joule
+  Modelo cargado desde C:\Users\sebas\Downloads\INTENTO2\modelo_autoencoder\model.keras
+  Reentrenamiento no requerido.
+  Lecturas recibidas: 11
+  Ventanas evaluadas: 7 con W=5
+  Primeras 6 lecturas: sistema_calibrando, sin alertas
+  Umbrales MSE por variable:
+    vrms  (alerta): 1.9634757
+    irms  (alerta): 1.7237091
+    power (info): 1.7527334
+    kwh   (info): 0.85581273
+    joule (info): 1.7231137
+  Alertas totales: 2 / 7
+    vrms: 2 | irms: 0
+  Consistencia joule: 100.0% (irms^2 * R_CABLE)
+  Primeras alertas:
+    [2026-05-18 19:34:37] vrms: vrms=91.82 V fuera de [99, 121] V RETIE 2024 (+/-10% sobre 110 V); MSE de vrms 2.12136 supera umbral 1.96348
+    [2026-05-18 19:34:47] vrms: vrms=4.94 V fuera de [99, 121] V RETIE 2024 (+/-10% sobre 110 V); MSE de vrms 66.0237 supera umbral 1.96348
+  Reporte HTML actualizado: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\reporte_anomalias.html
+  Conclusiones guardadas: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\conclusiones_20260518_193456.json
+  Resultados enviados a POST /ml/result.
+  Analisis finalizado.
+Traceback (most recent call last):
+  File "C:\Users\sebas\Downloads\INTENTO2\anomaliastf.py", line 957, in <module>
+    main()
+  File "C:\Users\sebas\Downloads\INTENTO2\anomaliastf.py", line 953, in main
+    time.sleep(max(1, args.interval))
+KeyboardInterrupt
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1779151674.033862   28456 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1779151676.190992   28456 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+I0000 00:00:1779151738.178694   28456 cpu_feature_guard.cc:227] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: SSE3 SSE4.1 SSE4.2 AVX AVX2 AVX_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+Iniciando anomaliastf.py en modo demonio...
+  GET http://192.168.1.7:5000/data
+  POST http://192.168.1.7:5000/ml/result
+  [daemon] 1/5 lecturas; esperando ventana completa.
+  [daemon] 3/5 lecturas; esperando ventana completa.
+  [daemon] 4/5 lecturas; esperando ventana completa.
+====================================================================
+  Analisis Watios LSTM - 2026-05-18 19:48:58
+====================================================================
+  Servidor local: http://192.168.1.7:5000
+  Features: vrms, irms, power, kwh, joule
+  Alertas: vrms, irms | Informativas: power, kwh, joule
+  Modelo cargado desde C:\Users\sebas\Downloads\INTENTO2\modelo_autoencoder\model.keras
+  Reentrenamiento no requerido.
+  Lecturas recibidas: 6
+  Ventanas evaluadas: 2 con W=5
+  Primeras 6 lecturas: sistema_calibrando, sin alertas
+  Umbrales MSE por variable:
+    vrms  (alerta): 1.9634757
+    irms  (alerta): 1.7237091
+    power (info): 1.7527334
+    kwh   (info): 0.85581273
+    joule (info): 1.7231137
+  Alertas totales: 0 / 2
+    vrms: 0 | irms: 0
+  Consistencia joule: 100.0% (irms^2 * R_CABLE)
+  Reporte HTML actualizado: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\reporte_anomalias.html
+  Conclusiones guardadas: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\conclusiones_20260518_194859.json
+  Resultados enviados a POST /ml/result.
+  Analisis finalizado.
+====================================================================
+  Analisis Watios LSTM - 2026-05-18 19:49:14
+====================================================================
+  Servidor local: http://192.168.1.7:5000
+  Features: vrms, irms, power, kwh, joule
+  Alertas: vrms, irms | Informativas: power, kwh, joule
+  Modelo cargado desde C:\Users\sebas\Downloads\INTENTO2\modelo_autoencoder\model.keras
+  Reentrenamiento no requerido.
+  Lecturas recibidas: 7
+  Ventanas evaluadas: 3 con W=5
+  Primeras 6 lecturas: sistema_calibrando, sin alertas
+  Umbrales MSE por variable:
+    vrms  (alerta): 1.9634757
+    irms  (alerta): 1.7237091
+    power (info): 1.7527334
+    kwh   (info): 0.85581273
+    joule (info): 1.7231137
+  Alertas totales: 0 / 3
+    vrms: 0 | irms: 0
+  Consistencia joule: 100.0% (irms^2 * R_CABLE)
+  Reporte HTML actualizado: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\reporte_anomalias.html
+  Conclusiones guardadas: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\conclusiones_20260518_194916.json
+  Resultados enviados a POST /ml/result.
+  Analisis finalizado.
+====================================================================
+  Analisis Watios LSTM - 2026-05-18 19:49:31
+====================================================================
+  Servidor local: http://192.168.1.7:5000
+  Features: vrms, irms, power, kwh, joule
+  Alertas: vrms, irms | Informativas: power, kwh, joule
+  Modelo cargado desde C:\Users\sebas\Downloads\INTENTO2\modelo_autoencoder\model.keras
+  Reentrenamiento no requerido.
+  Lecturas recibidas: 9
+  Ventanas evaluadas: 5 con W=5
+  Primeras 6 lecturas: sistema_calibrando, sin alertas
+  Umbrales MSE por variable:
+    vrms  (alerta): 1.9634757
+    irms  (alerta): 1.7237091
+    power (info): 1.7527334
+    kwh   (info): 0.85581273
+    joule (info): 1.7231137
+  Alertas totales: 0 / 5
+    vrms: 0 | irms: 0
+  Consistencia joule: 100.0% (irms^2 * R_CABLE)
+  Reporte HTML actualizado: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\reporte_anomalias.html
+  Conclusiones guardadas: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\conclusiones_20260518_194933.json
+  Resultados enviados a POST /ml/result.
+  Analisis finalizado.
+====================================================================
+  Analisis Watios LSTM - 2026-05-18 19:49:48
+====================================================================
+  Servidor local: http://192.168.1.7:5000
+  Features: vrms, irms, power, kwh, joule
+  Alertas: vrms, irms | Informativas: power, kwh, joule
+  Modelo cargado desde C:\Users\sebas\Downloads\INTENTO2\modelo_autoencoder\model.keras
+  Reentrenamiento no requerido.
+  Lecturas recibidas: 10
+  Ventanas evaluadas: 6 con W=5
+  Primeras 6 lecturas: sistema_calibrando, sin alertas
+  Umbrales MSE por variable:
+    vrms  (alerta): 1.9634757
+    irms  (alerta): 1.7237091
+    power (info): 1.7527334
+    kwh   (info): 0.85581273
+    joule (info): 1.7231137
+  Alertas totales: 1 / 6
+    vrms: 1 | irms: 1
+  Consistencia joule: 100.0% (irms^2 * R_CABLE)
+  Primeras alertas:
+    [2026-05-18 19:49:39] vrms, irms: vrms=25.50 V fuera de [99, 121] V RETIE 2024 (+/-10% sobre 110 V); MSE de vrms 42.4426 supera umbral 1.96348; MSE de irms 1.93546 supera umbral 1.72371
+  Reporte HTML actualizado: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\reporte_anomalias.html
+  Conclusiones guardadas: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\conclusiones_20260518_194950.json
+  Resultados enviados a POST /ml/result.
+  Analisis finalizado.
+====================================================================
+  Analisis Watios LSTM - 2026-05-18 19:50:05
+====================================================================
+  Servidor local: http://192.168.1.7:5000
+  Features: vrms, irms, power, kwh, joule
+  Alertas: vrms, irms | Informativas: power, kwh, joule
+  Modelo cargado desde C:\Users\sebas\Downloads\INTENTO2\modelo_autoencoder\model.keras
+  Reentrenamiento no requerido.
+  Lecturas recibidas: 12
+  Ventanas evaluadas: 8 con W=5
+  Primeras 6 lecturas: sistema_calibrando, sin alertas
+  Umbrales MSE por variable:
+    vrms  (alerta): 1.9634757
+    irms  (alerta): 1.7237091
+    power (info): 1.7527334
+    kwh   (info): 0.85581273
+    joule (info): 1.7231137
+  Alertas totales: 3 / 8
+    vrms: 3 | irms: 3
+  Consistencia joule: 100.0% (irms^2 * R_CABLE)
+  Primeras alertas:
+    [2026-05-18 19:49:39] vrms, irms: vrms=25.50 V fuera de [99, 121] V RETIE 2024 (+/-10% sobre 110 V); MSE de vrms 42.4426 supera umbral 1.96348; MSE de irms 1.93546 supera umbral 1.72371
+    [2026-05-18 19:49:49] vrms, irms: vrms=3.54 V fuera de [99, 121] V RETIE 2024 (+/-10% sobre 110 V); MSE de vrms 108.824 supera umbral 1.96348; MSE de irms 3.95247 supera umbral 1.72371
+    [2026-05-18 19:49:59] vrms, irms: vrms=3.21 V fuera de [99, 121] V RETIE 2024 (+/-10% sobre 110 V); MSE de vrms 174.091 supera umbral 1.96348; MSE de irms 6.08306 supera umbral 1.72371
+  Reporte HTML actualizado: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\reporte_anomalias.html
+  Conclusiones guardadas: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\conclusiones_20260518_195006.json
+  Resultados enviados a POST /ml/result.
+  Analisis finalizado.
+====================================================================
+  Analisis Watios LSTM - 2026-05-18 19:50:21
+====================================================================
+  Servidor local: http://192.168.1.7:5000
+  Features: vrms, irms, power, kwh, joule
+  Alertas: vrms, irms | Informativas: power, kwh, joule
+  Modelo cargado desde C:\Users\sebas\Downloads\INTENTO2\modelo_autoencoder\model.keras
+  Reentrenamiento no requerido.
+  Lecturas recibidas: 14
+  Ventanas evaluadas: 10 con W=5
+  Primeras 6 lecturas: sistema_calibrando, sin alertas
+  Umbrales MSE por variable:
+    vrms  (alerta): 1.9634757
+    irms  (alerta): 1.7237091
+    power (info): 1.7527334
+    kwh   (info): 0.85581273
+    joule (info): 1.7231137
+  Alertas totales: 5 / 10
+    vrms: 5 | irms: 5
+  Consistencia joule: 100.0% (irms^2 * R_CABLE)
+  Primeras alertas:
+    [2026-05-18 19:49:39] vrms, irms: vrms=25.50 V fuera de [99, 121] V RETIE 2024 (+/-10% sobre 110 V); MSE de vrms 42.4426 supera umbral 1.96348; MSE de irms 1.93546 supera umbral 1.72371
+    [2026-05-18 19:49:49] vrms, irms: vrms=3.54 V fuera de [99, 121] V RETIE 2024 (+/-10% sobre 110 V); MSE de vrms 108.824 supera umbral 1.96348; MSE de irms 3.95247 supera umbral 1.72371
+    [2026-05-18 19:49:59] vrms, irms: vrms=3.21 V fuera de [99, 121] V RETIE 2024 (+/-10% sobre 110 V); MSE de vrms 174.091 supera umbral 1.96348; MSE de irms 6.08306 supera umbral 1.72371
+    [2026-05-18 19:50:09] vrms, irms: vrms=3.12 V fuera de [99, 121] V RETIE 2024 (+/-10% sobre 110 V); MSE de vrms 238.676 supera umbral 1.96348; MSE de irms 8.14746 supera umbral 1.72371
+    [2026-05-18 19:50:20] vrms, irms: vrms=3.20 V fuera de [99, 121] V RETIE 2024 (+/-10% sobre 110 V); MSE de vrms 303.892 supera umbral 1.96348; MSE de irms 10.2202 supera umbral 1.72371
+  Reporte HTML actualizado: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\reporte_anomalias.html
+  Conclusiones guardadas: C:\Users\sebas\Downloads\INTENTO2\analisis_anomalias\conclusiones_20260518_195023.json
+  Resultados enviados a POST /ml/result.
+  Analisis finalizado.
+Traceback (most recent call last):
+  File "C:\Users\sebas\Downloads\INTENTO2\anomaliastf.py", line 957, in <module>
+    main()
+  File "C:\Users\sebas\Downloads\INTENTO2\anomaliastf.py", line 953, in main
+    time.sleep(max(1, args.interval))
+KeyboardInterrupt

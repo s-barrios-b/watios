@@ -462,6 +462,11 @@
       box-shadow: 0 0 0 1px var(--accent), 0 0 28px rgba(0, 229, 255, .25);
     }
 
+    .chart-card.anom {
+      border-color: var(--danger);
+      animation: aflash 1s ease 3;
+    }
+
     /* ── Chatbot ── */
     .chat-card {
       background: var(--surface);
@@ -1479,9 +1484,22 @@
       const std = Math.sqrt(pos.reduce((a, b) => a + (b - mean) ** 2, 0) / pos.length);
       return { min, max, avg: mean, mean, std };
     }
+
+    const VISUAL_ANOMALY_LINKS = {
+      vrms: ['power', 'kwh'],
+      irms: ['power', 'kwh', 'joule']
+    };
+
+    function getVisualAnomalyKeys(row) {
+      if (row.calibrando) return [];
+      const direct = Array.isArray(row.ml_anomalias) ? row.ml_anomalias : [];
+      const visual = new Set(direct);
+      direct.forEach(k => (VISUAL_ANOMALY_LINKS[k] || []).forEach(dep => visual.add(dep)));
+      return [...visual];
+    }
+
     function isAnom(row, key, hist) {
-      if (row.calibrando) return false;
-      return Array.isArray(row.ml_anomalias) && row.ml_anomalias.includes(key);
+      return getVisualAnomalyKeys(row).includes(key);
     }
 
     function applyMlResult(msg, options = {}) {
@@ -1584,6 +1602,19 @@
       }, 80);
     }
 
+    function setAnomFlash(el, active) {
+      if (!el) return;
+      if (active && !el.classList.contains('anom')) {
+        el.classList.add('anom');
+      } else if (!active) {
+        el.classList.remove('anom');
+      } else {
+        el.classList.remove('anom');
+        void el.offsetWidth;
+        el.classList.add('anom');
+      }
+    }
+
     // ── Actualizar UI ─────────────────────────────────────────
     function updateUI() {
       if (!rows.length) return;
@@ -1600,17 +1631,7 @@
         const anom = isAnom(last, k, rows.slice(0, -1));
         const card = document.getElementById(`ck-${k}`);
         const val = document.getElementById(`v-${k}`);
-        // Re-disparar animación aunque la clase ya estuviera presente
-        if (anom && !card.classList.contains('anom')) {
-          card.classList.add('anom');
-        } else if (!anom) {
-          card.classList.remove('anom');
-        } else {
-          // Ya estaba en anom: forzar replay quitando y reponiendo
-          card.classList.remove('anom');
-          void card.offsetWidth;   // reflow
-          card.classList.add('anom');
-        }
+        setAnomFlash(card, anom);
         val.classList.toggle('anom-val', anom);
       }
 
@@ -1623,6 +1644,9 @@
       for (const k of KEYS) {
         const ch = charts[k];
         const sc = SCALE[k] || 1;
+        const chartCard = document.getElementById(k === 'vrms' ? 'chart-card-vrms' : `chart-card-${k}`);
+        const latestAnom = isAnom(last, k, rows.slice(0, -1));
+        setAnomFlash(chartCard, latestAnom);
         ch.data.labels = labels;
         ch.data.datasets[0].data = slice.map(r => r[k] * sc);
         const pts = slice.map((r, i) => {
